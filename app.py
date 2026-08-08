@@ -1,18 +1,12 @@
 import os
-import urllib.request
-import gc
 import json
 from datetime import datetime
 import streamlit as st
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import transforms, models
-import timm
 from PIL import Image, ImageChops, ImageEnhance
 import cv2
 import numpy as np
 from streamlit_paste_button import paste_image_button
+from transformers import pipeline
 
 # ---------------------------------------------------------
 # 1. Page Configuration & MonoVision Custom Theme
@@ -165,7 +159,7 @@ st.markdown("""
     <div class="hero-title">MONOVISION</div>
     <div class="hero-subtitle">Deepfake & Synthetic Image Forensics Platform</div>
     <div>
-        <span class="status-badge"><span class="pulse-online"></span> ENGINES ONLINE</span>
+        <span class="status-badge"><span class="pulse-online"></span> NEXT-GEN ENGINE ONLINE</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -180,8 +174,8 @@ with st.sidebar:
     threshold = st.slider(
         "AI Detection Threshold (%)",
         min_value=50,
-        max_value=90,
-        value=60,
+        max_value=95,
+        value=65,
         step=5,
         help="Confidence level required to classify an image as AI-generated."
     )
@@ -190,60 +184,28 @@ with st.sidebar:
     st.markdown("### 📊 Active Model Pipeline")
     
     with st.container(border=True):
-        st.markdown("**1. ViT-Tiny (Vision Transformer)**")
-        st.caption("Weight: 50% | Resolution: 224×224")
-        st.markdown("**2. ResNet-18 (Deep ConvNet)**")
-        st.caption("Weight: 50% | Resolution: 224×224")
+        st.markdown("**prithivMLmods/Deep-Fake-Detector-v2-Model**")
+        st.caption("Architecture: Vision Transformer (ViT-Base)")
+        st.caption("Training Data: Real vs. Deepfake Images")
         
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛡️ System Telemetry")
-    st.caption("Inference Mode: CPU")
-    st.caption("Spatial Sampling: 5-Crop Strategy")
+    st.caption("Inference API: Hugging Face Transformers")
+    st.caption("Spatial Sampling: Global Vision Transform")
 
 # ---------------------------------------------------------
-# 4. Model Downloads & Processing Utilities
+# 4. Hugging Face Next-Gen Model Loader
 # ---------------------------------------------------------
-VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
-RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
-
-def download_file_if_missing(file_path, url):
-    if not os.path.exists(file_path):
-        with st.spinner(f"Downloading model weights ({file_path})..."):
-            req = urllib.request.Request(
-                url, 
-                headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-            )
-            with urllib.request.urlopen(req) as response, open(file_path, 'wb') as out_file:
-                out_file.write(response.read())
-
-device = torch.device("cpu")
-
-base_transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-five_crop = transforms.FiveCrop(224)
-
 @st.cache_resource
-def load_models():
-    download_file_if_missing("vit_highres_model.pth", VIT_URL)
-    download_file_if_missing("resnet_highres_model.pth", RESNET_URL)
-    
-    vit = timm.create_model('vit_tiny_patch16_224', pretrained=False, num_classes=2)
-    vit.load_state_dict(torch.load("vit_highres_model.pth", map_location=device, weights_only=True))
-    vit.eval()
-    
-    resnet = models.resnet18(weights=None)
-    num_ftrs = resnet.fc.in_features
-    resnet.fc = nn.Linear(num_ftrs, 2)
-    resnet.load_state_dict(torch.load("resnet_highres_model.pth", map_location=device, weights_only=True))
-    resnet.eval()
+def load_hf_detector():
+    """Pulls a next-gen Deepfake ViT model directly from Hugging Face."""
+    pipe = pipeline(
+        "image-classification", 
+        model="prithivMLmods/Deep-Fake-Detector-v2-Model"
+    )
+    return pipe
 
-    gc.collect()
-    return vit, resnet
-
-vit_model, resnet_model = load_models()
+hf_detector = load_hf_detector()
 
 # ---------------------------------------------------------
 # 5. Visual Forensic Generators (ELA & FFT)
@@ -277,11 +239,17 @@ def generate_fft(image_pil):
 # ---------------------------------------------------------
 # 6. Input Interface Tabs
 # ---------------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["📋 Clipboard Import", "📁 File Upload", "🔗 Image URL"])
+tab1, tab2 = st.tabs(["📁 File Upload", "📋 Clipboard Import"])
 
 image = None
 
 with tab1:
+    st.markdown("<br>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Upload Image File", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file).convert('RGB')
+        
+with tab2:
     st.markdown("<br>", unsafe_allow_html=True)
     paste_result = paste_image_button(
         label="📋 Paste Image from Clipboard",
@@ -291,31 +259,11 @@ with tab1:
     if paste_result.image_data is not None:
         image = paste_result.image_data.convert('RGB')
 
-with tab2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Upload Image File", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file).convert('RGB')
-
-with tab3:
-    st.markdown("<br>", unsafe_allow_html=True)
-    url_input = st.text_input("Direct Image URL", placeholder="https://example.com/image.jpg", label_visibility="collapsed")
-    if url_input:
-        try:
-            req = urllib.request.Request(url_input, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req) as response:
-                image = Image.open(response).convert('RGB')
-        except Exception:
-            st.error("⚠️ Unable to load image URL. Please check the link or paste the image directly.")
-
 # ---------------------------------------------------------
 # 7. Diagnostic Dashboard & Analysis Execution
 # ---------------------------------------------------------
 if image is not None:
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    if image.width < 224 or image.height < 224:
-        image = image.resize((max(224, image.width), max(224, image.height)))
         
     col_left, col_right = st.columns([1, 1], gap="medium")
     
@@ -328,20 +276,31 @@ if image is not None:
     with col_right:
         with st.container(border=True):
             st.markdown("#### ⚙️ Forensic Control")
-            st.write("Ready to analyze micro-textures across Center + 4-Corner high-res crops.")
+            st.write("Ready to analyze via State-of-the-Art Deepfake Vision Transformer.")
             analyze_btn = st.button("🚀 Run MonoVision Analysis", type="primary", use_container_width=True)
 
         if analyze_btn:
-            patches = five_crop(image)
-            patch_tensors = torch.stack([base_transform(p) for p in patches])
-
-            with st.spinner("Executing neural micro-texture evaluation..."):
-                with torch.no_grad():
-                    vit_probs = F.softmax(vit_model(patch_tensors), dim=1).mean(dim=0).tolist()
-                    res_probs = F.softmax(resnet_model(patch_tensors), dim=1).mean(dim=0).tolist()
-
-                avg_fake = (vit_probs[0] + res_probs[0]) / 2.0 * 100
-                avg_real = (vit_probs[1] + res_probs[1]) / 2.0 * 100
+            with st.spinner("Executing next-gen neural evaluation..."):
+                # Run the Hugging Face model
+                results = hf_detector(image)
+                
+                avg_fake, avg_real = 0.0, 0.0
+                
+                # Parse Hugging Face dynamic pipeline responses
+                for res in results:
+                    label = res['label'].lower()
+                    score = res['score'] * 100
+                    
+                    if label in ['fake', 'deepfake', 'ai', 'generated', 'label_1']:
+                        avg_fake = score
+                    elif label in ['real', 'realism', 'authentic', 'label_0']:
+                        avg_real = score
+                
+                # Fill in missing probability if pipeline only returns top-1 score
+                if avg_fake == 0.0 and avg_real > 0:
+                    avg_fake = 100.0 - avg_real
+                elif avg_real == 0.0 and avg_fake > 0:
+                    avg_real = 100.0 - avg_fake
 
             st.markdown("<br>", unsafe_allow_html=True)
             
@@ -357,30 +316,11 @@ if image is not None:
                 verdict_str = "Inconclusive"
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🔬 Neural Model Breakdown")
+            st.markdown("#### 🔬 Vision Transformer Breakdown")
             
-            c1, c2 = st.columns(2)
-            with c1:
-                with st.container(border=True):
-                    st.markdown("##### ViT-Tiny (Transformer)")
-                    st.progress(int(vit_probs[0] * 100), text=f"AI Artifacts: {vit_probs[0]*100:.1f}%")
-                    st.progress(int(vit_probs[1] * 100), text=f"Authentic Signal: {vit_probs[1]*100:.1f}%")
-                
-            with c2:
-                with st.container(border=True):
-                    st.markdown("##### ResNet-18 (Deep ConvNet)")
-                    st.progress(int(res_probs[0] * 100), text=f"AI Artifacts: {res_probs[0]*100:.1f}%")
-                    st.progress(int(res_probs[1] * 100), text=f"Authentic Signal: {res_probs[1]*100:.1f}%")
-
-            # --- Visual 5-Crop Inspector ---
-            st.markdown("<br>", unsafe_allow_html=True)
-            with st.expander("🔍 Inspection Area: Sampled 5-Crop Micro-Patches", expanded=False):
-                st.write("These 224x224 crops were evaluated across the neural ensemble:")
-                crop_cols = st.columns(5)
-                crop_names = ["Top-Left", "Top-Right", "Bottom-Left", "Bottom-Right", "Center"]
-                for idx, crop in enumerate(patches):
-                    with crop_cols[idx]:
-                        st.image(crop, caption=crop_names[idx], use_container_width=True)
+            with st.container(border=True):
+                st.progress(int(avg_fake), text=f"AI/Deepfake Signature: {avg_fake:.1f}%")
+                st.progress(int(avg_real), text=f"Authentic Photography Signature: {avg_real:.1f}%")
 
             # --- Advanced Visual Forensics (ELA & FFT) ---
             st.markdown("<br>", unsafe_allow_html=True)
@@ -400,22 +340,13 @@ if image is not None:
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
                 "platform": "MonoVision Forensics Studio",
+                "engine": "Hugging Face - prithivMLmods/Deep-Fake-Detector-v2-Model",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
                 "confidence_threshold_used": f"{threshold}%",
-                "ensemble_averages": {
+                "neural_probabilities": {
                     "ai_probability": f"{avg_fake:.2f}%",
                     "real_probability": f"{avg_real:.2f}%"
-                },
-                "models": {
-                    "vit_tiny": {
-                        "ai_prob": f"{vit_probs[0]*100:.2f}%",
-                        "real_prob": f"{vit_probs[1]*100:.2f}%"
-                    },
-                    "resnet18": {
-                        "ai_prob": f"{res_probs[0]*100:.2f}%",
-                        "real_prob": f"{res_probs[1]*100:.2f}%"
-                    }
                 }
             }
             
