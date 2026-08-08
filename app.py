@@ -20,14 +20,13 @@ st.set_page_config(
 )
 
 st.title("🔍 AI vs Real Image Detector")
-st.write("3-Model Ensemble (ViT Base + ResNet18 + ViT Landmark) with 5-crop micro-texture analysis.")
+st.write("2-Model Ensemble (ViT Tiny + ResNet18) with 5-crop micro-texture analysis.")
 
 # ---------------------------------------------------------
 # 2. Exact Model URLs & Download Utility
 # ---------------------------------------------------------
 VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
 RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
-LANDMARK_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_landmark_model.1.pth"
 
 def download_file_if_missing(file_path, url):
     if not os.path.exists(file_path):
@@ -50,13 +49,12 @@ base_transform = transforms.Compose([
 five_crop = transforms.FiveCrop(224)
 
 # ---------------------------------------------------------
-# 3. Load Models (With Memory Cleanup & Architecture Fix)
+# 3. Load Models (Memory Optimized)
 # ---------------------------------------------------------
 @st.cache_resource
 def load_models():
     download_file_if_missing("vit_highres_model.pth", VIT_URL)
     download_file_if_missing("resnet_highres_model.pth", RESNET_URL)
-    download_file_if_missing("vit_landmark_model.1.pth", LANDMARK_URL)
     
     # Model 1: ViT-Tiny (192-dim)
     vit = timm.create_model('vit_tiny_patch16_224', pretrained=False, num_classes=2)
@@ -70,34 +68,11 @@ def load_models():
     resnet.load_state_dict(torch.load("resnet_highres_model.pth", map_location=device, weights_only=True))
     resnet.eval()
 
-    # Model 3: ViT-Base (768-dim) for the Landmark Model
-    # --- THE FIX: Updated num_classes to 18 to match your trained weights ---
-    vit_landmark = timm.create_model('vit_base_patch16_224', pretrained=False, num_classes=18)
-    
-    raw_checkpoint = torch.load("vit_landmark_model.1.pth", map_location=device)
-    
-    # Extract inner state dict if wrapped in a dictionary
-    if isinstance(raw_checkpoint, dict) and "state_dict" in raw_checkpoint:
-        state_dict = raw_checkpoint["state_dict"]
-    elif isinstance(raw_checkpoint, dict) and "model" in raw_checkpoint:
-        state_dict = raw_checkpoint["model"]
-    else:
-        state_dict = raw_checkpoint
-
-    # Strip 'module.' prefix if trained using PyTorch DataParallel
-    clean_state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
-
-    # --- THE FIX: Removed strict=False so we ensure all weights are actually loaded ---
-    vit_landmark.load_state_dict(clean_state_dict)
-    vit_landmark.eval()
-    
-    # Free up unused RAM so Streamlit Cloud does not crash
-    del raw_checkpoint, state_dict, clean_state_dict
     gc.collect()
     
-    return vit, resnet, vit_landmark
+    return vit, resnet
 
-vit_model, resnet_model, landmark_model = load_models()
+vit_model, resnet_model = load_models()
 
 # ---------------------------------------------------------
 # 4. Input Interface (Clipboard, File, URL)
@@ -142,7 +117,6 @@ if image is not None:
     col_img, col_info = st.columns([1, 1])
     
     with col_img:
-        # Fixed the use_container_width warning here by using width="stretch"
         st.image(image, caption="Loaded Image", width="stretch")
         
     with col_info:
@@ -150,25 +124,22 @@ if image is not None:
         analyze_btn = st.button("🚀 Analyze Micro-Textures", type="primary")
 
     if analyze_btn:
-        with st.spinner("Analyzing 5 high-resolution crops across 3 Neural Networks..."):
+        with st.spinner("Analyzing 5 high-resolution crops across 2 Neural Networks..."):
             
             # Extract Center + 4 Corners patches
             patches = five_crop(image)
             patch_tensors = torch.stack([base_transform(p) for p in patches])
 
             with torch.no_grad():
-                # Model 1: ViT Base
+                # Model 1: ViT Tiny
                 vit_probs = F.softmax(vit_model(patch_tensors), dim=1).mean(dim=0).tolist()
                 
                 # Model 2: ResNet-18
                 res_probs = F.softmax(resnet_model(patch_tensors), dim=1).mean(dim=0).tolist()
-                
-                # Model 3: ViT Landmark
-                lmark_probs = F.softmax(landmark_model(patch_tensors), dim=1).mean(dim=0).tolist()
 
-            # Combined Ensemble Average across all 3 models
-            avg_fake = (vit_probs[0] + res_probs[0] + lmark_probs[0]) / 3.0 * 100
-            avg_real = (vit_probs[1] + res_probs[1] + lmark_probs[1]) / 3.0 * 100
+            # Clean Ensemble Average (50/50 split between ViT and ResNet)
+            avg_fake = (vit_probs[0] + res_probs[0]) / 2.0 * 100
+            avg_real = (vit_probs[1] + res_probs[1]) / 2.0 * 100
 
         st.divider()
         st.subheader("📊 Ensemble Detection Results")
@@ -182,7 +153,7 @@ if image is not None:
             st.warning(f"🤔 **Verdict:** Uncertain / Natural Photo ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)")
 
         # Individual Breakdown per Neural Network
-        c1, c2, c3 = st.columns(3)
+        c1, c2 = st.columns(2)
         
         with c1:
             st.markdown("#### ViT Tiny")
@@ -193,8 +164,3 @@ if image is not None:
             st.markdown("#### ResNet-18")
             st.progress(int(res_probs[0] * 100), text=f"AI: {res_probs[0]*100:.1f}%")
             st.progress(int(res_probs[1] * 100), text=f"Real: {res_probs[1]*100:.1f}%")
-
-        with c3:
-            st.markdown("#### ViT Landmark")
-            st.progress(int(lmark_probs[0] * 100), text=f"AI: {lmark_probs[0]*100:.1f}%")
-            st.progress(int(lmark_probs[1] * 100), text=f"Real: {lmark_probs[1]*100:.1f}%")
