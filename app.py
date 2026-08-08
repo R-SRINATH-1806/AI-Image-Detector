@@ -13,9 +13,18 @@ st.set_page_config(page_title="AI vs Real Image Detector", page_icon="🚀")
 st.title("Ultimate AI vs. Real Image Detector 🚀")
 st.write("Upload a high-resolution image! Our models evaluate native textures without resolution limits.")
 
-# 2. Setup Device and Transforms
+# 2. GitHub Release Asset Direct Links (Replace YOUR_USERNAME if needed)
+VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
+RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
+
+# Helper function to download model files if missing
+def download_file_if_missing(file_path, url):
+    if not os.path.exists(file_path):
+        with st.spinner(f"Downloading model weights ({file_path})..."):
+            urllib.request.urlretrieve(url, file_path)
+
+# 3. Setup Device and Transforms
 device = torch.device("cpu")
-classes = ['fake', 'real']
 
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -23,28 +32,19 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-# Function to download models from GitHub Release or URL if missing
-def download_model_if_missing(file_path, url):
-    if not os.path.exists(file_path):
-        with st.spinner(f"Downloading model weights ({file_path})..."):
-            urllib.request.urlretrieve(url, file_path)
-
-# 3. Load Models (Cached so they only load once)
+# 4. Load Models (Cached so downloading and loading only happen once)
 @st.cache_resource
 def load_models():
-    # Replace these URLs with your actual direct download URLs (e.g. from GitHub Release assets)
-    VIT_URL = "YOUR_VIT_RELEASE_URL"
-    RESNET_URL = "YOUR_RESNET_RELEASE_URL"
-
-    download_model_if_missing("vit_highres_model.pth", VIT_URL)
-    download_model_if_missing("resnet_highres_model.pth", RESNET_URL)
-
-    # ViT
+    # Download weights from Release assets if not present
+    download_file_if_missing("vit_highres_model.pth", VIT_URL)
+    download_file_if_missing("resnet_highres_model.pth", RESNET_URL)
+    
+    # Load ViT
     vit = timm.create_model('vit_tiny_patch16_224', pretrained=False, num_classes=2)
     vit.load_state_dict(torch.load("vit_highres_model.pth", map_location=device, weights_only=True))
     vit.eval()
     
-    # ResNet18
+    # Load ResNet18
     resnet = models.resnet18(weights=None)
     num_ftrs = resnet.fc.in_features
     resnet.fc = nn.Linear(num_ftrs, 2)
@@ -55,12 +55,12 @@ def load_models():
 
 vit_model, resnet_model = load_models()
 
-# 4. File Uploader UI
+# 5. UI and Prediction Logic
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert('RGB')
-    st.image(image, caption='Uploaded Image', use_column_width=True)
+    st.image(image, caption='Uploaded Image', use_container_width=True)
     
     if st.button("Analyze Image"):
         with st.spinner("AI is analyzing the image..."):
@@ -76,7 +76,7 @@ if uploaded_file is not None:
                 res_out = resnet_model(img_tensor)
                 res_probs = F.softmax(res_out, dim=1).squeeze().tolist()
 
-            # Display Results
+            # Results Display
             st.markdown("### 📊 Results")
             col1, col2 = st.columns(2)
             
