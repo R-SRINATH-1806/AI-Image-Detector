@@ -1,7 +1,8 @@
 streamlit
-torch
-torchvision
-Pillow
+pillow
 opencv-python-headless
+numpy
+plotly
 streamlit-paste-button
 transformers
+torch
