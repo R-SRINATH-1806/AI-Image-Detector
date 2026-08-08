@@ -9,11 +9,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms, models
 import timm
-from PIL import Image
+from PIL import Image, ImageChops, ImageEnhance
+import cv2
+import numpy as np
 from streamlit_paste_button import paste_image_button
 
 # ---------------------------------------------------------
-# 1. Page Config & High-End Custom CSS
+# 1. Page Configuration & MonoVision Custom Theme
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="MonoVision | Deepfake Forensics Studio",
@@ -46,7 +48,6 @@ st.markdown("""
         margin-bottom: 2rem;
         text-align: center;
         box-shadow: 0 0 40px rgba(56, 189, 248, 0.08);
-        position: relative;
     }
 
     .hero-title {
@@ -170,7 +171,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Sidebar Engine Configuration & Telemetry
+# 3. Sidebar Engine Configuration & Controls
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("### ⚙️ Engine Parameters")
@@ -195,19 +196,19 @@ with st.sidebar:
         st.caption("Weight: 50% | Resolution: 224×224")
         
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🛡️ System Status")
-    st.caption("Device: CPU Inference Mode")
+    st.markdown("### 🛡️ System Telemetry")
+    st.caption("Inference Mode: CPU")
     st.caption("Spatial Sampling: 5-Crop Strategy")
 
 # ---------------------------------------------------------
-# 4. Model Downloads & Processing Setup
+# 4. Model Downloads & Processing Utilities
 # ---------------------------------------------------------
 VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
 RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
 
 def download_file_if_missing(file_path, url):
     if not os.path.exists(file_path):
-        with st.spinner(f"Downloading weights ({file_path})..."):
+        with st.spinner(f"Downloading model weights ({file_path})..."):
             req = urllib.request.Request(
                 url, 
                 headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
@@ -245,7 +246,36 @@ def load_models():
 vit_model, resnet_model = load_models()
 
 # ---------------------------------------------------------
-# 5. Input Console
+# 5. Visual Forensic Generators (ELA & FFT)
+# ---------------------------------------------------------
+def generate_ela(image, quality=90):
+    """Generates Error Level Analysis (ELA) map highlighting compression artifacts."""
+    temp_filename = "temp_ela.jpg"
+    image.save(temp_filename, 'JPEG', quality=quality)
+    compressed_image = Image.open(temp_filename)
+    ela_image = ImageChops.difference(image, compressed_image)
+    
+    extrema = ela_image.getextrema()
+    max_diff = max([ex[1] for ex in extrema]) if max([ex[1] for ex in extrema]) != 0 else 1
+    scale = 255.0 / max_diff
+    ela_image = ImageEnhance.Brightness(ela_image).enhance(scale)
+    
+    if os.path.exists(temp_filename):
+        os.remove(temp_filename)
+    return ela_image
+
+def generate_fft(image_pil):
+    """Generates Frequency Spectrum (FFT) map highlighting grid artifacts."""
+    img_gray = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
+    f_transform = np.fft.fft2(img_gray)
+    f_shift = np.fft.fftshift(f_transform)
+    
+    magnitude_spectrum = 20 * np.log(np.abs(f_shift) + 1)
+    magnitude_spectrum = cv2.normalize(magnitude_spectrum, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    return Image.fromarray(magnitude_spectrum)
+
+# ---------------------------------------------------------
+# 6. Input Interface Tabs
 # ---------------------------------------------------------
 tab1, tab2, tab3 = st.tabs(["📋 Clipboard Import", "📁 File Upload", "🔗 Image URL"])
 
@@ -279,7 +309,7 @@ with tab3:
             st.error("⚠️ Unable to load image URL. Please check the link or paste the image directly.")
 
 # ---------------------------------------------------------
-# 6. Diagnostic Dashboard & Forensic Analysis
+# 7. Diagnostic Dashboard & Analysis Execution
 # ---------------------------------------------------------
 if image is not None:
     st.markdown("<br>", unsafe_allow_html=True)
@@ -291,21 +321,21 @@ if image is not None:
     
     with col_left:
         with st.container(border=True):
-            st.markdown("#### 🖼️ Media Sample")
+            st.markdown("#### 🖼️ Source Media")
             st.image(image, use_container_width=True)
             st.markdown(f"<p style='color:#64748b; font-size:0.85rem; text-align:center;'>Resolution: {image.width} × {image.height}px</p>", unsafe_allow_html=True)
         
     with col_right:
         with st.container(border=True):
-            st.markdown("#### ⚙️ Forensic Execution")
-            st.write("Ready to analyze micro-textures across Center + 4-Corner high-res patches.")
+            st.markdown("#### ⚙️ Forensic Control")
+            st.write("Ready to analyze micro-textures across Center + 4-Corner high-res crops.")
             analyze_btn = st.button("🚀 Run MonoVision Analysis", type="primary", use_container_width=True)
 
         if analyze_btn:
             patches = five_crop(image)
             patch_tensors = torch.stack([base_transform(p) for p in patches])
 
-            with st.spinner("Executing dual-model micro-texture inference..."):
+            with st.spinner("Executing neural micro-texture evaluation..."):
                 with torch.no_grad():
                     vit_probs = F.softmax(vit_model(patch_tensors), dim=1).mean(dim=0).tolist()
                     res_probs = F.softmax(resnet_model(patch_tensors), dim=1).mean(dim=0).tolist()
@@ -315,7 +345,7 @@ if image is not None:
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Dynamic Threshold Verdict Card
+            # Dynamic Verdict Display
             if avg_fake >= threshold:
                 st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
@@ -342,17 +372,31 @@ if image is not None:
                     st.progress(int(res_probs[0] * 100), text=f"AI Artifacts: {res_probs[0]*100:.1f}%")
                     st.progress(int(res_probs[1] * 100), text=f"Authentic Signal: {res_probs[1]*100:.1f}%")
 
-            # --- Visual 5-Crop Patch Inspector ---
+            # --- Visual 5-Crop Inspector ---
             st.markdown("<br>", unsafe_allow_html=True)
             with st.expander("🔍 Inspection Area: Sampled 5-Crop Micro-Patches", expanded=False):
-                st.write("These 224x224 crops were passed through both neural networks for high-frequency noise evaluation:")
+                st.write("These 224x224 crops were evaluated across the neural ensemble:")
                 crop_cols = st.columns(5)
                 crop_names = ["Top-Left", "Top-Right", "Bottom-Left", "Bottom-Right", "Center"]
                 for idx, crop in enumerate(patches):
                     with crop_cols[idx]:
                         st.image(crop, caption=crop_names[idx], use_container_width=True)
 
-            # --- Downloadable Forensic Report ---
+            # --- Advanced Visual Forensics (ELA & FFT) ---
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("#### 🕵️‍♂️ Advanced Visual Forensics")
+            
+            tab_ela, tab_fft = st.tabs(["Error Level Analysis (ELA)", "Frequency Spectrum (FFT)"])
+            
+            with tab_ela:
+                st.write("Highlights areas with different JPEG compression ratios. Digital splices and synthetic regions often glow brighter than untouched areas.")
+                st.image(generate_ela(image), use_container_width=True)
+            
+            with tab_fft:
+                st.write("Visualizes high-frequency patterns. Real photos have continuous radial glows, while AI generators often leave unnatural geometric grids.")
+                st.image(generate_fft(image), use_container_width=True)
+
+            # --- Forensic Report Download ---
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
                 "platform": "MonoVision Forensics Studio",
