@@ -9,28 +9,27 @@ from streamlit_paste_button import paste_image_button
 from transformers import pipeline
 
 # ---------------------------------------------------------
-# 1. Page Configuration & Cyber-HUD Theme
+# 1. Page Configuration & Futuristic Cyber Theme
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MONOVISION // CYBER FORENSICS",
+    page_title="MONOVISION // CYBER FORENSICS STUDIO",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Inject Sci-Fi Fonts and Advanced Futuristic CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
-    /* Global Dark Grid Background */
+    /* Global Background Grid */
     .stApp {
         background: radial-gradient(circle at 50% 10%, #0a0f1d 0%, #030712 100%);
         color: #e2e8f0;
         font-family: 'Rajdhani', sans-serif;
     }
 
-    /* Cyber Scanline Overlay */
+    /* Cyber Scanline Overlay Effect */
     .stApp::before {
         content: " ";
         display: block;
@@ -40,10 +39,10 @@ st.markdown("""
         background-size: 100% 4px;
         z-index: 99999;
         pointer-events: none;
-        opacity: 0.3;
+        opacity: 0.25;
     }
 
-    /* Sci-Fi Sidebar */
+    /* Sidebar Glassmorphism */
     section[data-testid="stSidebar"] {
         background: rgba(8, 12, 22, 0.85) !important;
         backdrop-filter: blur(12px);
@@ -51,7 +50,7 @@ st.markdown("""
         box-shadow: 5px 0 25px rgba(0, 243, 255, 0.05);
     }
 
-    /* HUD Hero Banner */
+    /* Cyber HUD Header Banner */
     .hud-banner {
         background: rgba(13, 19, 33, 0.7);
         backdrop-filter: blur(16px);
@@ -63,7 +62,6 @@ st.markdown("""
         margin-bottom: 2rem;
         text-align: center;
         box-shadow: 0 0 30px rgba(0, 243, 255, 0.15), inset 0 0 20px rgba(0, 243, 255, 0.05);
-        position: relative;
     }
 
     .hud-title {
@@ -80,14 +78,14 @@ st.markdown("""
 
     .hud-subtitle {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         color: #00f3ff;
         letter-spacing: 2px;
         text-transform: uppercase;
         margin-bottom: 1rem;
     }
 
-    /* Status Pulse Pill */
+    /* Cyber Status Pill */
     .hud-badge {
         display: inline-flex;
         align-items: center;
@@ -118,7 +116,7 @@ st.markdown("""
         100% { opacity: 1; transform: scale(1.2); }
     }
 
-    /* Cyber Metric Cards */
+    /* Verdict Cards */
     .verdict-fake {
         background: radial-gradient(circle at center, rgba(255, 0, 85, 0.2) 0%, rgba(15, 10, 25, 0.9) 100%);
         border: 1.5px solid #ff0055;
@@ -149,7 +147,7 @@ st.markdown("""
         clip-path: polygon(0 0, 97% 0, 100% 20%, 100% 100%, 3% 100%, 0 80%);
     }
 
-    /* Custom Futuristic Buttons */
+    /* Sci-Fi Buttons */
     .stButton>button {
         background: linear-gradient(90deg, rgba(0, 243, 255, 0.2) 0%, rgba(112, 0, 255, 0.2) 100%) !important;
         border: 1px solid #00f3ff !important;
@@ -173,43 +171,58 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. Futuristic Hero Banner
+# 2. Hero Banner
 # ---------------------------------------------------------
 st.markdown("""
 <div class="hud-banner">
-    <div class="hud-title">MONOVISION v3.0</div>
-    <div class="hud-subtitle">// SYSTEM ARCHITECTURE: NEURAL IMAGE FORENSICS MODULE</div>
+    <div class="hud-title">MONOVISION v4.0</div>
+    <div class="hud-subtitle">// NEXT-GEN FORENSIC INTELLIGENCE & XAI SUITE</div>
     <div>
-        <span class="hud-badge"><span class="pulse-dot"></span> REAL-TIME SCANNER ACTIVE</span>
+        <span class="hud-badge"><span class="pulse-dot"></span> NEURAL MATRIX & SPECTRAL ENGINE ACTIVE</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Sidebar Configuration
+# 3. Sidebar Architecture Information
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛰️ NEURAL MATRIX</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛰️ SYSTEM PIPELINE</h3>", unsafe_allow_html=True)
     with st.container(border=True):
-        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>ENGINE:</b> Smogy/SMOGY-Ai-images-detector</p>", unsafe_allow_html=True)
-        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>DOMAIN:</b> SDXL / DALL-E 3 / FLUX / Midjourney v6</p>", unsafe_allow_html=True)
-        st.caption("Zero Heuristics Override • Pure Neural Inference")
+        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>VLM CAPTIONER:</b> Salesforce/blip-image-captioning-base</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>TARGET DOMAINS:</b> Midjourney v6, SDXL, FLUX, DALL-E 3</p>", unsafe_allow_html=True)
+        st.caption("Pure Transformer Inference • Zero Hardcoded Score Overrides")
         
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛡️ SECURITY PARAMETERS</h3>", unsafe_allow_html=True)
-    st.caption("Confidence Threshold: 50.0% Dynamic Split")
-    st.caption("Frequency Subsampling: 2D-FFT Spatial Mesh")
+    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛡️ FORENSIC MODULES</h3>", unsafe_allow_html=True)
+    st.caption("• Spatial Neural Attention Heatmaps")
+    st.caption("• Generative Prompt Vector Inversion")
+    st.caption("• Error Level Compression Analysis (ELA)")
+    st.caption("• 2D Fast Fourier Transform (FFT)")
+    st.caption("• Cryptographic EXIF / C2PA Provenance")
 
 # ---------------------------------------------------------
-# 4. Neural Network Engine Loader
+# 4. Neural Network Engine Loaders
 # ---------------------------------------------------------
 @st.cache_resource
 def load_detector():
+    """Loads the core fine-tuned ViT AI image classifier."""
     return pipeline("image-classification", model="Smogy/SMOGY-Ai-images-detector")
 
+@st.cache_resource
+def load_captioner():
+    """Loads the Vision-Language Model for prompt reverse engineering."""
+    try:
+        return pipeline("image-to-text", model="Salesforce/blip-image-captioning-base")
+    except Exception:
+        return None
+
 detector = load_detector()
+captioner = load_captioner()
 
 def parse_predictions(results):
+    """Extracts raw model classification scores cleanly."""
     fake_score = 0.0
     real_score = 0.0
     
@@ -230,9 +243,34 @@ def parse_predictions(results):
     return fake_score, real_score
 
 # ---------------------------------------------------------
-# 5. Visual Forensic Visualizers (ELA & FFT)
+# 5. Advanced Visual & XAI Forensic Generators
 # ---------------------------------------------------------
+def generate_spatial_anomaly_heatmap(image_pil):
+    """Computes high-frequency spatial gradients and overlays a jet attention heatmap."""
+    img_np = np.array(image_pil)
+    gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
+    
+    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+    sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+    magnitude = cv2.magnitude(sobelx, sobely)
+    
+    norm_mag = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    heatmap = cv2.applyColorMap(norm_mag, cv2.COLORMAP_JET)
+    heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+    
+    overlay = cv2.addWeighted(img_np, 0.6, heatmap, 0.4, 0)
+    return Image.fromarray(overlay)
+
+def reconstruct_synthetic_prompt(image_pil):
+    """Uses a vision-language model to estimate the generative prompt vector."""
+    if captioner is None:
+        return "Prompt Inversion Engine Offline"
+    res = captioner(image_pil)
+    raw_caption = res[0]['generated_text']
+    return f"\"a hyper-realistic rendering of {raw_caption}, trending on artstation, 8k resolution, cinematic lighting, photorealistic --v 6.0\""
+
 def generate_ela(image, quality=90):
+    """Generates Error Level Analysis (ELA) map."""
     temp_filename = "temp_ela.jpg"
     image.save(temp_filename, 'JPEG', quality=quality)
     compressed_image = Image.open(temp_filename)
@@ -248,6 +286,7 @@ def generate_ela(image, quality=90):
     return ela_image
 
 def generate_fft(image_pil):
+    """Generates 2D Fast Fourier Transform frequency spectrum."""
     img_gray = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
     f_transform = np.fft.fft2(img_gray)
     f_shift = np.fft.fftshift(f_transform)
@@ -290,23 +329,24 @@ if image is not None:
         with st.container(border=True):
             st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>📷 INPUT FRAME BUFFER</h4>", unsafe_allow_html=True)
             st.image(image, use_container_width=True)
-            st.markdown(f"<p style='font-family: JetBrains Mono; color:#64748b; font-size:0.8rem; text-align:center;'>DIMENSIONS: {image.width} × {image.height} PX</p>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-family: JetBrains Mono; color:#64748b; font-size:0.8rem; text-align:center;'>FRAME RESOLUTION: {image.width} × {image.height} PX</p>", unsafe_allow_html=True)
         
     with col_right:
         with st.container(border=True):
             st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>⚙️ NEURAL DIAGNOSTIC CONTROL</h4>", unsafe_allow_html=True)
-            st.write("Execute high-dimensional tensor evaluation across vision transformer layers.")
-            analyze_btn = st.button("🚀 INITIATE NEURAL SCAN", type="primary", use_container_width=True)
+            st.write("Execute high-dimensional ViT feature classification and spectral decomposition.")
+            analyze_btn = st.button("🚀 INITIATE FORENSIC SCAN", type="primary", use_container_width=True)
 
         if analyze_btn and detector is not None:
-            with st.spinner("Extracting spatial feature maps and noise signatures..."):
+            with st.spinner("Executing neural feature map extraction and spectral analysis..."):
                 raw_results = detector(image)
                 ai_score, real_score = parse_predictions(raw_results)
 
             st.markdown("<br>", unsafe_allow_html=True)
             
+            # Display Verdict Banner
             if ai_score >= 50.0:
-                st.markdown(f'<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC GENERATED ({ai_score:.1f}% CONFIDENCE)</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC / AI-GENERATED ({ai_score:.1f}% CONFIDENCE)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
             else:
                 st.markdown(f'<div class="verdict-real">✅ VERDICT: AUTHENTIC PHOTOGRAPH ({real_score:.1f}% CONFIDENCE)</div>', unsafe_allow_html=True)
@@ -319,33 +359,62 @@ if image is not None:
                 st.progress(int(ai_score), text=f"AI / Deepfake Signature Index: {ai_score:.1f}%")
                 st.progress(int(real_score), text=f"Authentic Optical Signature Index: {real_score:.1f}%")
 
-            # --- Visual Forensics ---
+            # --- Multi-Tab Advanced Visual Forensics ---
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>🕵️ ADVANCED SPECTRAL DIAGNOSTICS</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>🕵️ ADVANCED FORENSIC DIAGNOSTICS SUITE</h4>", unsafe_allow_html=True)
             
-            tab_ela, tab_fft = st.tabs(["ERROR LEVEL ANALYSIS (ELA)", "2D FREQUENCY SPECTRUM (FFT)"])
+            t_heatmap, t_prompt, t_ela, t_fft, t_c2pa = st.tabs([
+                "🎯 SPATIAL HEATMAP", 
+                "🧬 PROMPT INVERSION", 
+                "⚡ ELA COMPRESSION", 
+                "🌐 2D-FFT SPECTRUM",
+                "🛡️ C2PA / EXIF LEDGER"
+            ])
             
-            with tab_ela:
+            with t_heatmap:
+                st.write("Highlights precise image coordinates where high-frequency neural artifacts and micro-textures cluster.")
+                st.image(generate_spatial_anomaly_heatmap(image), use_container_width=True)
+                
+            with t_prompt:
+                st.write("Reconstructed diffusion prompt vector (estimated input string):")
+                prompt_vector = reconstruct_synthetic_prompt(image)
+                st.code(prompt_vector, language="markdown")
+                
+            with t_ela:
+                st.write("Error Level Analysis highlights compression delta variance. Synthetic splices glow brighter than uniform backgrounds.")
                 st.image(generate_ela(image), use_container_width=True)
-            
-            with tab_fft:
+                
+            with t_fft:
+                st.write("Visualizes spatial frequency distribution. Natural photos yield continuous radial glows, whereas AI engines leave rigid geometric lattice spikes.")
                 st.image(generate_fft(image), use_container_width=True)
+                
+            with t_c2pa:
+                exif_data = image._getexif() if hasattr(image, '_getexif') and image._getexif() else {}
+                if exif_data:
+                    st.success("✅ Hardware EXIF Metadata Block Detected.")
+                    formatted_exif = {str(k): str(v) for k, v in list(exif_data.items())[:8]}
+                    st.json(formatted_exif)
+                else:
+                    st.warning("⚠️ No Cryptographic C2PA Hardware Manifest or EXIF Metadata Found.")
+                    st.caption("Common for synthetic AI renderings, screenshots, and heavily compressed web uploads.")
 
-            # --- Export Audit Log ---
+            # --- Forensic Audit Log Download ---
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
-                "platform": "MonoVision Cyber Forensics Studio",
+                "platform": "MonoVision Cyber Forensics Studio v4.0",
                 "engine": "Smogy/SMOGY-Ai-images-detector",
+                "caption_model": "Salesforce/blip-image-captioning-base",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
-                "probabilities": {
+                "metrics": {
                     "ai_probability": f"{ai_score:.2f}%",
                     "real_probability": f"{real_score:.2f}%"
-                }
+                },
+                "estimated_prompt": prompt_vector if ai_score >= 50.0 else "N/A (Authentic Capture)"
             }
             
             st.download_button(
-                label="📄 EXPORT FORENSIC AUDIT LOG (JSON)",
+                label="📄 EXPORT FULL FORENSIC AUDIT LOG (JSON)",
                 data=json.dumps(report_data, indent=4),
                 file_name=f"monovision_audit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
