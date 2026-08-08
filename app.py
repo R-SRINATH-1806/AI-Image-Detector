@@ -153,7 +153,7 @@ st.markdown("""
     <div class="hero-title">MONOVISION</div>
     <div class="hero-subtitle">Deepfake & Synthetic Image Forensics Platform</div>
     <div>
-        <span class="status-badge"><span class="pulse-online"></span> ENSEMBLE ENGINE ONLINE</span>
+        <span class="status-badge"><span class="pulse-online"></span> NEURAL ENGINE ONLINE</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -162,46 +162,31 @@ st.markdown("""
 # 3. Sidebar Configuration
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("### 📊 Dual-Model Pipeline")
+    st.markdown("### 📊 Active Model Pipeline")
     
     with st.container(border=True):
-        st.markdown("**Engine 1:** `umm-maybe/AI-image-detector`")
-        st.markdown("**Engine 2:** `Falconsai/intent_image_classifier`")
-        st.caption("Focus: Midjourney, Stable Diffusion & DALL-E Detection")
+        st.markdown("**umm-maybe/AI-image-detector**")
+        st.caption("Architecture: Vision Transformer (ViT-Base)")
+        st.caption("Domain: General AI Generation, Midjourney, SD & Photos")
         
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛡️ System Telemetry")
-    st.caption("Analysis Mode: Weighted Ensemble Averaging")
+    st.caption("Inference API: Hugging Face Transformers")
+    st.caption("Status: Stable Single-Pipeline Execution")
 
 # ---------------------------------------------------------
-# 4. Hugging Face Dual-Model Ensemble Loader
+# 4. Hugging Face Model Loader (Safe & Lightweight)
 # ---------------------------------------------------------
 @st.cache_resource
-def load_ensemble_detectors():
-    """Loads two models specialized in Midjourney and general synthetic art."""
-    pipe1 = pipeline("image-classification", model="umm-maybe/AI-image-detector")
-    pipe2 = pipeline("image-classification", model="Falconsai/intent_image_classifier")
-    return pipe1, pipe2
+def load_hf_detector():
+    """Loads a stable general-purpose detector model."""
+    try:
+        return pipeline("image-classification", model="umm-maybe/AI-image-detector")
+    except Exception as e:
+        st.error(f"Failed to load detection model: {e}")
+        return None
 
-pipe1, pipe2 = load_ensemble_detectors()
-
-def parse_model_scores(results):
-    """Cleanly extracts fake/real percentages regardless of output label syntax."""
-    fake_score, real_score = 0.0, 0.0
-    for res in results:
-        label = str(res['label']).lower()
-        score = res['score'] * 100.0
-        if any(k in label for k in ['fake', 'ai', 'generated', 'synthetic', 'artificial', 'label_1']):
-            fake_score = score
-        elif any(k in label for k in ['real', 'authentic', 'human', 'label_0']):
-            real_score = score
-            
-    if fake_score == 0.0 and real_score > 0:
-        fake_score = 100.0 - real_score
-    elif real_score == 0.0 and fake_score > 0:
-        real_score = 100.0 - fake_score
-        
-    return fake_score, real_score
+hf_detector = load_hf_detector()
 
 # ---------------------------------------------------------
 # 5. Visual Forensic Generators (ELA & FFT)
@@ -264,7 +249,7 @@ if image is not None:
     if image.width < 500 or image.height < 500:
         st.warning(
             f"⚠️ **Low Resolution Media ({image.width} × {image.height}px):** "
-            "Small images have heavy JPEG compression, which can impact detection precision."
+            "Thumbnails contain heavy JPEG compression blocks, which may lower detection precision."
         )
 
     col_left, col_right = st.columns([1, 1], gap="medium")
@@ -278,41 +263,45 @@ if image is not None:
     with col_right:
         with st.container(border=True):
             st.markdown("#### ⚙️ Forensic Control")
-            st.write("Evaluating against dual Midjourney and synthetic image classification models.")
+            st.write("Ready to analyze via ViT-Base Image Classification pipeline.")
             analyze_btn = st.button("🚀 Run Forensic Analysis", type="primary", use_container_width=True)
 
-        if analyze_btn:
+        if analyze_btn and hf_detector is not None:
             with st.spinner("Analyzing neural texture patterns..."):
-                res1 = pipe1(image)
-                fake1, real1 = parse_model_scores(res1)
+                results = hf_detector(image)
                 
-                res2 = pipe2(image)
-                fake2, real2 = parse_model_scores(res2)
+                avg_fake, avg_real = 0.0, 0.0
                 
-                # Weighted ensemble (Engine 1: 50%, Engine 2: 50%)
-                avg_fake = (fake1 + fake2) / 2.0
-                avg_real = (real1 + real2) / 2.0
+                for res in results:
+                    label = str(res['label']).lower()
+                    score = res['score'] * 100.0
+                    
+                    if any(k in label for k in ['fake', 'ai', 'generated', 'synthetic', 'artificial', 'label_1']):
+                        avg_fake = score
+                    elif any(k in label for k in ['real', 'authentic', 'human', 'label_0']):
+                        avg_real = score
+                
+                if avg_fake == 0.0 and avg_real > 0:
+                    avg_fake = 100.0 - avg_real
+                elif avg_real == 0.0 and avg_fake > 0:
+                    avg_real = 100.0 - avg_fake
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # --- BALANCED VERDICT LOGIC ---
+            # --- ACCURATE DIRECT VERDICT LOGIC ---
             if avg_fake >= 50.0:
                 st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
-            elif avg_real > 50.0:
+            else:
                 st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({avg_real:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "Authentic Photo"
-            else:
-                st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Inconclusive Signal ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
-                verdict_str = "Inconclusive"
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🔬 Ensemble Transformer Breakdown")
+            st.markdown("#### 🔬 Neural Breakdown")
             
             with st.container(border=True):
-                st.progress(int(avg_fake), text=f"Combined AI/Deepfake Signature: {avg_fake:.1f}%")
-                st.progress(int(avg_real), text=f"Combined Authentic Signature: {avg_real:.1f}%")
-                st.caption(f"Engine 1 (General AI): {fake1:.1f}% AI | Engine 2 (Generator Classifier): {fake2:.1f}% AI")
+                st.progress(int(avg_fake), text=f"AI/Deepfake Signature: {avg_fake:.1f}%")
+                st.progress(int(avg_real), text=f"Authentic Photography Signature: {avg_real:.1f}%")
 
             # --- Advanced Visual Forensics (ELA & FFT) ---
             st.markdown("<br>", unsafe_allow_html=True)
@@ -332,14 +321,12 @@ if image is not None:
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
                 "platform": "MonoVision Forensics Studio",
-                "engine": "Dual-Ensemble (umm-maybe + Falconsai)",
+                "engine": "umm-maybe/AI-image-detector",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
-                "engine_breakdown": {
-                    "engine_1_ai_score": f"{fake1:.2f}%",
-                    "engine_2_ai_score": f"{fake2:.2f}%",
-                    "ensemble_average_fake": f"{avg_fake:.2f}%",
-                    "ensemble_average_real": f"{avg_real:.2f}%"
+                "probabilities": {
+                    "ai_score": f"{avg_fake:.2f}%",
+                    "real_score": f"{avg_real:.2f}%"
                 }
             }
             
