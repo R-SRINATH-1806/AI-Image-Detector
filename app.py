@@ -25,7 +25,7 @@ st.write("Detect if an image is real or AI-generated using ViT Tiny & ResNet18 m
 # ---------------------------------------------------------
 VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
 RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
-
+Vit_LANDMARK_URL ="https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_landmark_model.1.pth"
 def download_file_if_missing(file_path, url):
     if not os.path.exists(file_path):
         with st.spinner(f"Downloading model weights ({file_path})..."):
