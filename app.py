@@ -8,24 +8,14 @@ from torchvision import transforms, models
 import timm
 from PIL import Image
 
-# ---------------------------------------------------------
-# 1. Page Configuration
-# ---------------------------------------------------------
-st.set_page_config(
-    page_title="AI vs Real Image Detector",
-    page_icon="🔍",
-    layout="centered"
-)
-
+st.set_page_config(page_title="AI vs Real Image Detector", page_icon="🔍", layout="centered")
 st.title("🔍 AI vs Real Image Detector")
-st.write("Detect if an image is real or AI-generated using ViT Tiny & ResNet18 models.")
+st.write("Native micro-texture analysis using Vision Transformer & ResNet18.")
 
-# ---------------------------------------------------------
-# 2. Model Setup
-# ---------------------------------------------------------
+# Model Setup
 VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
 RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
-Vit_LANDMARK_URL ="https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_landmark_model.1.pth"
+
 def download_file_if_missing(file_path, url):
     if not os.path.exists(file_path):
         with st.spinner(f"Downloading model weights ({file_path})..."):
@@ -33,11 +23,14 @@ def download_file_if_missing(file_path, url):
 
 device = torch.device("cpu")
 
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+# 1. Base transform for individual 224x224 crops
+base_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
+
+# 2. Extract 5 patches at native resolution (Center + 4 Corners)
+five_crop = transforms.FiveCrop(224)
 
 @st.cache_resource
 def load_models():
@@ -58,78 +51,59 @@ def load_models():
 
 vit_model, resnet_model = load_models()
 
-# ---------------------------------------------------------
-# 3. Input Options (Tabs for File/Paste vs URL)
-# ---------------------------------------------------------
-tab1, tab2 = st.tabs(["📁 File Upload / Paste Image", "🔗 Image Web Link (URL)"])
+# Input UI
+uploaded_file = st.file_uploader("Upload or Paste Image (Ctrl+V)", type=["jpg", "jpeg", "png", "webp"])
 
-image = None
-
-with tab1:
-    st.caption("💡 Click the box below to select a file, or click it and press **Ctrl + V** to paste an image.")
-    uploaded_file = st.file_uploader("Upload or Paste Image", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file).convert('RGB')
-
-with tab2:
-    st.caption("🌐 Right-click any image online, select 'Copy image address', and paste the URL below.")
-    url_input = st.text_input("Image URL", placeholder="https://example.com/image.jpg", label_visibility="collapsed")
+if uploaded_file is not None:
+    image = Image.open(uploaded_file).convert('RGB')
     
-    if url_input:
-        try:
-            req = urllib.request.Request(url_input, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req) as response:
-                image = Image.open(response).convert('RGB')
-        except Exception:
-            st.error("⚠️ Unable to load image from this URL. Please verify the link is a direct image URL.")
-
-# ---------------------------------------------------------
-# 4. Analysis & Results
-# ---------------------------------------------------------
-if image is not None:
-    st.divider()
-    col_img, col_info = st.columns([1, 1])
-    
-    with col_img:
-        st.image(image, caption="Loaded Image", use_container_width=True)
+    # Ensure image is at least 224x224 before cropping
+    if image.width < 224 or image.height < 224:
+        image = image.resize((max(224, image.width), max(224, image.height)))
         
-    with col_info:
-        st.write("### Ready to Analyze")
-        analyze_btn = st.button("🚀 Analyze Image Now", type="primary")
+    st.image(image, caption="Loaded Image", use_container_width=True)
+    
+    if st.button("🚀 Analyze Native Micro-Textures", type="primary"):
+        with st.spinner("Analyzing 5 high-resolution patches across the image..."):
+            
+            # Extract 5 native patches
+            patches = five_crop(image)
+            # Batch them together into tensor shape [5, 3, 224, 224]
+            patch_tensors = torch.stack([base_transform(p) for p in patches])
 
-    if analyze_btn:
-        with st.spinner("AI is analyzing image details..."):
-            img_tensor = transform(image).unsqueeze(0)
-
-            # ViT Prediction
             with torch.no_grad():
-                vit_out = vit_model(img_tensor)
-                vit_probs = F.softmax(vit_out, dim=1).squeeze().tolist()
+                # Get ViT predictions across all 5 patches and average them
+                vit_outs = vit_model(patch_tensors)
+                vit_probs_batch = F.softmax(vit_outs, dim=1)
+                vit_avg_probs = vit_probs_batch.mean(dim=0).tolist() # [Fake_prob, Real_prob]
                 
-            # ResNet Prediction
-            with torch.no_grad():
-                res_out = resnet_model(img_tensor)
-                res_probs = F.softmax(res_out, dim=1).squeeze().tolist()
+                # Get ResNet predictions across all 5 patches and average them
+                res_outs = resnet_model(patch_tensors)
+                res_probs_batch = F.softmax(res_outs, dim=1)
+                res_avg_probs = res_probs_batch.mean(dim=0).tolist()
 
-            avg_fake = (vit_probs[0] + res_probs[0]) / 2.0 * 100
-            avg_real = (vit_probs[1] + res_probs[1]) / 2.0 * 100
+            # Combined Ensemble Score
+            avg_fake = (vit_avg_probs[0] + res_avg_probs[0]) / 2.0 * 100
+            avg_real = (vit_avg_probs[1] + res_avg_probs[1]) / 2.0 * 100
 
         st.divider()
-        st.subheader("📊 Detection Results")
+        st.subheader("📊 Multi-Patch Detection Results")
 
-        if avg_fake > avg_real:
+        # Set a realistic decision threshold (Requires >60% confidence to call AI)
+        if avg_fake > 60.0:
             st.error(f"⚠️ **Verdict:** Likely AI-Generated ({avg_fake:.1f}% Confidence)")
-        else:
+        elif avg_real > 60.0:
             st.success(f"✅ **Verdict:** Likely Real Photo ({avg_real:.1f}% Confidence)")
+        else:
+            st.warning(f"🤔 **Verdict:** Uncertain / Natural Photo with Smooth Lighting ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)")
 
         c1, c2 = st.columns(2)
-        
         with c1:
             st.markdown("#### Vision Transformer (ViT)")
-            st.progress(int(vit_probs[0] * 100), text=f"AI/Fake: {vit_probs[0]*100:.1f}%")
-            st.progress(int(vit_probs[1] * 100), text=f"Real: {vit_probs[1]*100:.1f}%")
+            st.progress(int(vit_avg_probs[0] * 100), text=f"AI/Fake: {vit_avg_probs[0]*100:.1f}%")
+            st.progress(int(vit_avg_probs[1] * 100), text=f"Real: {vit_avg_probs[1]*100:.1f}%")
             
         with c2:
             st.markdown("#### ResNet-18 Architecture")
-            st.progress(int(res_probs[0] * 100), text=f"AI/Fake: {res_probs[0]*100:.1f}%")
-            st.progress(int(res_probs[1] * 100), text=f"Real: {res_probs[1]*100:.1f}%")
+            st.progress(int(res_avg_probs[0] * 100), text=f"AI/Fake: {res_avg_probs[0]*100:.1f}%")
+            st.progress(int(res_avg_probs[1] * 100), text=f"Real: {res_avg_probs[1]*100:.1f}%")
