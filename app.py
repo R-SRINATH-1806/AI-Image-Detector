@@ -388,6 +388,31 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
         </div>
 
         <script>
+            // Ensure shader uniform definitions exist on global THREE scope
+            if (typeof THREE !== 'undefined') {
+                if (!THREE.CopyShader) {
+                    THREE.CopyShader = {
+                        uniforms: { 'tDiffuse': { value: null }, 'opacity': { value: 1.0 } },
+                        vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
+                        fragmentShader: 'uniform float opacity; uniform sampler2D tDiffuse; varying vec2 vUv; void main() { vec4 tex = texture2D( tDiffuse, vUv ); gl_FragColor = opacity * tex; }'
+                    };
+                }
+                if (!THREE.LuminanceHighPassShader) {
+                    THREE.LuminanceHighPassShader = {
+                        shaderID: 'luminanceHighPass',
+                        uniforms: {
+                            'tDiffuse': { value: null },
+                            'luminanceThreshold': { value: 0.21 },
+                            'smoothWidth': { value: 0.01 },
+                            'defaultColor': { value: new THREE.Color( 0x000000 ) },
+                            'defaultOpacity': { value: 0.0 }
+                        },
+                        vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
+                        fragmentShader: 'uniform sampler2D tDiffuse; uniform vec3 defaultColor; uniform float defaultOpacity; uniform float luminanceThreshold; uniform float smoothWidth; varying vec2 vUv; void main() { vec4 texel = texture2D( tDiffuse, vUv ); vec3 luma = vec3( 0.299, 0.587, 0.114 ); float v = dot( texel.rgb, luma ); vec4 outputColor = vec4( defaultColor, defaultOpacity ); float alpha = smoothstep( luminanceThreshold, luminanceThreshold + smoothWidth, v ); gl_FragColor = mix( outputColor, texel, alpha ); }'
+                    };
+                }
+            }
+
             let uniforms = {
                 uDepthMap: { value: null },
                 uColorMap: { value: null },
@@ -398,6 +423,8 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
             };
 
             let bloomPass;
+            let composer;
+            let useComposer = false;
 
             function setPalette(mode) {
                 uniforms.uColorMode.value = mode;
@@ -483,6 +510,31 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
             function init() {
                 try {
+                    // Double check inline definitions if scripts loaded late
+                    if (typeof THREE !== 'undefined') {
+                        if (!THREE.CopyShader) {
+                            THREE.CopyShader = {
+                                uniforms: { 'tDiffuse': { value: null }, 'opacity': { value: 1.0 } },
+                                vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
+                                fragmentShader: 'uniform float opacity; uniform sampler2D tDiffuse; varying vec2 vUv; void main() { vec4 tex = texture2D( tDiffuse, vUv ); gl_FragColor = opacity * tex; }'
+                            };
+                        }
+                        if (!THREE.LuminanceHighPassShader) {
+                            THREE.LuminanceHighPassShader = {
+                                shaderID: 'luminanceHighPass',
+                                uniforms: {
+                                    'tDiffuse': { value: null },
+                                    'luminanceThreshold': { value: 0.21 },
+                                    'smoothWidth': { value: 0.01 },
+                                    'defaultColor': { value: new THREE.Color( 0x000000 ) },
+                                    'defaultOpacity': { value: 0.0 }
+                                },
+                                vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
+                                fragmentShader: 'uniform sampler2D tDiffuse; uniform vec3 defaultColor; uniform float defaultOpacity; uniform float luminanceThreshold; uniform float smoothWidth; varying vec2 vUv; void main() { vec4 texel = texture2D( tDiffuse, vUv ); vec3 luma = vec3( 0.299, 0.587, 0.114 ); float v = dot( texel.rgb, luma ); vec4 outputColor = vec4( defaultColor, defaultOpacity ); float alpha = smoothstep( luminanceThreshold, luminanceThreshold + smoothWidth, v ); gl_FragColor = mix( outputColor, texel, alpha ); }'
+                            };
+                        }
+                    }
+
                     const container = document.getElementById('canvas-container');
                     let width = container.clientWidth || window.innerWidth || 800;
                     let height = container.clientHeight || 580;
@@ -556,12 +608,19 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     const particleSystem = new THREE.Points(geometry, shaderMaterial);
                     scene.add(particleSystem);
 
-                    const renderScene = new THREE.RenderPass(scene, camera);
-                    bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.4, 0.4, 0.85);
-                    
-                    const composer = new THREE.EffectComposer(renderer);
-                    composer.addPass(renderScene);
-                    composer.addPass(bloomPass);
+                    try {
+                        if (typeof THREE.EffectComposer !== 'undefined' && typeof THREE.UnrealBloomPass !== 'undefined') {
+                            const renderScene = new THREE.RenderPass(scene, camera);
+                            bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.4, 0.4, 0.85);
+                            composer = new THREE.EffectComposer(renderer);
+                            composer.addPass(renderScene);
+                            composer.addPass(bloomPass);
+                            useComposer = true;
+                        }
+                    } catch (err) {
+                        console.warn("Bloom post-processing skipped, falling back to direct render:", err);
+                        useComposer = false;
+                    }
 
                     document.getElementById('sliderExtrude').addEventListener('input', (e) => {
                         uniforms.uExtrusionHeight.value = parseFloat(e.target.value);
@@ -587,7 +646,12 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                         }
 
                         controls.update();
-                        composer.render();
+
+                        if (useComposer && composer) {
+                            composer.render();
+                        } else {
+                            renderer.render(scene, camera);
+                        }
                     }
                     animate();
 
@@ -598,7 +662,9 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                             camera.aspect = newWidth / newHeight;
                             camera.updateProjectionMatrix();
                             renderer.setSize(newWidth, newHeight);
-                            composer.setSize(newWidth, newHeight);
+                            if (useComposer && composer) {
+                                composer.setSize(newWidth, newHeight);
+                            }
                         }
                     });
                     resizeObserver.observe(container);
