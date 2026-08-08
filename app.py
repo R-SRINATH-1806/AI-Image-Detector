@@ -482,4 +482,4 @@ def reconstruct_synthetic_prompt(image_pil):
     description = ""
     if captioner is not None:
         try:
-            res = captioner(image_pil
+            res = captioner(image_pil)
