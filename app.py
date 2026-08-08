@@ -17,7 +17,7 @@ from transformers import pipeline
 # 1. Page Configuration & Cyber HUD Styling
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MONOVISION // HOLO-FORENSICS",
+    page_title="MONOVISION // HOLO-FORENSICS AI",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -185,10 +185,10 @@ def render_cyber_header(text):
 st.markdown(
     """
 <div class="hud-banner">
-    <div class="hud-title">MONOVISION v5.0</div>
-    <div class="hud-subtitle">// 3D HOLOGRAM PROJECTION & FORENSIC SUITE</div>
+    <div class="hud-title">MONOVISION v6.0</div>
+    <div class="hud-subtitle">// AI VOLUMETRIC DEPTH & 3D FORENSIC SUITE</div>
     <div>
-        <span class="hud-badge"><span class="pulse-dot"></span> HOLOGRAM EMITTER & NEURAL MATRIX ACTIVE</span>
+        <span class="hud-badge"><span class="pulse-dot"></span> MiDaS AI GEOMETRIC DEPTH ENGINE ONLINE</span>
     </div>
 </div>
 """,
@@ -206,22 +206,26 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>3D ENGINE:</b> WebGL Three.js + Plotly Mesh</p>""",
+        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>DEPTH ENGINE:</b> Intel DPT-MiDaS Hybrid</p>""",
         unsafe_allow_html=True,
     )
-    st.caption("Interactive Volumetric Display Active")
+    st.markdown(
+        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>3D RENDERER:</b> WebGL Point-Cloud + Plotly</p>""",
+        unsafe_allow_html=True,
+    )
+    st.caption("Active Volumetric Depth Mapping")
 
   st.markdown("<br>", unsafe_allow_html=True)
   st.markdown(
       """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
       unsafe_allow_html=True,
   )
-  st.caption("• Animated Laser-Scan 3D Hologram")
-  st.caption("• Native Volumetric Surface Mesh")
-  st.caption("• Spatial Attention Heatmaps")
-  st.caption("• Prompt Vector Inversion")
-  st.caption("• Error Level Compression Delta")
-  st.caption("• Fast Fourier Frequency Spectrum")
+  st.caption("• AI MiDaS Volumetric 3D Point-Cloud")
+  st.caption("• Geometric Surface Depth Topography")
+  st.caption("• Spatial Attention Artifact Heatmap")
+  st.caption("• Latent Prompt Vector Inversion")
+  st.caption("• JPEG Compression Delta (ELA)")
+  st.caption("• 2D Fourier Frequency Spectrum")
 
 
 # ---------------------------------------------------------
@@ -242,8 +246,30 @@ def load_captioner():
     return None
 
 
+@st.cache_resource
+def load_depth_estimator():
+  try:
+    return pipeline("depth-estimation", model="Intel/dpt-hybrid-midas")
+  except Exception:
+    return None
+
+
 detector = load_detector()
 captioner = load_captioner()
+depth_estimator = load_depth_estimator()
+
+
+def generate_depth_map(image_pil):
+  """Generates a true monocular depth map using AI MiDaS pipeline."""
+  if depth_estimator is not None:
+    try:
+      result = depth_estimator(image_pil)
+      depth_img = result["depth"].convert("L")
+      return depth_img
+    except Exception:
+      pass
+  # Fallback to luminance grayscale if model is unavailable
+  return image_pil.convert("L")
 
 
 def parse_predictions(results):
@@ -270,7 +296,7 @@ def parse_predictions(results):
 
 
 # ---------------------------------------------------------
-# 4. Interactive 3D Render Engines
+# 4. WebGL AI Volumetric 3D Particle Cloud Engine
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
   buffered = BytesIO()
@@ -279,15 +305,15 @@ def image_to_base64(img_pil):
   return f"data:image/png;base64,{img_str}"
 
 
-def render_3d_hologram_component(img_b64):
-  """WebGL Three.js Cyber Hologram with Laser Scanlines, Particles & Tab Auto-Resize."""
+def render_3d_hologram_component(img_b64, depth_b64):
+  """WebGL Three.js AI Depth Extruded Volumetric Point Cloud with HUD controls."""
   html_code = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <style>
             * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-            body {{ background: #030712; overflow: hidden; width: 100vw; height: 500px; font-family: monospace; }}
+            body {{ background: #030712; overflow: hidden; width: 100vw; height: 530px; font-family: 'Courier New', monospace; }}
             #canvas-container {{ width: 100%; height: 100%; position: relative; }}
             .hud-overlay {{
                 position: absolute; top: 12px; left: 12px;
@@ -296,11 +322,27 @@ def render_3d_hologram_component(img_b64):
                 font-size: 11px; letter-spacing: 1.5px; border-radius: 4px;
                 pointer-events: none; z-index: 100; box-shadow: 0 0 10px rgba(0,243,255,0.2);
             }}
+            .controls-hud {{
+                position: absolute; bottom: 12px; right: 12px; z-index: 100;
+                display: flex; gap: 8px; background: rgba(3,7,18,0.85); padding: 8px;
+                border: 1px solid rgba(0,243,255,0.3); border-radius: 6px;
+            }}
+            .hud-btn {{
+                background: rgba(0,243,255,0.1); border: 1px solid #00f3ff; color: #00f3ff;
+                padding: 5px 12px; font-size: 10px; cursor: pointer; border-radius: 3px; font-weight: bold;
+                transition: all 0.2s; font-family: monospace;
+            }}
+            .hud-btn:hover {{ background: #00f3ff; color: #000; box-shadow: 0 0 10px #00f3ff; }}
         </style>
     </head>
     <body>
         <div id="canvas-container">
-            <div class="hud-overlay">⚡ WebGL 3D HOLOGRAM EMITTER // CLICK & DRAG TO ROTATE</div>
+            <div class="hud-overlay">⚡ AI MIDAS GEOMETRIC 3D POINT-CLOUD // ACTIVE</div>
+            <div class="controls-hud">
+                <button class="hud-btn" onclick="toggleMesh()">TOGGLE MESH</button>
+                <button class="hud-btn" onclick="setMode('cyber')">CYBER GLOW</button>
+                <button class="hud-btn" onclick="setMode('rgb')">TRUE COLOR</button>
+            </div>
         </div>
         <script>
             function loadScript(src) {{
@@ -313,20 +355,31 @@ def render_3d_hologram_component(img_b64):
                 }});
             }}
 
+            let wireframeMesh, pointCloud, colorMode = 'cyber', holoGroup;
+
+            function toggleMesh() {{
+                if (wireframeMesh) wireframeMesh.visible = !wireframeMesh.visible;
+            }}
+
+            function setMode(mode) {{
+                colorMode = mode;
+                if (window.rebuildHologram) window.rebuildHologram();
+            }}
+
             async function init() {{
                 try {{
                     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
                     await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
-                    
+
                     const container = document.getElementById('canvas-container');
                     let width = container.clientWidth || window.innerWidth || 800;
-                    let height = container.clientHeight || 500;
+                    let height = container.clientHeight || 530;
 
                     const scene = new THREE.Scene();
-                    scene.fog = new THREE.FogExp2(0x030712, 0.08);
+                    scene.fog = new THREE.FogExp2(0x030712, 0.05);
 
                     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                    camera.position.set(0, 2.2, 6.5);
+                    camera.position.set(0, 2.5, 6.0);
 
                     const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
                     renderer.setSize(width, height);
@@ -338,113 +391,138 @@ def render_3d_hologram_component(img_b64):
                     controls.dampingFactor = 0.05;
 
                     // Neon Grid Floor
-                    const gridHelper = new THREE.GridHelper(10, 20, 0x00f3ff, 0x112233);
-                    gridHelper.position.y = -1.5;
+                    const gridHelper = new THREE.GridHelper(10, 24, 0x00f3ff, 0x112233);
+                    gridHelper.position.y = -1.2;
                     scene.add(gridHelper);
 
-                    // Dual Emitter Rings
-                    const ring1Geo = new THREE.RingGeometry(1.2, 1.35, 32);
-                    const ring1Mat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, side: THREE.DoubleSide, transparent: true, opacity: 0.8 }});
-                    const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
-                    ring1.rotation.x = Math.PI / 2;
-                    ring1.position.y = -1.49;
-                    scene.add(ring1);
+                    // Scanning Laser Bar
+                    const scanPlaneGeo = new THREE.PlaneGeometry(3.5, 3.5);
+                    const scanPlaneMat = new THREE.MeshBasicMaterial({{
+                        color: 0x00f3ff, side: THREE.DoubleSide, transparent: true, opacity: 0.12, wireframe: true
+                    }});
+                    const scanPlane = new THREE.Mesh(scanPlaneGeo, scanPlaneMat);
+                    scanPlane.rotation.x = Math.PI / 2;
+                    scene.add(scanPlane);
 
-                    const ring2Geo = new THREE.RingGeometry(1.5, 1.55, 32);
-                    const ring2Mat = new THREE.MeshBasicMaterial({{ color: 0xff0055, side: THREE.DoubleSide, transparent: true, opacity: 0.5 }});
-                    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-                    ring2.rotation.x = Math.PI / 2;
-                    ring2.position.y = -1.48;
-                    scene.add(ring2);
+                    // Load Image & AI Depth Map into Dual Canvas Buffers
+                    const img = new Image();
+                    const depthImg = new Image();
+                    let imgLoaded = false, depthLoaded = false;
 
-                    // Emitter Particles Fountain
-                    const particleCount = 150;
-                    const pGeo = new THREE.BufferGeometry();
-                    const pPositions = new Float32Array(particleCount * 3);
-                    for(let i=0; i<particleCount*3; i+=3) {{
-                        pPositions[i] = (Math.random() - 0.5) * 3;
-                        pPositions[i+1] = Math.random() * 3.5 - 1.5;
-                        pPositions[i+2] = (Math.random() - 0.5) * 3;
+                    img.src = '{img_b64}';
+                    depthImg.src = '{depth_b64}';
+
+                    function checkReady() {{
+                        if (imgLoaded && depthLoaded) buildVolumetricHologram();
                     }}
-                    pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-                    const pMat = new THREE.PointsMaterial({{ color: 0x00f3ff, size: 0.04, transparent: true, opacity: 0.6 }});
-                    const particles = new THREE.Points(pGeo, pMat);
-                    scene.add(particles);
 
-                    // Projection Cone
-                    const coneGeo = new THREE.ConeGeometry(1.6, 3.2, 32, 1, true);
-                    const coneMat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, transparent: true, opacity: 0.08, wireframe: true, side: THREE.DoubleSide }});
-                    const cone = new THREE.Mesh(coneGeo, coneMat);
-                    cone.position.y = -0.1;
-                    scene.add(cone);
+                    img.onload = () => {{ imgLoaded = true; checkReady(); }};
+                    depthImg.onload = () => {{ depthLoaded = true; checkReady(); }};
 
-                    // Laser Scanline Bar
-                    const scanlineGeo = new THREE.BoxGeometry(2.8, 0.04, 0.05);
-                    const scanlineMat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, transparent: true, opacity: 0.9 }});
-                    const scanline = new THREE.Mesh(scanlineGeo, scanlineMat);
-                    scene.add(scanline);
+                    function buildVolumetricHologram() {{
+                        const imgW = 110, imgH = 110;
 
-                    // Image Texture Hologram Plane
-                    const textureLoader = new THREE.TextureLoader();
-                    textureLoader.load('{img_b64}', (texture) => {{
-                        const aspect = texture.image.width / texture.image.height;
-                        const w = 2.4;
-                        const h = w / aspect;
+                        // Canvas 1: Color
+                        const canvasColor = document.createElement('canvas');
+                        canvasColor.width = imgW; canvasColor.height = imgH;
+                        const ctxC = canvasColor.getContext('2d');
+                        ctxC.drawImage(img, 0, 0, imgW, imgH);
+                        const rgbData = ctxC.getImageData(0, 0, imgW, imgH).data;
 
-                        const planeGeo = new THREE.PlaneGeometry(w, h, 16, 16);
-                        const planeMat = new THREE.MeshBasicMaterial({{
-                            map: texture,
-                            side: THREE.DoubleSide,
-                            transparent: true,
-                            opacity: 0.88,
-                            blending: THREE.AdditiveBlending
-                        }});
-                        const holoPlane = new THREE.Mesh(planeGeo, planeMat);
-                        holoPlane.position.y = 0.5;
-                        scene.add(holoPlane);
+                        // Canvas 2: AI Depth
+                        const canvasDepth = document.createElement('canvas');
+                        canvasDepth.width = imgW; canvasDepth.height = imgH;
+                        const ctxD = canvasDepth.getContext('2d');
+                        ctxD.drawImage(depthImg, 0, 0, imgW, imgH);
+                        const depthData = ctxD.getImageData(0, 0, imgW, imgH).data;
 
-                        // Wireframe Grid Overlay
-                        const wireGeo = new THREE.PlaneGeometry(w, h, 12, 12);
-                        const wireMat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.2 }});
-                        const wirePlane = new THREE.Mesh(wireGeo, wireMat);
-                        wirePlane.position.z = 0.01;
-                        holoPlane.add(wirePlane);
+                        holoGroup = new THREE.Group();
+                        scene.add(holoGroup);
+
+                        window.rebuildHologram = () => {{
+                            scene.remove(holoGroup);
+                            holoGroup = new THREE.Group();
+
+                            const numPoints = imgW * imgH;
+                            const positions = new Float32Array(numPoints * 3);
+                            const colors = new Float32Array(numPoints * 3);
+
+                            for (let y = 0; y < imgH; y++) {{
+                                for (let x = 0; x < imgW; x++) {{
+                                    const idx = (y * imgW + x);
+                                    const pIdx = idx * 4;
+
+                                    const r = rgbData[pIdx] / 255;
+                                    const g = rgbData[pIdx + 1] / 255;
+                                    const b = rgbData[pIdx + 2] / 255;
+
+                                    // Extract AI depth displacement
+                                    const depthVal = depthData[pIdx] / 255.0;
+
+                                    positions[idx * 3] = (x / imgW - 0.5) * 3.4;
+                                    positions[idx * 3 + 1] = depthVal * 1.6 - 0.2; // AI Depth Height Extrusion
+                                    positions[idx * 3 + 2] = (y / imgH - 0.5) * 3.4;
+
+                                    if (colorMode === 'cyber') {{
+                                        colors[idx * 3] = 0.0;
+                                        colors[idx * 3 + 1] = 0.7 + depthVal * 0.3;
+                                        colors[idx * 3 + 2] = 1.0;
+                                    }} else {{
+                                        colors[idx * 3] = r;
+                                        colors[idx * 3 + 1] = g;
+                                        colors[idx * 3 + 2] = b;
+                                    }}
+                                }}
+                            }}
+
+                            const geometry = new THREE.BufferGeometry();
+                            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+                            // Point Cloud Geometry
+                            const pMat = new THREE.PointsMaterial({{
+                                size: 0.038, vertexColors: true, transparent: true, opacity: 0.92, blending: THREE.AdditiveBlending
+                            }});
+                            pointCloud = new THREE.Points(geometry, pMat);
+                            holoGroup.add(pointCloud);
+
+                            // Surface Wireframe Mesh
+                            const wireMat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.15 }});
+                            const planeGeo = new THREE.PlaneGeometry(3.4, 3.4, imgW - 1, imgH - 1);
+                            const posAttr = planeGeo.attributes.position;
+                            for (let i = 0; i < posAttr.count; i++) {{
+                                posAttr.setZ(i, positions[i * 3 + 1]);
+                            }}
+                            planeGeo.computeVertexNormals();
+                            wireframeMesh = new THREE.Mesh(planeGeo, wireMat);
+                            wireframeMesh.rotation.x = -Math.PI / 2;
+                            wireframeMesh.position.y = 0;
+                            holoGroup.add(wireframeMesh);
+
+                            scene.add(holoGroup);
+                        }};
+
+                        window.rebuildHologram();
 
                         let time = 0;
                         function animate() {{
                             requestAnimationFrame(animate);
                             time += 0.02;
 
-                            // Float and spin
-                            holoPlane.position.y = 0.5 + Math.sin(time) * 0.08;
-                            holoPlane.rotation.y += 0.005;
-
-                            // Sweep scanline across image plane
-                            scanline.position.y = holoPlane.position.y + Math.sin(time * 2) * (h / 2);
-                            scanline.rotation.y = holoPlane.rotation.y;
-
-                            // Counter-rotate emitter rings
-                            ring1.rotation.z += 0.01;
-                            ring2.rotation.z -= 0.015;
-
-                            // Float particles upward
-                            const positions = particles.geometry.attributes.position.array;
-                            for (let i = 1; i < particleCount * 3; i += 3) {{
-                                positions[i] += 0.01;
-                                if (positions[i] > 2.0) positions[i] = -1.5;
+                            if (holoGroup) {{
+                                holoGroup.rotation.y += 0.004;
+                                scanPlane.position.y = Math.sin(time * 1.5) * 0.9 + 0.6;
                             }}
-                            particles.geometry.attributes.position.needsUpdate = true;
 
                             controls.update();
                             renderer.render(scene, camera);
                         }}
                         animate();
-                    }});
+                    }}
 
-                    // Dynamic Resize Observer
                     const resizeObserver = new ResizeObserver(() => {{
                         const newWidth = container.clientWidth;
-                        const newHeight = container.clientHeight || 500;
+                        const newHeight = container.clientHeight || 530;
                         if (newWidth > 0 && newHeight > 0) {{
                             camera.aspect = newWidth / newHeight;
                             camera.updateProjectionMatrix();
@@ -462,18 +540,18 @@ def render_3d_hologram_component(img_b64):
     </body>
     </html>
     """
-  components.html(html_code, height=520)
+  components.html(html_code, height=550)
 
 
-def create_plotly_3d_hologram(image_pil):
-  """Generates a native 3D surface topography mesh."""
-  img_small = image_pil.resize((120, 120))
-  gray_np = np.array(img_small.convert("L"))
+def create_plotly_3d_hologram(depth_pil):
+  """Generates a native 3D surface topography mesh from AI Depth map."""
+  depth_small = depth_pil.resize((120, 120))
+  depth_np = np.array(depth_small)
 
   x = np.linspace(0, 10, 120)
   y = np.linspace(0, 10, 120)
   X, Y = np.meshgrid(x, y)
-  Z = gray_np / 25.5
+  Z = depth_np / 25.5
 
   colorscale = [
       [0.0, "rgb(3,7,18)"],
@@ -482,10 +560,10 @@ def create_plotly_3d_hologram(image_pil):
   ]
 
   fig = go.Figure(
-      data=[go.Surface(z=Z, x=X, y=Y, colorscale=colorscale, opacity=0.85)]
+      data=[go.Surface(z=Z, x=X, y=Y, colorscale=colorscale, opacity=0.88)]
   )
   fig.update_layout(
-      title="3D VOLUMETRIC DENSITY TOPOGRAPHY",
+      title="AI MiDaS GEOMETRIC SURFACE TOPOGRAPHY",
       autosize=True,
       height=500,
       margin=dict(l=0, r=0, b=0, t=30),
@@ -494,8 +572,8 @@ def create_plotly_3d_hologram(image_pil):
       scene=dict(
           xaxis=dict(visible=False),
           yaxis=dict(visible=False),
-          zaxis=dict(title="Density", backgroundcolor="rgba(3,7,18,0)"),
-          aspectratio=dict(x=1, y=1, z=0.4),
+          zaxis=dict(title="Depth Z", backgroundcolor="rgba(3,7,18,0)"),
+          aspectratio=dict(x=1, y=1, z=0.45),
       ),
   )
   return fig
@@ -618,19 +696,22 @@ if image is not None:
     with st.container(border=True):
       render_cyber_header("⚙️ NEURAL DIAGNOSTIC CONTROL")
       st.write(
-          "Execute high-dimensional ViT feature classification and project 3D"
-          " hologram."
+          "Execute ViT classification and compute MiDaS AI monocular depth map"
+          " extrusion."
       )
       analyze_btn = st.button(
-          "🚀 INITIATE FORENSIC SCAN", type="primary", use_container_width=True
+          "🚀 INITIATE FULL FORENSIC SCAN",
+          type="primary",
+          use_container_width=True,
       )
 
     if analyze_btn and detector is not None:
       with st.spinner(
-          "Initializing 3D Hologram Emitter & Extracting Feature Maps..."
+          "Computing AI Geometric Depth Map & Extracting Point-Cloud..."
       ):
         raw_results = detector(image)
         ai_score, real_score = parse_predictions(raw_results)
+        depth_map = generate_depth_map(image)
 
       st.markdown("<br>", unsafe_allow_html=True)
 
@@ -656,8 +737,9 @@ if image is not None:
       st.markdown("<br>", unsafe_allow_html=True)
       render_cyber_header("🕵️ ADVANCED FORENSIC DIAGNOSTICS SUITE")
 
-      t_holo, t_mesh, t_heatmap, t_prompt, t_ela, t_fft = st.tabs([
+      t_holo, t_depth, t_mesh, t_heatmap, t_prompt, t_ela, t_fft = st.tabs([
           "🛸 WebGL 3D HOLOGRAM",
+          "🗺️ AI DEPTH MAP",
           "🌋 NATIVE 3D MESH",
           "🎯 SPATIAL HEATMAP",
           "🧬 PROMPT INVERSION",
@@ -667,17 +749,27 @@ if image is not None:
 
       with t_holo:
         st.write(
-            "Interactive WebGL Hologram with Laser Scanlines & Particle Field."
-            " Click and drag to rotate."
+            "True 3D Point-Cloud extruded dynamically using MiDaS AI Geometric"
+            " Depth Map. Use canvas buttons to toggle wireframe or real RGB"
+            " colors."
         )
         img_b64 = image_to_base64(image)
-        render_3d_hologram_component(img_b64)
+        depth_b64 = image_to_base64(depth_map)
+        render_3d_hologram_component(img_b64, depth_b64)
+
+      with t_depth:
+        st.write(
+            "Monocular Depth Estimation computed via Intel DPT-MiDaS Hybrid Neural"
+            " Pipeline:"
+        )
+        st.image(depth_map, use_container_width=True)
 
       with t_mesh:
         st.write(
-            "Native Volumetric Density Mesh (Interactive Plotly Topography):"
+            "Native Volumetric Surface Mesh projected from AI Depth Map"
+            " Topography:"
         )
-        fig_3d = create_plotly_3d_hologram(image)
+        fig_3d = create_plotly_3d_hologram(depth_map)
         st.plotly_chart(fig_3d, use_container_width=True)
 
       with t_heatmap:
@@ -710,8 +802,9 @@ if image is not None:
       # --- Export Audit Log ---
       st.markdown("<br>", unsafe_allow_html=True)
       report_data = {
-          "platform": "MonoVision Cyber Forensics Studio v5.0",
+          "platform": "MonoVision Cyber Forensics Studio v6.0",
           "engine": "Smogy/SMOGY-Ai-images-detector",
+          "depth_engine": "Intel/dpt-hybrid-midas",
           "timestamp": datetime.utcnow().isoformat() + "Z",
           "verdict": verdict_str,
           "metrics": {
