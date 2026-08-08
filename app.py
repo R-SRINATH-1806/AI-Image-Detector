@@ -1,5 +1,6 @@
 import os
 import urllib.request
+import gc
 import streamlit as st
 import torch
 import torch.nn as nn
@@ -22,7 +23,7 @@ st.title("🔍 AI vs Real Image Detector")
 st.write("3-Model Ensemble (ViT Base + ResNet18 + ViT Landmark) with 5-crop micro-texture analysis.")
 
 # ---------------------------------------------------------
-# 2. Model URLs & Download Utility
+# 2. Exact Model URLs & Download Utility
 # ---------------------------------------------------------
 VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
 RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
@@ -49,13 +50,13 @@ base_transform = transforms.Compose([
 five_crop = transforms.FiveCrop(224)
 
 # ---------------------------------------------------------
-# 3. Model Loading with Architecture Fixes
+# 3. Load Models (With Memory Cleanup & Architecture Fix)
 # ---------------------------------------------------------
 @st.cache_resource
 def load_models():
     download_file_if_missing("vit_highres_model.pth", VIT_URL)
     download_file_if_missing("resnet_highres_model.pth", RESNET_URL)
-    download_file_if_missing("vit_landmark_model.pth", LANDMARK_URL)
+    download_file_if_missing("vit_landmark_model.1.pth", LANDMARK_URL)
     
     # Model 1: ViT-Tiny (192-dim)
     vit = timm.create_model('vit_tiny_patch16_224', pretrained=False, num_classes=2)
@@ -69,10 +70,10 @@ def load_models():
     resnet.load_state_dict(torch.load("resnet_highres_model.pth", map_location=device, weights_only=True))
     resnet.eval()
 
-    # Model 3: ViT-Base (768-dim) - Fixed architecture mismatch
+    # Model 3: ViT-Base (768-dim) for the Landmark Model
     vit_landmark = timm.create_model('vit_base_patch16_224', pretrained=False, num_classes=2)
     
-    raw_checkpoint = torch.load("vit_landmark_model.pth", map_location=device)
+    raw_checkpoint = torch.load("vit_landmark_model.1.pth", map_location=device)
     
     # Extract inner state dict if wrapped in a dictionary
     if isinstance(raw_checkpoint, dict) and "state_dict" in raw_checkpoint:
@@ -87,6 +88,10 @@ def load_models():
 
     vit_landmark.load_state_dict(clean_state_dict, strict=False)
     vit_landmark.eval()
+    
+    # Free up unused RAM so Streamlit Cloud does not crash
+    del raw_checkpoint, state_dict, clean_state_dict
+    gc.collect()
     
     return vit, resnet, vit_landmark
 
@@ -135,7 +140,8 @@ if image is not None:
     col_img, col_info = st.columns([1, 1])
     
     with col_img:
-        st.image(image, caption="Loaded Image", use_container_width=True)
+        # Fixed the use_container_width warning here by using width="stretch"
+        st.image(image, caption="Loaded Image", width="stretch")
         
     with col_info:
         st.write("### Ready to Analyze")
