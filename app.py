@@ -21,7 +21,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.markdown("""
+# Global Custom CSS
+CYBER_CSS = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
@@ -164,12 +165,22 @@ st.markdown("""
         transform: translateY(-2px);
     }
 </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(CYBER_CSS, unsafe_allow_html=True)
+
+# Helper Function to Render Cyber Section Headers Safely
+def render_cyber_header(text):
+    html = f"""
+    <h4 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1rem; margin-top: 10px; margin-bottom: 10px;">
+        {text}
+    </h4>
+    """
+    st.markdown(html, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # 2. Hero Banner
 # ---------------------------------------------------------
-st.markdown("""
+HERO_BANNER = """
 <div class="hud-banner">
     <div class="hud-title">MONOVISION v5.0</div>
     <div class="hud-subtitle">// 3D HOLOGRAM PROJECTION & FORENSIC SUITE</div>
@@ -177,20 +188,21 @@ st.markdown("""
         <span class="hud-badge"><span class="pulse-dot"></span> HOLOGRAM EMITTER & NEURAL MATRIX ACTIVE</span>
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""
+st.markdown(HERO_BANNER, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # 3. Sidebar Architecture
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛰️ SYSTEM PIPELINE</h3>", unsafe_allow_html=True)
+    st.markdown("""<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛰️ SYSTEM PIPELINE</h3>""", unsafe_allow_html=True)
     with st.container(border=True):
-        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>", unsafe_allow_html=True)
-        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>3D ENGINE:</b> WebGL Three.js Hologram</p>", unsafe_allow_html=True)
+        st.markdown("""<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>""", unsafe_allow_html=True)
+        st.markdown("""<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>3D ENGINE:</b> WebGL Three.js Hologram</p>""", unsafe_allow_html=True)
         st.caption("Interactive Volumetric Display Active")
         
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛡️ FORENSIC MODULES</h3>", unsafe_allow_html=True)
+    st.markdown("""<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""", unsafe_allow_html=True)
     st.caption("• Interactive 3D Holographic Projection")
     st.caption("• Spatial Attention Heatmaps")
     st.caption("• Prompt Vector Inversion")
@@ -456,14 +468,14 @@ if image is not None:
     
     with col_left:
         with st.container(border=True):
-            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>📷 INPUT FRAME BUFFER</h4>", unsafe_allow_html=True)
+            render_cyber_header("📷 INPUT FRAME BUFFER")
             st.image(image, use_container_width=True)
-            resolution_str = f"FRAME RESOLUTION: {image.width} × {image.height} PX"
-            st.markdown(f"<p style='font-family: JetBrains Mono; color:#64748b; font-size:0.8rem; text-align:center;'>{resolution_str}</p>", unsafe_allow_html=True)
+            res_txt = f"FRAME RESOLUTION: {image.width} × {image.height} PX"
+            st.markdown(f"""<p style="font-family: 'JetBrains Mono', monospace; color: #64748b; font-size: 0.8rem; text-align: center;">{res_txt}</p>""", unsafe_allow_html=True)
         
     with col_right:
         with st.container(border=True):
-            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>⚙️ NEURAL DIAGNOSTIC CONTROL</h4>", unsafe_allow_html=True)
+            render_cyber_header("⚙️ NEURAL DIAGNOSTIC CONTROL")
             st.write("Execute high-dimensional ViT feature classification and project 3D hologram.")
             analyze_btn = st.button("🚀 INITIATE FORENSIC SCAN", type="primary", use_container_width=True)
 
@@ -475,16 +487,16 @@ if image is not None:
             st.markdown("<br>", unsafe_allow_html=True)
             
             if ai_score >= 50.0:
-                fake_html = f'<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC / AI-GENERATED ({ai_score:.1f}% CONFIDENCE)</div>'
+                fake_html = f"""<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC / AI-GENERATED ({ai_score:.1f}% CONFIDENCE)</div>"""
                 st.markdown(fake_html, unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
             else:
-                real_html = f'<div class="verdict-real">✅ VERDICT: AUTHENTIC PHOTOGRAPH ({real_score:.1f}% CONFIDENCE)</div>'
+                real_html = f"""<div class="verdict-real">✅ VERDICT: AUTHENTIC PHOTOGRAPH ({real_score:.1f}% CONFIDENCE)</div>"""
                 st.markdown(real_html, unsafe_allow_html=True)
                 verdict_str = "Authentic Photo"
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>📊 PROBABILITY MATRIX</h4>", unsafe_allow_html=True)
+            render_cyber_header("📊 PROBABILITY MATRIX")
             
             with st.container(border=True):
                 ai_label = f"AI / Deepfake Signature Index: {ai_score:.1f}%"
@@ -492,6 +504,4 @@ if image is not None:
                 st.progress(int(ai_score), text=ai_label)
                 st.progress(int(real_score), text=real_label)
 
-            # --- Multi-Tab Advanced Visual Forensics ---
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size:
+    
