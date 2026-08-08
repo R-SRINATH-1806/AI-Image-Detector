@@ -166,28 +166,27 @@ with st.sidebar:
     
     with st.container(border=True):
         st.markdown("**Engine 1:** `umm-maybe/AI-image-detector`")
-        st.markdown("**Engine 2:** `dima806/deepfake_vs_real`")
-        st.caption("Consensus Logic: Dual High-Confidence Agreement")
+        st.markdown("**Engine 2:** `Falconsai/intent_image_classifier`")
+        st.caption("Focus: Midjourney, Stable Diffusion & DALL-E Detection")
         
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛡️ System Telemetry")
-    st.caption("False Positive Protection: ACTIVE")
-    st.caption("JPEG Noise Calibration: ENABLED")
+    st.caption("Analysis Mode: Weighted Ensemble Averaging")
 
 # ---------------------------------------------------------
 # 4. Hugging Face Dual-Model Ensemble Loader
 # ---------------------------------------------------------
 @st.cache_resource
 def load_ensemble_detectors():
-    """Loads two distinct neural models to eliminate single-model false positives."""
+    """Loads two models specialized in Midjourney and general synthetic art."""
     pipe1 = pipeline("image-classification", model="umm-maybe/AI-image-detector")
-    pipe2 = pipeline("image-classification", model="dima806/deepfake_vs_real_image_detection")
+    pipe2 = pipeline("image-classification", model="Falconsai/intent_image_classifier")
     return pipe1, pipe2
 
 pipe1, pipe2 = load_ensemble_detectors()
 
 def parse_model_scores(results):
-    """Helper to cleanly extract fake/real percentages regardless of label names."""
+    """Cleanly extracts fake/real percentages regardless of output label syntax."""
     fake_score, real_score = 0.0, 0.0
     for res in results:
         label = str(res['label']).lower()
@@ -262,6 +261,12 @@ with tab2:
 if image is not None:
     st.markdown("<br>", unsafe_allow_html=True)
     
+    if image.width < 500 or image.height < 500:
+        st.warning(
+            f"⚠️ **Low Resolution Media ({image.width} × {image.height}px):** "
+            "Small images have heavy JPEG compression, which can impact detection precision."
+        )
+
     col_left, col_right = st.columns([1, 1], gap="medium")
     
     with col_left:
@@ -273,35 +278,33 @@ if image is not None:
     with col_right:
         with st.container(border=True):
             st.markdown("#### ⚙️ Forensic Control")
-            st.write("Cross-evaluating across dual Vision Transformers to prevent false positives.")
-            analyze_btn = st.button("🚀 Run Dual-Ensemble Analysis", type="primary", use_container_width=True)
+            st.write("Evaluating against dual Midjourney and synthetic image classification models.")
+            analyze_btn = st.button("🚀 Run Forensic Analysis", type="primary", use_container_width=True)
 
         if analyze_btn:
-            with st.spinner("Executing dual-model cross validation..."):
+            with st.spinner("Analyzing neural texture patterns..."):
                 res1 = pipe1(image)
                 fake1, real1 = parse_model_scores(res1)
                 
                 res2 = pipe2(image)
                 fake2, real2 = parse_model_scores(res2)
                 
-                # Average scores across both models
+                # Weighted ensemble (Engine 1: 50%, Engine 2: 50%)
                 avg_fake = (fake1 + fake2) / 2.0
                 avg_real = (real1 + real2) / 2.0
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # --- CONSENSUS & SAFETY LOGIC ---
-            # Both models must agree (>65% AI confidence each) to declare AI-Generated
-            if fake1 > 65.0 and fake2 > 65.0:
-                st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Ensemble Confidence)</div>', unsafe_allow_html=True)
+            # --- BALANCED VERDICT LOGIC ---
+            if avg_fake >= 50.0:
+                st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
-            # If one model says fake and the other says real, or scores are moderate, favor Authentic Photograph
-            elif (fake1 > 50.0 and fake2 < 50.0) or (fake2 > 50.0 and fake1 < 50.0) or abs(avg_fake - avg_real) < 15.0:
-                st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({avg_real:.1f}% Confidence - Fine Detail Verified)</div>', unsafe_allow_html=True)
-                verdict_str = "Authentic Photo"
-            else:
+            elif avg_real > 50.0:
                 st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({avg_real:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "Authentic Photo"
+            else:
+                st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Inconclusive Signal ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
+                verdict_str = "Inconclusive"
 
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("#### 🔬 Ensemble Transformer Breakdown")
@@ -309,7 +312,7 @@ if image is not None:
             with st.container(border=True):
                 st.progress(int(avg_fake), text=f"Combined AI/Deepfake Signature: {avg_fake:.1f}%")
                 st.progress(int(avg_real), text=f"Combined Authentic Signature: {avg_real:.1f}%")
-                st.caption(f"Engine 1 (General AI): {fake1:.1f}% Fake | Engine 2 (Pattern Forensics): {fake2:.1f}% Fake")
+                st.caption(f"Engine 1 (General AI): {fake1:.1f}% AI | Engine 2 (Generator Classifier): {fake2:.1f}% AI")
 
             # --- Advanced Visual Forensics (ELA & FFT) ---
             st.markdown("<br>", unsafe_allow_html=True)
@@ -329,12 +332,13 @@ if image is not None:
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
                 "platform": "MonoVision Forensics Studio",
-                "engine": "Dual-Ensemble (umm-maybe + dima806)",
+                "engine": "Dual-Ensemble (umm-maybe + Falconsai)",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
                 "engine_breakdown": {
                     "engine_1_ai_score": f"{fake1:.2f}%",
                     "engine_2_ai_score": f"{fake2:.2f}%",
+                    "ensemble_average_fake": f"{avg_fake:.2f}%",
                     "ensemble_average_real": f"{avg_real:.2f}%"
                 }
             }
