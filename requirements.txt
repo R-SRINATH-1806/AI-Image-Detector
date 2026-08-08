@@ -4,3 +4,4 @@ timm
 streamlit
 Pillow
 streamlit-paste-button
+opencv-python-headless
