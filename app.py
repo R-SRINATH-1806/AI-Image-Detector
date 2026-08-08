@@ -9,101 +9,178 @@ from streamlit_paste_button import paste_image_button
 from transformers import pipeline
 
 # ---------------------------------------------------------
-# 1. Page Configuration & Custom Cyber Theme
+# 1. Page Configuration & Cyber-HUD Theme
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MonoVision | AI Image Forensics",
-    page_icon="👁️",
+    page_title="MONOVISION // CYBER FORENSICS",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# Inject Sci-Fi Fonts and Advanced Futuristic CSS
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    /* Global Dark Grid Background */
     .stApp {
-        background: #090d16;
+        background: radial-gradient(circle at 50% 10%, #0a0f1d 0%, #030712 100%);
         color: #e2e8f0;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Rajdhani', sans-serif;
     }
 
+    /* Cyber Scanline Overlay */
+    .stApp::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+        background-size: 100% 4px;
+        z-index: 99999;
+        pointer-events: none;
+        opacity: 0.3;
+    }
+
+    /* Sci-Fi Sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #0d1322 !important;
-        border-right: 1px solid rgba(56, 189, 248, 0.15);
+        background: rgba(8, 12, 22, 0.85) !important;
+        backdrop-filter: blur(12px);
+        border-right: 1px solid rgba(0, 243, 255, 0.2) !important;
+        box-shadow: 5px 0 25px rgba(0, 243, 255, 0.05);
     }
 
-    .hero-banner {
-        background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(9, 13, 22, 0.95) 100%);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        border-radius: 18px;
-        padding: 2.2rem;
-        margin-bottom: 1.5rem;
+    /* HUD Hero Banner */
+    .hud-banner {
+        background: rgba(13, 19, 33, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        border-left: 4px solid #00f3ff;
+        border-right: 4px solid #00f3ff;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
         text-align: center;
-        box-shadow: 0 0 40px rgba(56, 189, 248, 0.08);
+        box-shadow: 0 0 30px rgba(0, 243, 255, 0.15), inset 0 0 20px rgba(0, 243, 255, 0.05);
+        position: relative;
     }
 
-    .hero-title {
-        font-size: 3.2rem;
+    .hud-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 3.5rem;
         font-weight: 900;
-        letter-spacing: -1.5px;
-        background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+        letter-spacing: 4px;
+        background: linear-gradient(90deg, #00f3ff 0%, #7000ff 50%, #ff0055 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
         margin-bottom: 0.2rem;
     }
 
-    .hero-subtitle {
-        font-size: 1.05rem;
-        color: #94a3b8;
-        margin-bottom: 1.2rem;
+    .hud-subtitle {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.95rem;
+        color: #00f3ff;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
     }
 
-    .status-badge {
+    /* Status Pulse Pill */
+    .hud-badge {
         display: inline-flex;
         align-items: center;
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        color: #34d399;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 0.82rem;
+        background: rgba(0, 243, 255, 0.1);
+        border: 1px solid #00f3ff;
+        color: #00f3ff;
+        font-family: 'JetBrains Mono', monospace;
+        padding: 6px 18px;
+        border-radius: 4px;
+        font-size: 0.8rem;
         font-weight: 600;
+        letter-spacing: 1.5px;
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
     }
 
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #00f3ff;
+        box-shadow: 0 0 10px #00f3ff;
+        animation: pulse 1.5s infinite alternate;
+        margin-right: 8px;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.3; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Cyber Metric Cards */
     .verdict-fake {
-        background: linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1.5px solid #f43f5e;
-        color: #fda4af;
-        border-radius: 16px;
+        background: radial-gradient(circle at center, rgba(255, 0, 85, 0.2) 0%, rgba(15, 10, 25, 0.9) 100%);
+        border: 1.5px solid #ff0055;
+        color: #ff3377;
+        font-family: 'Orbitron', sans-serif;
+        border-radius: 8px;
         padding: 1.5rem;
         text-align: center;
         font-weight: 800;
-        font-size: 1.6rem;
-        box-shadow: 0 0 30px rgba(244, 63, 94, 0.2);
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+        box-shadow: 0 0 35px rgba(255, 0, 85, 0.3), inset 0 0 15px rgba(255, 0, 85, 0.15);
+        clip-path: polygon(0 0, 97% 0, 100% 20%, 100% 100%, 3% 100%, 0 80%);
     }
 
     .verdict-real {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1.5px solid #10b981;
-        color: #6ee7b7;
-        border-radius: 16px;
+        background: radial-gradient(circle at center, rgba(0, 255, 136, 0.15) 0%, rgba(10, 25, 20, 0.9) 100%);
+        border: 1.5px solid #00ff88;
+        color: #00ff88;
+        font-family: 'Orbitron', sans-serif;
+        border-radius: 8px;
         padding: 1.5rem;
         text-align: center;
         font-weight: 800;
-        font-size: 1.6rem;
-        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+        box-shadow: 0 0 35px rgba(0, 255, 136, 0.25), inset 0 0 15px rgba(0, 255, 136, 0.1);
+        clip-path: polygon(0 0, 97% 0, 100% 20%, 100% 100%, 3% 100%, 0 80%);
+    }
+
+    /* Custom Futuristic Buttons */
+    .stButton>button {
+        background: linear-gradient(90deg, rgba(0, 243, 255, 0.2) 0%, rgba(112, 0, 255, 0.2) 100%) !important;
+        border: 1px solid #00f3ff !important;
+        color: #00f3ff !important;
+        font-family: 'Orbitron', sans-serif !important;
+        font-weight: 700 !important;
+        letter-spacing: 2px !important;
+        text-transform: uppercase !important;
+        border-radius: 4px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.1) !important;
+    }
+
+    .stButton>button:hover {
+        background: linear-gradient(90deg, #00f3ff 0%, #7000ff 100%) !important;
+        color: #000 !important;
+        box-shadow: 0 0 30px rgba(0, 243, 255, 0.6) !important;
+        transform: translateY(-2px);
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. Hero Section
+# 2. Futuristic Hero Banner
 # ---------------------------------------------------------
 st.markdown("""
-<div class="hero-banner">
-    <div class="hero-title">MONOVISION</div>
-    <div class="hero-subtitle">Deepfake & Synthetic Image Forensics</div>
+<div class="hud-banner">
+    <div class="hud-title">MONOVISION v3.0</div>
+    <div class="hud-subtitle">// SYSTEM ARCHITECTURE: NEURAL IMAGE FORENSICS MODULE</div>
     <div>
-        <span class="status-badge">ENGINE ONLINE</span>
+        <span class="hud-badge"><span class="pulse-dot"></span> REAL-TIME SCANNER ACTIVE</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -112,26 +189,27 @@ st.markdown("""
 # 3. Sidebar Configuration
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("### 📊 Active Pipeline")
+    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛰️ NEURAL MATRIX</h3>", unsafe_allow_html=True)
     with st.container(border=True):
-        st.markdown("**Model:** `Smogy/SMOGY-Ai-images-detector`")
-        st.caption("Fine-tuned on SDXL, DALL-E 3, FLUX, and artwork domain datasets.")
+        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>ENGINE:</b> Smogy/SMOGY-Ai-images-detector</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-family: JetBrains Mono; font-size: 0.85rem; color: #94a3b8;'><b>DOMAIN:</b> SDXL / DALL-E 3 / FLUX / Midjourney v6</p>", unsafe_allow_html=True)
+        st.caption("Zero Heuristics Override • Pure Neural Inference")
+        
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-family: Orbitron; color: #00f3ff; font-size: 1.1rem;'>🛡️ SECURITY PARAMETERS</h3>", unsafe_allow_html=True)
+    st.caption("Confidence Threshold: 50.0% Dynamic Split")
+    st.caption("Frequency Subsampling: 2D-FFT Spatial Mesh")
 
 # ---------------------------------------------------------
-# 4. Model Loader
+# 4. Neural Network Engine Loader
 # ---------------------------------------------------------
 @st.cache_resource
 def load_detector():
-    """Loads the model pipeline cleanly."""
     return pipeline("image-classification", model="Smogy/SMOGY-Ai-images-detector")
 
 detector = load_detector()
 
 def parse_predictions(results):
-    """
-    Parses output probabilities directly from the neural network
-    without any manual heuristic overrides.
-    """
     fake_score = 0.0
     real_score = 0.0
     
@@ -179,22 +257,22 @@ def generate_fft(image_pil):
     return Image.fromarray(magnitude_spectrum)
 
 # ---------------------------------------------------------
-# 6. Input Interface
+# 6. Input Interface Tabs
 # ---------------------------------------------------------
-tab1, tab2 = st.tabs(["📁 File Upload", "📋 Clipboard Import"])
+tab1, tab2 = st.tabs(["📁 MEDIA UPLOAD", "📋 CLIPBOARD INGESTION"])
 
 image = None
 
 with tab1:
     st.markdown("<br>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Upload Image File", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
+    uploaded_file = st.file_uploader("Upload Target Media", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
     if uploaded_file is not None:
         image = Image.open(uploaded_file).convert('RGB')
         
 with tab2:
     st.markdown("<br>", unsafe_allow_html=True)
     paste_result = paste_image_button(
-        label="📋 Paste Image from Clipboard",
+        label="📋 PASTE FROM CLIPBOARD BUFFER",
         background_color="#0284c7",
         hover_background_color="#0369a1",
     )
@@ -210,42 +288,42 @@ if image is not None:
     
     with col_left:
         with st.container(border=True):
-            st.markdown("#### 🖼️ Source Media")
+            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>📷 INPUT FRAME BUFFER</h4>", unsafe_allow_html=True)
             st.image(image, use_container_width=True)
-            st.markdown(f"<p style='color:#64748b; font-size:0.85rem; text-align:center;'>Resolution: {image.width} × {image.height}px</p>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-family: JetBrains Mono; color:#64748b; font-size:0.8rem; text-align:center;'>DIMENSIONS: {image.width} × {image.height} PX</p>", unsafe_allow_html=True)
         
     with col_right:
         with st.container(border=True):
-            st.markdown("#### ⚙️ Forensic Control")
-            st.write("Evaluating image features using fine-tuned neural classification.")
-            analyze_btn = st.button("🚀 Run Forensic Analysis", type="primary", use_container_width=True)
+            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>⚙️ NEURAL DIAGNOSTIC CONTROL</h4>", unsafe_allow_html=True)
+            st.write("Execute high-dimensional tensor evaluation across vision transformer layers.")
+            analyze_btn = st.button("🚀 INITIATE NEURAL SCAN", type="primary", use_container_width=True)
 
         if analyze_btn and detector is not None:
-            with st.spinner("Analyzing image features..."):
+            with st.spinner("Extracting spatial feature maps and noise signatures..."):
                 raw_results = detector(image)
                 ai_score, real_score = parse_predictions(raw_results)
 
             st.markdown("<br>", unsafe_allow_html=True)
             
             if ai_score >= 50.0:
-                st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({ai_score:.1f}% Confidence)</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC GENERATED ({ai_score:.1f}% CONFIDENCE)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
             else:
-                st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({real_score:.1f}% Confidence)</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="verdict-real">✅ VERDICT: AUTHENTIC PHOTOGRAPH ({real_score:.1f}% CONFIDENCE)</div>', unsafe_allow_html=True)
                 verdict_str = "Authentic Photo"
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🔬 Neural Breakdown")
+            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>📊 PROBABILITY MATRIX</h4>", unsafe_allow_html=True)
             
             with st.container(border=True):
-                st.progress(int(ai_score), text=f"AI/Deepfake Probability: {ai_score:.1f}%")
-                st.progress(int(real_score), text=f"Authentic Photography Probability: {real_score:.1f}%")
+                st.progress(int(ai_score), text=f"AI / Deepfake Signature Index: {ai_score:.1f}%")
+                st.progress(int(real_score), text=f"Authentic Optical Signature Index: {real_score:.1f}%")
 
             # --- Visual Forensics ---
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🕵️ Visual Diagnostics")
+            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>🕵️ ADVANCED SPECTRAL DIAGNOSTICS</h4>", unsafe_allow_html=True)
             
-            tab_ela, tab_fft = st.tabs(["Error Level Analysis (ELA)", "Frequency Spectrum (FFT)"])
+            tab_ela, tab_fft = st.tabs(["ERROR LEVEL ANALYSIS (ELA)", "2D FREQUENCY SPECTRUM (FFT)"])
             
             with tab_ela:
                 st.image(generate_ela(image), use_container_width=True)
@@ -256,8 +334,8 @@ if image is not None:
             # --- Export Audit Log ---
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
-                "platform": "MonoVision Forensics Studio",
-                "model": "Smogy/SMOGY-Ai-images-detector",
+                "platform": "MonoVision Cyber Forensics Studio",
+                "engine": "Smogy/SMOGY-Ai-images-detector",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
                 "probabilities": {
@@ -267,9 +345,9 @@ if image is not None:
             }
             
             st.download_button(
-                label="📄 Download Forensic Audit Log (JSON)",
+                label="📄 EXPORT FORENSIC AUDIT LOG (JSON)",
                 data=json.dumps(report_data, indent=4),
-                file_name=f"monovision_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                file_name=f"monovision_audit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
                 use_container_width=True
-    )
+            )
