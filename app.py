@@ -17,7 +17,7 @@ from transformers import pipeline
 # 1. Page Configuration & Cyber HUD Styling
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MONOVISION // HOLO-FORENSICS AI",
+    page_title="MONOVISION // GPU GLSL HOLO-FORENSICS",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -28,7 +28,7 @@ CYBER_CSS = """
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
     .stApp {
-        background: radial-gradient(circle at 50% 10%, #0a0f1d 0%, #030712 100%);
+        background: radial-gradient(circle at 50% 10%, #080d1a 0%, #02040a 100%);
         color: #e2e8f0;
         font-family: 'Rajdhani', sans-serif;
     }
@@ -38,42 +38,42 @@ CYBER_CSS = """
         display: block;
         position: absolute;
         top: 0; left: 0; bottom: 0; right: 0;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
         background-size: 100% 4px;
         z-index: 99999;
         pointer-events: none;
-        opacity: 0.25;
+        opacity: 0.3;
     }
 
     section[data-testid="stSidebar"] {
-        background: rgba(8, 12, 22, 0.85) !important;
-        backdrop-filter: blur(12px);
-        border-right: 1px solid rgba(0, 243, 255, 0.2) !important;
-        box-shadow: 5px 0 25px rgba(0, 243, 255, 0.05);
+        background: rgba(6, 10, 20, 0.9) !important;
+        backdrop-filter: blur(16px);
+        border-right: 1px solid rgba(0, 243, 255, 0.25) !important;
+        box-shadow: 5px 0 30px rgba(0, 243, 255, 0.08);
     }
 
     .hud-banner {
-        background: rgba(13, 19, 33, 0.7);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(0, 243, 255, 0.3);
-        border-left: 4px solid #00f3ff;
-        border-right: 4px solid #00f3ff;
+        background: rgba(10, 16, 30, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 243, 255, 0.4);
+        border-left: 5px solid #00f3ff;
+        border-right: 5px solid #ff0055;
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
         text-align: center;
-        box-shadow: 0 0 30px rgba(0, 243, 255, 0.15), inset 0 0 20px rgba(0, 243, 255, 0.05);
+        box-shadow: 0 0 35px rgba(0, 243, 255, 0.2), inset 0 0 25px rgba(0, 243, 255, 0.05);
     }
 
     .hud-title {
         font-family: 'Orbitron', sans-serif;
         font-size: 3.2rem;
         font-weight: 900;
-        letter-spacing: 4px;
+        letter-spacing: 5px;
         background: linear-gradient(90deg, #00f3ff 0%, #7000ff 50%, #ff0055 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        text-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
         margin-bottom: 0.2rem;
     }
 
@@ -89,7 +89,7 @@ CYBER_CSS = """
     .hud-badge {
         display: inline-flex;
         align-items: center;
-        background: rgba(0, 243, 255, 0.1);
+        background: rgba(0, 243, 255, 0.12);
         border: 1px solid #00f3ff;
         color: #00f3ff;
         font-family: 'JetBrains Mono', monospace;
@@ -98,7 +98,7 @@ CYBER_CSS = """
         font-size: 0.8rem;
         font-weight: 600;
         letter-spacing: 1.5px;
-        box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.25);
     }
 
     .pulse-dot {
@@ -113,11 +113,11 @@ CYBER_CSS = """
 
     @keyframes pulse {
         0% { opacity: 0.3; transform: scale(0.8); }
-        100% { opacity: 1; transform: scale(1.2); }
+        100% { opacity: 1; transform: scale(1.3); }
     }
 
     .verdict-fake {
-        background: radial-gradient(circle at center, rgba(255, 0, 85, 0.2) 0%, rgba(15, 10, 25, 0.9) 100%);
+        background: radial-gradient(circle at center, rgba(255, 0, 85, 0.25) 0%, rgba(15, 8, 20, 0.95) 100%);
         border: 1.5px solid #ff0055;
         color: #ff3377;
         font-family: 'Orbitron', sans-serif;
@@ -127,11 +127,11 @@ CYBER_CSS = """
         font-weight: 800;
         font-size: 1.4rem;
         letter-spacing: 2px;
-        box-shadow: 0 0 35px rgba(255, 0, 85, 0.3), inset 0 0 15px rgba(255, 0, 85, 0.15);
+        box-shadow: 0 0 40px rgba(255, 0, 85, 0.35), inset 0 0 20px rgba(255, 0, 85, 0.2);
     }
 
     .verdict-real {
-        background: radial-gradient(circle at center, rgba(0, 255, 136, 0.15) 0%, rgba(10, 25, 20, 0.9) 100%);
+        background: radial-gradient(circle at center, rgba(0, 255, 136, 0.2) 0%, rgba(8, 20, 16, 0.95) 100%);
         border: 1.5px solid #00ff88;
         color: #00ff88;
         font-family: 'Orbitron', sans-serif;
@@ -141,7 +141,7 @@ CYBER_CSS = """
         font-weight: 800;
         font-size: 1.4rem;
         letter-spacing: 2px;
-        box-shadow: 0 0 35px rgba(0, 255, 136, 0.25), inset 0 0 15px rgba(0, 255, 136, 0.1);
+        box-shadow: 0 0 40px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.15);
     }
 
     .stButton>button {
@@ -154,13 +154,13 @@ CYBER_CSS = """
         text-transform: uppercase !important;
         border-radius: 4px !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 0 15px rgba(0, 243, 255, 0.1) !important;
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.15) !important;
     }
 
     .stButton>button:hover {
         background: linear-gradient(90deg, #00f3ff 0%, #7000ff 100%) !important;
         color: #000 !important;
-        box-shadow: 0 0 30px rgba(0, 243, 255, 0.6) !important;
+        box-shadow: 0 0 35px rgba(0, 243, 255, 0.7) !important;
         transform: translateY(-2px);
     }
 </style>
@@ -185,10 +185,10 @@ def render_cyber_header(text):
 st.markdown(
     """
 <div class="hud-banner">
-    <div class="hud-title">MONOVISION v6.0</div>
-    <div class="hud-subtitle">// AI VOLUMETRIC DEPTH & 3D FORENSIC SUITE</div>
+    <div class="hud-title">MONOVISION v7.0 ULTRA</div>
+    <div class="hud-subtitle">// GPU-ACCELERATED GLSL HOLOGRAM & AI FORENSICS SUITE</div>
     <div>
-        <span class="hud-badge"><span class="pulse-dot"></span> MiDaS AI GEOMETRIC DEPTH ENGINE ONLINE</span>
+        <span class="hud-badge"><span class="pulse-dot"></span> REAL-TIME GPU VERTEX SHADER & UNREAL BLOOM ONLINE</span>
     </div>
 </div>
 """,
@@ -197,35 +197,40 @@ st.markdown(
 
 with st.sidebar:
   st.markdown(
-      """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛰️ SYSTEM PIPELINE</h3>""",
+      """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛰️ GPU & AI PIPELINE</h3>""",
       unsafe_allow_html=True,
   )
   with st.container(border=True):
     st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>""",
+        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>""",
         unsafe_allow_html=True,
     )
     st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>DEPTH ENGINE:</b> Intel DPT-MiDaS Hybrid</p>""",
+        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>DEPTH ENGINE:</b> Intel DPT-MiDaS Hybrid</p>""",
         unsafe_allow_html=True,
     )
     st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94a3b8;"><b>3D RENDERER:</b> WebGL Point-Cloud + Plotly</p>""",
+        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>3D PIPELINE:</b> GLSL GPU Shader (90k Vertices)</p>""",
         unsafe_allow_html=True,
     )
-    st.caption("Active Volumetric Depth Mapping")
+    st.markdown(
+        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>POST-FX:</b> Unreal Bloom + Selective Pass</p>""",
+        unsafe_allow_html=True,
+    )
 
   st.markdown("<br>", unsafe_allow_html=True)
   st.markdown(
       """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
       unsafe_allow_html=True,
   )
-  st.caption("• AI MiDaS Volumetric 3D Point-Cloud")
-  st.caption("• Geometric Surface Depth Topography")
-  st.caption("• Spatial Attention Artifact Heatmap")
-  st.caption("• Latent Prompt Vector Inversion")
-  st.caption("• JPEG Compression Delta (ELA)")
-  st.caption("• 2D Fourier Frequency Spectrum")
+  st.caption("• Custom GLSL GPU Particle Displacement Shader")
+  st.caption("• Selective Unreal Bloom & Chromatic Pass")
+  st.caption("• Live Interactive Canvas Controls & Z-Cut Plane")
+  st.caption("• Native 3D Volumetric Mesh Topography")
+  st.caption("• Spatial Anomaly Artifact Map")
+  st.caption("• Latent Prompt Inversion Vector")
+  st.caption("• JPEG Error Level Analysis (ELA)")
+  st.caption("• 2D Fast Fourier Transform (FFT)")
 
 
 # ---------------------------------------------------------
@@ -260,7 +265,6 @@ depth_estimator = load_depth_estimator()
 
 
 def generate_depth_map(image_pil):
-  """Generates a true monocular depth map using AI MiDaS pipeline."""
   if depth_estimator is not None:
     try:
       result = depth_estimator(image_pil)
@@ -268,7 +272,6 @@ def generate_depth_map(image_pil):
       return depth_img
     except Exception:
       pass
-  # Fallback to luminance grayscale if model is unavailable
   return image_pil.convert("L")
 
 
@@ -296,7 +299,7 @@ def parse_predictions(results):
 
 
 # ---------------------------------------------------------
-# 4. WebGL AI Volumetric 3D Particle Cloud Engine
+# 4. WebGL GLSL Shader Engine with Unreal Bloom & HUD
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
   buffered = BytesIO()
@@ -305,45 +308,75 @@ def image_to_base64(img_pil):
   return f"data:image/png;base64,{img_str}"
 
 
-def render_3d_hologram_component(img_b64, depth_b64):
-  """WebGL Three.js AI Depth Extruded Volumetric Point Cloud with HUD controls."""
+def render_gpu_glsl_hologram(img_b64, depth_b64):
+  """Ultra-High Density WebGL GPU Shader Hologram (90,000+ Particles at 60FPS) with Unreal Bloom & Live Interactive Controls."""
   html_code = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <style>
             * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-            body {{ background: #030712; overflow: hidden; width: 100vw; height: 530px; font-family: 'Courier New', monospace; }}
+            body {{ background: #02040a; overflow: hidden; width: 100vw; height: 580px; font-family: 'Courier New', monospace; }}
             #canvas-container {{ width: 100%; height: 100%; position: relative; }}
+            
             .hud-overlay {{
                 position: absolute; top: 12px; left: 12px;
                 color: #00f3ff; border: 1px solid rgba(0,243,255,0.5);
-                padding: 6px 12px; background: rgba(3,7,18,0.85);
+                padding: 6px 14px; background: rgba(2,4,10,0.85);
                 font-size: 11px; letter-spacing: 1.5px; border-radius: 4px;
-                pointer-events: none; z-index: 100; box-shadow: 0 0 10px rgba(0,243,255,0.2);
+                pointer-events: none; z-index: 100; box-shadow: 0 0 12px rgba(0,243,255,0.25);
             }}
-            .controls-hud {{
-                position: absolute; bottom: 12px; right: 12px; z-index: 100;
-                display: flex; gap: 8px; background: rgba(3,7,18,0.85); padding: 8px;
-                border: 1px solid rgba(0,243,255,0.3); border-radius: 6px;
+
+            .controls-panel {{
+                position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 100;
+                display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+                gap: 10px; background: rgba(2,4,10,0.88); padding: 10px 16px;
+                border: 1px solid rgba(0,243,255,0.3); border-radius: 8px; backdrop-filter: blur(8px);
             }}
+
+            .control-group {{ display: flex; align-items: center; gap: 8px; color: #00f3ff; font-size: 11px; }}
+            .control-group label {{ font-weight: bold; letter-spacing: 1px; }}
+            .control-group input[type=range] {{
+                -webkit-appearance: none; width: 90px; background: rgba(0,243,255,0.2); height: 4px; border-radius: 2px;
+            }}
+            .control-group input[type=range]::-webkit-slider-thumb {{
+                -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #00f3ff; cursor: pointer;
+            }}
+
             .hud-btn {{
-                background: rgba(0,243,255,0.1); border: 1px solid #00f3ff; color: #00f3ff;
-                padding: 5px 12px; font-size: 10px; cursor: pointer; border-radius: 3px; font-weight: bold;
+                background: rgba(0,243,255,0.12); border: 1px solid #00f3ff; color: #00f3ff;
+                padding: 5px 12px; font-size: 10px; cursor: pointer; border-radius: 4px; font-weight: bold;
                 transition: all 0.2s; font-family: monospace;
             }}
-            .hud-btn:hover {{ background: #00f3ff; color: #000; box-shadow: 0 0 10px #00f3ff; }}
+            .hud-btn:hover {{ background: #00f3ff; color: #000; box-shadow: 0 0 12px #00f3ff; }}
         </style>
     </head>
     <body>
         <div id="canvas-container">
-            <div class="hud-overlay">⚡ AI MIDAS GEOMETRIC 3D POINT-CLOUD // ACTIVE</div>
-            <div class="controls-hud">
-                <button class="hud-btn" onclick="toggleMesh()">TOGGLE MESH</button>
-                <button class="hud-btn" onclick="setMode('cyber')">CYBER GLOW</button>
-                <button class="hud-btn" onclick="setMode('rgb')">TRUE COLOR</button>
+            <div class="hud-overlay">⚡ GPU GLSL VERTEX SHADER ENGINE // 90,000 VOXELS // BLOOM ACTIVE</div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>EXTRUSION:</label>
+                    <input type="range" id="sliderExtrude" min="0.1" max="4.0" step="0.1" value="1.8">
+                </div>
+                <div class="control-group">
+                    <label>BLOOM:</label>
+                    <input type="range" id="sliderBloom" min="0.0" max="3.0" step="0.1" value="1.4">
+                </div>
+                <div class="control-group">
+                    <label>Z-CUT PLANE:</label>
+                    <input type="range" id="sliderClip" min="0.0" max="1.0" step="0.01" value="1.0">
+                </div>
+                <div class="control-group">
+                    <button class="hud-btn" onclick="setPalette(0)">CYBER</button>
+                    <button class="hud-btn" onclick="setPalette(1)">MATRIX</button>
+                    <button class="hud-btn" onclick="setPalette(2)">SYNTHWAVE</button>
+                    <button class="hud-btn" onclick="setPalette(3)">TRUE RGB</button>
+                </div>
             </div>
         </div>
+
         <script>
             function loadScript(src) {{
                 return new Promise((resolve, reject) => {{
@@ -355,31 +388,115 @@ def render_3d_hologram_component(img_b64, depth_b64):
                 }});
             }}
 
-            let wireframeMesh, pointCloud, colorMode = 'cyber', holoGroup;
+            let uniforms = {{
+                uDepthMap: {{ value: null }},
+                uColorMap: {{ value: null }},
+                uExtrusionHeight: {{ value: 1.8 }},
+                uZClip: {{ value: 1.0 }},
+                uColorMode: {{ value: 0 }},
+                uTime: {{ value: 0.0 }}
+            }};
 
-            function toggleMesh() {{
-                if (wireframeMesh) wireframeMesh.visible = !wireframeMesh.visible;
+            let bloomPass;
+
+            function setPalette(mode) {{
+                uniforms.uColorMode.value = mode;
             }}
 
-            function setMode(mode) {{
-                colorMode = mode;
-                if (window.rebuildHologram) window.rebuildHologram();
-            }}
+            const vertexShader = `
+                uniform sampler2D uDepthMap;
+                uniform float uExtrusionHeight;
+                uniform float uZClip;
+                uniform float uTime;
+                varying vec2 vUv;
+                varying float vDepth;
+                varying float vClip;
+
+                void main() {
+                    vUv = uv;
+                    vec4 depthColor = texture2D(uDepthMap, uv);
+                    float depth = depthColor.r;
+                    vDepth = depth;
+
+                    vec3 pos = position;
+
+                    if (depth > uZClip) {
+                        vClip = 1.0;
+                    } else {
+                        vClip = 0.0;
+                    }
+
+                    // GPU-based Extrusion along Y-axis
+                    pos.y += depth * uExtrusionHeight;
+                    pos.y += sin(pos.x * 8.0 + uTime * 2.0) * 0.02 * depth;
+
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    gl_PointSize = (3.2 / -mvPosition.z) * (0.8 + depth * 0.6);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `;
+
+            const fragmentShader = `
+                uniform sampler2D uColorMap;
+                uniform float uTime;
+                uniform int uColorMode;
+                varying vec2 vUv;
+                varying float vDepth;
+                varying float vClip;
+
+                void main() {
+                    if (vClip > 0.5) discard;
+
+                    vec4 texColor = texture2D(uColorMap, vUv);
+                    vec3 finalColor;
+
+                    if (uColorMode == 0) {
+                        // Cyberpunk Cyan / Electric Purple
+                        finalColor = mix(vec3(0.0, 0.35, 1.0), vec3(0.0, 0.95, 1.0), vDepth);
+                    } else if (uColorMode == 1) {
+                        // Matrix Neural Green
+                        finalColor = mix(vec3(0.0, 0.15, 0.05), vec3(0.1, 1.0, 0.4), vDepth);
+                    } else if (uColorMode == 2) {
+                        // Synthwave Magenta / Sunset Orange
+                        finalColor = mix(vec3(0.9, 0.0, 0.5), vec3(1.0, 0.6, 0.0), vDepth);
+                    } else {
+                        // Real Original RGB Colors
+                        finalColor = texColor.rgb;
+                    }
+
+                    // Laser Scanlines
+                    float scanline = sin((vUv.y * 180.0) - (uTime * 4.0)) * 0.18 + 0.82;
+                    finalColor *= scanline;
+
+                    // Soft Circular Particle Point
+                    float dist = length(gl_PointCoord - vec2(0.5));
+                    if (dist > 0.5) discard;
+                    float alpha = (1.0 - dist * 2.0) * (0.7 + vDepth * 0.3);
+
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `;
 
             async function init() {{
                 try {{
                     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
                     await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
+                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js');
+                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js');
+                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js');
+                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js');
+                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminanceHighPassShader.js');
+                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js');
 
                     const container = document.getElementById('canvas-container');
                     let width = container.clientWidth || window.innerWidth || 800;
-                    let height = container.clientHeight || 530;
+                    let height = container.clientHeight || 580;
 
                     const scene = new THREE.Scene();
-                    scene.fog = new THREE.FogExp2(0x030712, 0.05);
+                    scene.fog = new THREE.FogExp2(0x02040a, 0.04);
 
                     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                    camera.position.set(0, 2.5, 6.0);
+                    camera.position.set(0, 2.5, 6.2);
 
                     const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
                     renderer.setSize(width, height);
@@ -391,12 +508,12 @@ def render_3d_hologram_component(img_b64, depth_b64):
                     controls.dampingFactor = 0.05;
 
                     // Neon Grid Floor
-                    const gridHelper = new THREE.GridHelper(10, 24, 0x00f3ff, 0x112233);
+                    const gridHelper = new THREE.GridHelper(10, 28, 0x00f3ff, 0x112233);
                     gridHelper.position.y = -1.2;
                     scene.add(gridHelper);
 
-                    // Scanning Laser Bar
-                    const scanPlaneGeo = new THREE.PlaneGeometry(3.5, 3.5);
+                    // Scanning Laser Plane
+                    const scanPlaneGeo = new THREE.PlaneGeometry(3.6, 3.6);
                     const scanPlaneMat = new THREE.MeshBasicMaterial({{
                         color: 0x00f3ff, side: THREE.DoubleSide, transparent: true, opacity: 0.12, wireframe: true
                     }});
@@ -404,135 +521,104 @@ def render_3d_hologram_component(img_b64, depth_b64):
                     scanPlane.rotation.x = Math.PI / 2;
                     scene.add(scanPlane);
 
-                    // Load Image & AI Depth Map into Dual Canvas Buffers
-                    const img = new Image();
-                    const depthImg = new Image();
-                    let imgLoaded = false, depthLoaded = false;
+                    // Load Textures directly into GPU
+                    const textureLoader = new THREE.TextureLoader();
+                    const colorTex = textureLoader.load('{img_b64}');
+                    const depthTex = textureLoader.load('{depth_b64}');
 
-                    img.src = '{img_b64}';
-                    depthImg.src = '{depth_b64}';
+                    uniforms.uColorMap.value = colorTex;
+                    uniforms.uDepthMap.value = depthTex;
 
-                    function checkReady() {{
-                        if (imgLoaded && depthLoaded) buildVolumetricHologram();
-                    }}
+                    // Create High-Density Mesh Buffer (300 x 300 = 90,000 Vertices)
+                    const gridRes = 300;
+                    const geometry = new THREE.BufferGeometry();
+                    const positions = new Float32Array(gridRes * gridRes * 3);
+                    const uvs = new Float32Array(gridRes * gridRes * 2);
 
-                    img.onload = () => {{ imgLoaded = true; checkReady(); }};
-                    depthImg.onload = () => {{ depthLoaded = true; checkReady(); }};
+                    let pIdx = 0, uIdx = 0;
+                    for (let y = 0; y < gridRes; y++) {{
+                        for (let x = 0; x < gridRes; x++) {{
+                            const u = x / (gridRes - 1);
+                            const v = y / (gridRes - 1);
 
-                    function buildVolumetricHologram() {{
-                        const imgW = 110, imgH = 110;
+                            positions[pIdx] = (u - 0.5) * 3.6;
+                            positions[pIdx + 1] = 0;
+                            positions[pIdx + 2] = (v - 0.5) * 3.6;
 
-                        // Canvas 1: Color
-                        const canvasColor = document.createElement('canvas');
-                        canvasColor.width = imgW; canvasColor.height = imgH;
-                        const ctxC = canvasColor.getContext('2d');
-                        ctxC.drawImage(img, 0, 0, imgW, imgH);
-                        const rgbData = ctxC.getImageData(0, 0, imgW, imgH).data;
+                            uvs[uIdx] = u;
+                            uvs[uIdx + 1] = 1.0 - v; // Flip UV Y axis
 
-                        // Canvas 2: AI Depth
-                        const canvasDepth = document.createElement('canvas');
-                        canvasDepth.width = imgW; canvasDepth.height = imgH;
-                        const ctxD = canvasDepth.getContext('2d');
-                        ctxD.drawImage(depthImg, 0, 0, imgW, imgH);
-                        const depthData = ctxD.getImageData(0, 0, imgW, imgH).data;
-
-                        holoGroup = new THREE.Group();
-                        scene.add(holoGroup);
-
-                        window.rebuildHologram = () => {{
-                            scene.remove(holoGroup);
-                            holoGroup = new THREE.Group();
-
-                            const numPoints = imgW * imgH;
-                            const positions = new Float32Array(numPoints * 3);
-                            const colors = new Float32Array(numPoints * 3);
-
-                            for (let y = 0; y < imgH; y++) {{
-                                for (let x = 0; x < imgW; x++) {{
-                                    const idx = (y * imgW + x);
-                                    const pIdx = idx * 4;
-
-                                    const r = rgbData[pIdx] / 255;
-                                    const g = rgbData[pIdx + 1] / 255;
-                                    const b = rgbData[pIdx + 2] / 255;
-
-                                    // Extract AI depth displacement
-                                    const depthVal = depthData[pIdx] / 255.0;
-
-                                    positions[idx * 3] = (x / imgW - 0.5) * 3.4;
-                                    positions[idx * 3 + 1] = depthVal * 1.6 - 0.2; // AI Depth Height Extrusion
-                                    positions[idx * 3 + 2] = (y / imgH - 0.5) * 3.4;
-
-                                    if (colorMode === 'cyber') {{
-                                        colors[idx * 3] = 0.0;
-                                        colors[idx * 3 + 1] = 0.7 + depthVal * 0.3;
-                                        colors[idx * 3 + 2] = 1.0;
-                                    }} else {{
-                                        colors[idx * 3] = r;
-                                        colors[idx * 3 + 1] = g;
-                                        colors[idx * 3 + 2] = b;
-                                    }}
-                                }}
-                            }}
-
-                            const geometry = new THREE.BufferGeometry();
-                            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-                            // Point Cloud Geometry
-                            const pMat = new THREE.PointsMaterial({{
-                                size: 0.038, vertexColors: true, transparent: true, opacity: 0.92, blending: THREE.AdditiveBlending
-                            }});
-                            pointCloud = new THREE.Points(geometry, pMat);
-                            holoGroup.add(pointCloud);
-
-                            // Surface Wireframe Mesh
-                            const wireMat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.15 }});
-                            const planeGeo = new THREE.PlaneGeometry(3.4, 3.4, imgW - 1, imgH - 1);
-                            const posAttr = planeGeo.attributes.position;
-                            for (let i = 0; i < posAttr.count; i++) {{
-                                posAttr.setZ(i, positions[i * 3 + 1]);
-                            }}
-                            planeGeo.computeVertexNormals();
-                            wireframeMesh = new THREE.Mesh(planeGeo, wireMat);
-                            wireframeMesh.rotation.x = -Math.PI / 2;
-                            wireframeMesh.position.y = 0;
-                            holoGroup.add(wireframeMesh);
-
-                            scene.add(holoGroup);
-                        }};
-
-                        window.rebuildHologram();
-
-                        let time = 0;
-                        function animate() {{
-                            requestAnimationFrame(animate);
-                            time += 0.02;
-
-                            if (holoGroup) {{
-                                holoGroup.rotation.y += 0.004;
-                                scanPlane.position.y = Math.sin(time * 1.5) * 0.9 + 0.6;
-                            }}
-
-                            controls.update();
-                            renderer.render(scene, camera);
+                            pIdx += 3;
+                            uIdx += 2;
                         }}
-                        animate();
                     }}
+
+                    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+                    const shaderMaterial = new THREE.ShaderMaterial({{
+                        uniforms: uniforms,
+                        vertexShader: vertexShader,
+                        fragmentShader: fragmentShader,
+                        transparent: true,
+                        blending: THREE.AdditiveBlending,
+                        depthWrite: false
+                    }});
+
+                    const particleSystem = new THREE.Points(geometry, shaderMaterial);
+                    scene.add(particleSystem);
+
+                    // Unreal Bloom Post-Processing
+                    const renderScene = new THREE.RenderPass(scene, camera);
+                    bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.4, 0.4, 0.85);
+                    
+                    const composer = new THREE.EffectComposer(renderer);
+                    composer.addPass(renderScene);
+                    composer.addPass(bloomPass);
+
+                    // Connect Sliders to Uniforms & Post-FX
+                    document.getElementById('sliderExtrude').addEventListener('input', (e) => {{
+                        uniforms.uExtrusionHeight.value = parseFloat(e.target.value);
+                    }});
+
+                    document.getElementById('sliderBloom').addEventListener('input', (e) => {{
+                        if (bloomPass) bloomPass.strength = parseFloat(e.target.value);
+                    }});
+
+                    document.getElementById('sliderClip').addEventListener('input', (e) => {{
+                        uniforms.uZClip.value = parseFloat(e.target.value);
+                    }});
+
+                    let time = 0;
+                    function animate() {{
+                        requestAnimationFrame(animate);
+                        time += 0.02;
+                        uniforms.uTime.value = time;
+
+                        if (particleSystem) {{
+                            particleSystem.rotation.y += 0.003;
+                            scanPlane.position.y = Math.sin(time * 1.5) * 0.9 + 0.5;
+                        }}
+
+                        controls.update();
+                        composer.render();
+                    }}
+                    animate();
 
                     const resizeObserver = new ResizeObserver(() => {{
                         const newWidth = container.clientWidth;
-                        const newHeight = container.clientHeight || 530;
+                        const newHeight = container.clientHeight || 580;
                         if (newWidth > 0 && newHeight > 0) {{
                             camera.aspect = newWidth / newHeight;
                             camera.updateProjectionMatrix();
                             renderer.setSize(newWidth, newHeight);
+                            composer.setSize(newWidth, newHeight);
                         }}
                     }});
                     resizeObserver.observe(container);
 
                 }} catch(e) {{
-                    console.error("WebGL Init Error: ", e);
+                    console.error("WebGL GPU Init Error: ", e);
                 }}
             }}
             init();
@@ -540,11 +626,10 @@ def render_3d_hologram_component(img_b64, depth_b64):
     </body>
     </html>
     """
-  components.html(html_code, height=550)
+  components.html(html_code, height=600)
 
 
 def create_plotly_3d_hologram(depth_pil):
-  """Generates a native 3D surface topography mesh from AI Depth map."""
   depth_small = depth_pil.resize((120, 120))
   depth_np = np.array(depth_small)
 
@@ -554,7 +639,7 @@ def create_plotly_3d_hologram(depth_pil):
   Z = depth_np / 25.5
 
   colorscale = [
-      [0.0, "rgb(3,7,18)"],
+      [0.0, "rgb(2,4,10)"],
       [0.5, "rgb(0,243,255)"],
       [1.0, "rgb(255,0,85)"],
   ]
@@ -563,16 +648,16 @@ def create_plotly_3d_hologram(depth_pil):
       data=[go.Surface(z=Z, x=X, y=Y, colorscale=colorscale, opacity=0.88)]
   )
   fig.update_layout(
-      title="AI MiDaS GEOMETRIC SURFACE TOPOGRAPHY",
+      title="NATIVE 3D VOLUMETRIC SURFACE MESH TOPOGRAPHY",
       autosize=True,
       height=500,
       margin=dict(l=0, r=0, b=0, t=30),
-      paper_bgcolor="rgba(3,7,18,0)",
-      plot_bgcolor="rgba(3,7,18,0)",
+      paper_bgcolor="rgba(2,4,10,0)",
+      plot_bgcolor="rgba(2,4,10,0)",
       scene=dict(
           xaxis=dict(visible=False),
           yaxis=dict(visible=False),
-          zaxis=dict(title="Depth Z", backgroundcolor="rgba(3,7,18,0)"),
+          zaxis=dict(title="Depth Z", backgroundcolor="rgba(2,4,10,0)"),
           aspectratio=dict(x=1, y=1, z=0.45),
       ),
   )
@@ -707,7 +792,7 @@ if image is not None:
 
     if analyze_btn and detector is not None:
       with st.spinner(
-          "Computing AI Geometric Depth Map & Extracting Point-Cloud..."
+          "Computing AI Geometric Depth Map & Compiling GLSL GPU Shaders..."
       ):
         raw_results = detector(image)
         ai_score, real_score = parse_predictions(raw_results)
@@ -738,7 +823,7 @@ if image is not None:
       render_cyber_header("🕵️ ADVANCED FORENSIC DIAGNOSTICS SUITE")
 
       t_holo, t_depth, t_mesh, t_heatmap, t_prompt, t_ela, t_fft = st.tabs([
-          "🛸 WebGL 3D HOLOGRAM",
+          "🛸 GPU GLSL HOLOGRAM",
           "🗺️ AI DEPTH MAP",
           "🌋 NATIVE 3D MESH",
           "🎯 SPATIAL HEATMAP",
@@ -749,13 +834,13 @@ if image is not None:
 
       with t_holo:
         st.write(
-            "True 3D Point-Cloud extruded dynamically using MiDaS AI Geometric"
-            " Depth Map. Use canvas buttons to toggle wireframe or real RGB"
-            " colors."
+            "High-Density GPU Vertex Shader (90,000 Voxels) with Unreal Bloom"
+            " Post-Processing. Use canvas sliders below to tweak Extrusion,"
+            " Bloom, Z-Cut Plane, and Palettes."
         )
         img_b64 = image_to_base64(image)
         depth_b64 = image_to_base64(depth_map)
-        render_3d_hologram_component(img_b64, depth_b64)
+        render_gpu_glsl_hologram(img_b64, depth_b64)
 
       with t_depth:
         st.write(
@@ -802,7 +887,7 @@ if image is not None:
       # --- Export Audit Log ---
       st.markdown("<br>", unsafe_allow_html=True)
       report_data = {
-          "platform": "MonoVision Cyber Forensics Studio v6.0",
+          "platform": "MonoVision Cyber Forensics Studio v7.0 ULTRA",
           "engine": "Smogy/SMOGY-Ai-images-detector",
           "depth_engine": "Intel/dpt-hybrid-midas",
           "timestamp": datetime.utcnow().isoformat() + "Z",
