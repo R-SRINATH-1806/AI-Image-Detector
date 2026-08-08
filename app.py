@@ -26,7 +26,7 @@ st.write("3-Model Ensemble (ViT Base + ResNet18 + ViT Landmark) with 5-crop anal
 # ---------------------------------------------------------
 VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
 RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
-LANDMARK_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_landmark_model.pth"  # Update with your URL
+LANDMARK_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_landmark_model.1.pth"  # Update with your URL
 
 def download_file_if_missing(file_path, url):
     if not os.path.exists(file_path):
