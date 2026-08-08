@@ -11,142 +11,149 @@ from PIL import Image
 from streamlit_paste_button import paste_image_button
 
 # ---------------------------------------------------------
-# 1. Modern Page & Theme Configuration
+# 1. Page Configuration & MonoVision Theme Styling
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="VeriSight AI | Deepfake & Media Forensics",
-    page_icon="🛡️",
+    page_title="MonoVision | AI Forensics Studio",
+    page_icon="👁️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Inject Modern Dark Glassmorphism CSS styling
+# Injected CSS for MonoVision Dark Cyber-Forensic Interface
 st.markdown("""
 <style>
-    /* Global Container Theme */
+    /* Global Base Theme Override */
     .stApp {
-        background-color: #0d1117;
-        color: #c9d1d9;
+        background-color: #07090e;
+        color: #e2e8f0;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    
-    /* Hero Header Styling */
+
+    /* MonoVision Hero Header */
     .hero-container {
-        background: linear-gradient(135deg, rgba(22, 27, 34, 0.8) 0%, rgba(13, 17, 23, 0.9) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 2.5rem 2rem;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(7, 9, 14, 0.95) 100%);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        border-radius: 20px;
+        padding: 2.2rem 1.8rem;
         margin-bottom: 2rem;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         text-align: center;
+        box-shadow: 0 0 35px rgba(56, 189, 248, 0.08);
     }
-    .hero-title {
-        font-size: 2.8rem;
-        font-weight: 800;
-        background: linear-gradient(90deg, #58a6ff 0%, #bc8cff 100%);
+    
+    .hero-logo {
+        font-size: 3rem;
+        font-weight: 900;
+        letter-spacing: -1px;
+        background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.2rem;
     }
-    .hero-subtitle {
-        font-size: 1.1rem;
-        color: #8b949e;
-        max-width: 650px;
-        margin: 0 auto;
+
+    .hero-tagline {
+        font-size: 1.05rem;
+        color: #94a3b8;
+        max-width: 600px;
+        margin: 0 auto 1.2rem auto;
     }
-    .badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
+
+    .badge-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .m-badge {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        color: #38bdf8;
+        padding: 4px 14px;
         border-radius: 20px;
         font-size: 0.8rem;
         font-weight: 600;
-        margin: 0.5rem 0.25rem 0 0.25rem;
-        background: rgba(56, 139, 253, 0.15);
-        color: #58a6ff;
-        border: 1px solid rgba(56, 139, 253, 0.4);
+        letter-spacing: 0.5px;
     }
-    
-    /* Result Cards */
-    .card {
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    
-    /* Verdict Alerts */
-    .verdict-fake {
-        background: linear-gradient(135deg, rgba(248, 81, 73, 0.15) 0%, rgba(13, 17, 23, 0.8) 100%);
-        border: 1px solid #f85149;
-        color: #ff7b72;
-        border-radius: 12px;
-        padding: 1.25rem;
-        text-align: center;
-        font-weight: 700;
-        font-size: 1.4rem;
-    }
-    .verdict-real {
-        background: linear-gradient(135deg, rgba(46, 160, 67, 0.15) 0%, rgba(13, 17, 23, 0.8) 100%);
-        border: 1px solid #2ea043;
-        color: #3fb950;
-        border-radius: 12px;
-        padding: 1.25rem;
-        text-align: center;
-        font-weight: 700;
-        font-size: 1.4rem;
-    }
-    .verdict-uncertain {
-        background: linear-gradient(135deg, rgba(210, 153, 34, 0.15) 0%, rgba(13, 17, 23, 0.8) 100%);
-        border: 1px solid #d29922;
-        color: #e3b341;
-        border-radius: 12px;
-        padding: 1.25rem;
-        text-align: center;
-        font-weight: 700;
-        font-size: 1.4rem;
-    }
-    
-    /* Custom Streamlit Tabs Override */
+
+    /* Tab Custom Styling */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #161b22;
+        gap: 10px;
+        background-color: #0f172a;
         padding: 8px;
-        border-radius: 12px;
-        border: 1px solid #30363d;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }
+
     .stTabs [data-baseweb="tab"] {
         height: 48px;
-        border-radius: 8px;
-        color: #8b949e;
+        border-radius: 10px;
+        color: #94a3b8;
         font-weight: 600;
     }
+
     .stTabs [aria-selected="true"] {
-        background-color: #21262d !important;
-        color: #58a6ff !important;
+        background-color: #1e293b !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    /* Verdict Card Highlights */
+    .verdict-fake {
+        background: linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+        border: 1.5px solid #f43f5e;
+        color: #fda4af;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        font-weight: 800;
+        font-size: 1.5rem;
+        box-shadow: 0 0 25px rgba(244, 63, 94, 0.15);
+    }
+
+    .verdict-real {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+        border: 1.5px solid #10b981;
+        color: #6ee7b7;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        font-weight: 800;
+        font-size: 1.5rem;
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+    }
+
+    .verdict-uncertain {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+        border: 1.5px solid #f59e0b;
+        color: #fde68a;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        font-weight: 800;
+        font-size: 1.5rem;
+        box-shadow: 0 0 25px rgba(245, 158, 11, 0.15);
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. Hero Header Section
+# 2. Hero Branding Section
 # ---------------------------------------------------------
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🛡️ VeriSight Neural Forensics</div>
-    <div class="hero-subtitle">High-precision AI image detection powered by dual Vision Architectures & 5-crop spatial texture sampling.</div>
-    <div>
-        <span class="badge">ViT-Tiny Vision Transformer</span>
-        <span class="badge">ResNet-18 Deep ConvNet</span>
-        <span class="badge">5-Crop Spatial Analysis</span>
+    <div class="hero-logo">MONOVISION</div>
+    <div class="hero-tagline">Deepfake & Synthetic Media Forensics Platform</div>
+    <div class="badge-container">
+        <span class="m-badge">⚡ Dual-Engine Ensemble</span>
+        <span class="m-badge">🔬 5-Crop Spatial Sampling</span>
+        <span class="m-badge">🛡️ Real-Time Detection</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Model Downloads & Processing Utilities
+# 3. Model Downloads & Processing Setup
 # ---------------------------------------------------------
 VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
 RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
@@ -175,10 +182,12 @@ def load_models():
     download_file_if_missing("vit_highres_model.pth", VIT_URL)
     download_file_if_missing("resnet_highres_model.pth", RESNET_URL)
     
+    # Model 1: ViT Tiny
     vit = timm.create_model('vit_tiny_patch16_224', pretrained=False, num_classes=2)
     vit.load_state_dict(torch.load("vit_highres_model.pth", map_location=device, weights_only=True))
     vit.eval()
     
+    # Model 2: ResNet-18
     resnet = models.resnet18(weights=None)
     num_ftrs = resnet.fc.in_features
     resnet.fc = nn.Linear(num_ftrs, 2)
@@ -191,18 +200,18 @@ def load_models():
 vit_model, resnet_model = load_models()
 
 # ---------------------------------------------------------
-# 4. Professional Input Console Tabs
+# 4. Input Console (Clipboard, Upload, Web Link)
 # ---------------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["📋 Clipboard Import", "📁 Direct File Upload", "🔗 Web Image Link"])
+tab1, tab2, tab3 = st.tabs(["📋 Clipboard Import", "📁 Local File Upload", "🔗 Web Image Link"])
 
 image = None
 
 with tab1:
     st.markdown("<br>", unsafe_allow_html=True)
     paste_result = paste_image_button(
-        label="📋 Paste Image directly from Clipboard",
-        background_color="#238636",
-        hover_background_color="#2ea043",
+        label="📋 Paste Image from Clipboard",
+        background_color="#0284c7",
+        hover_background_color="#0369a1",
     )
     if paste_result.image_data is not None:
         image = paste_result.image_data.convert('RGB')
@@ -215,17 +224,17 @@ with tab2:
 
 with tab3:
     st.markdown("<br>", unsafe_allow_html=True)
-    url_input = st.text_input("Source Image Link", placeholder="https://example.com/image.jpg", label_visibility="collapsed")
+    url_input = st.text_input("Direct Image URL", placeholder="https://example.com/image.jpg", label_visibility="collapsed")
     if url_input:
         try:
             req = urllib.request.Request(url_input, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req) as response:
                 image = Image.open(response).convert('RGB')
         except Exception:
-            st.error("⚠️ Direct link access failed. Please verify the URL or try pasting the image directly.")
+            st.error("⚠️ Direct link connection failed. Please verify the link or paste the image directly.")
 
 # ---------------------------------------------------------
-# 5. Diagnostic Dashboard & Ensemble Analysis
+# 5. Diagnostic Dashboard & Forensic Analysis
 # ---------------------------------------------------------
 if image is not None:
     st.markdown("<br>", unsafe_allow_html=True)
@@ -233,25 +242,22 @@ if image is not None:
     if image.width < 224 or image.height < 224:
         image = image.resize((max(224, image.width), max(224, image.height)))
         
-    col_left, col_right = st.columns([1, 1], gap="large")
+    col_left, col_right = st.columns([1, 1], gap="medium")
     
     with col_left:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("#### 🖼️ Media Sample")
-        st.image(image, use_container_width=True)
-        st.markdown(f"<p style='color:#8b949e; font-size:0.85rem; text-align:center;'>Dimensions: {image.width} × {image.height}px</p>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("#### 🖼️ Media Preview")
+            st.image(image, use_container_width=True)
+            st.markdown(f"<p style='color:#64748b; font-size:0.85rem; text-align:center;'>Source Image Resolution: {image.width} × {image.height}px</p>", unsafe_allow_html=True)
         
     with col_right:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("#### ⚙️ Forensic Engine")
-        st.write("Ready to analyze micro-texture spatial patterns across center and 4 corner high-res crops.")
-        
-        analyze_btn = st.button("🚀 Run Deep Forensic Inspection", type="primary", use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("#### ⚙️ Forensic Engine")
+            st.write("Extracting micro-texture spatial distributions using Center + 4-Corner high-res image crops.")
+            analyze_btn = st.button("🚀 Run MonoVision Forensics", type="primary", use_container_width=True)
 
         if analyze_btn:
-            with st.spinner("Extracting spatial micro-features across Neural Ensemble..."):
+            with st.spinner("Analyzing high-frequency pixel artifacts..."):
                 patches = five_crop(image)
                 patch_tensors = torch.stack([base_transform(p) for p in patches])
 
@@ -264,30 +270,28 @@ if image is not None:
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Interactive Verdict Card
+            # MonoVision Verdict Card
             if avg_fake > 60.0:
                 st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Confidence)</div>', unsafe_allow_html=True)
             elif avg_real > 60.0:
                 st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({avg_real:.1f}% Confidence)</div>', unsafe_allow_html=True)
             else:
-                st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Uncertain Analysis ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Inconclusive Signal ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🔬 Neural Breakdown")
+            st.markdown("#### 🔬 Model Diagnostic Breakdown")
             
-            # Neural Network Metric Breakdown
+            # Native Streamlit Containers for metrics
             c1, c2 = st.columns(2)
             
             with c1:
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                st.markdown("##### ViT-Tiny (Transformer)")
-                st.progress(int(vit_probs[0] * 100), text=f"AI Artifacts: {vit_probs[0]*100:.1f}%")
-                st.progress(int(vit_probs[1] * 100), text=f"Authentic: {vit_probs[1]*100:.1f}%")
-                st.markdown('</div>', unsafe_allow_html=True)
+                with st.container(border=True):
+                    st.markdown("##### ViT-Tiny (Vision Transformer)")
+                    st.progress(int(vit_probs[0] * 100), text=f"AI Artifacts: {vit_probs[0]*100:.1f}%")
+                    st.progress(int(vit_probs[1] * 100), text=f"Authentic Signal: {vit_probs[1]*100:.1f}%")
                 
             with c2:
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                st.markdown("##### ResNet-18 (ConvNet)")
-                st.progress(int(res_probs[0] * 100), text=f"AI Artifacts: {res_probs[0]*100:.1f}%")
-                st.progress(int(res_probs[1] * 100), text=f"Authentic: {res_probs[1]*100:.1f}%")
-                st.markdown('</div>', unsafe_allow_html=True)
+                with st.container(border=True):
+                    st.markdown("##### ResNet-18 (Deep ConvNet)")
+                    st.progress(int(res_probs[0] * 100), text=f"AI Artifacts: {res_probs[0]*100:.1f}%")
+                    st.progress(int(res_probs[1] * 100), text=f"Authentic Signal: {res_probs[1]*100:.1f}%")
