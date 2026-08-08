@@ -231,6 +231,7 @@ with st.sidebar:
   st.caption("• Latent Prompt Inversion Vector")
   st.caption("• JPEG Error Level Analysis (ELA)")
   st.caption("• 2D Fast Fourier Transform (FFT)")
+  st.caption("• Neuro-Acoustic Sonification Engine")
 
 
 # ---------------------------------------------------------
@@ -299,13 +300,83 @@ def parse_predictions(results):
 
 
 # ---------------------------------------------------------
-# 4. WebGL GLSL Shader Engine with Unreal Bloom & HUD
+# 4. WebGL GLSL Shader Engine & Interactive Components
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
   buffered = BytesIO()
   img_pil.save(buffered, format="PNG")
   img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
   return f"data:image/png;base64,{img_str}"
+
+
+def render_sonification_module():
+    """Generates a Web Audio API synthesizer for acoustic data scanning."""
+    html_code = """
+    <div style="background: rgba(10,16,30,0.8); border: 1px solid rgba(0, 243, 255, 0.4); border-left: 4px solid #00f3ff; padding: 15px; border-radius: 8px; text-align: center; color: #00f3ff; font-family: 'Courier New', monospace; box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);">
+        <p style="margin-top: 0; font-weight: bold; letter-spacing: 2px;">🔊 NEURO-ACOUSTIC DATA SONIFICATION</p>
+        <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">Translating latent visual frequencies into audible waveform telemetry.</p>
+        <button onclick="playSciFiDrone()" style="background: rgba(0,243,255,0.15); color: #00f3ff; border: 1px solid #00f3ff; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.3s; margin-right: 10px; border-radius: 4px;">▶ INITIATE AUDIO SCAN</button>
+        <button onclick="stopDrone()" style="background: rgba(255,0,85,0.1); color: #ff0055; border: 1px solid #ff0055; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.3s; border-radius: 4px;">■ HALT</button>
+    </div>
+    
+    <script>
+        let audioCtx;
+        let activeNodes = [];
+
+        function playSciFiDrone() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (activeNodes.length > 0) return; // Prevent overlapping
+
+            // Sci-fi chord frequencies (Sub-bass, Root, Fifth)
+            const freqs = [41.20, 82.41, 123.47]; 
+            
+            freqs.forEach((freq, i) => {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                
+                osc.type = i === 0 ? 'sine' : 'sawtooth';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                // LFO to create a pulsing "scanning" effect
+                let lfo = audioCtx.createOscillator();
+                lfo.type = 'sine';
+                lfo.frequency.value = 0.5 + (i * 1.5);
+                
+                let lfoGain = audioCtx.createGain();
+                lfoGain.gain.value = 5 + (i * 2);
+                
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                
+                // Volume envelope
+                gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 2.0); // Fade in
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                lfo.start();
+                
+                activeNodes.push({osc, lfo, gain});
+            });
+        }
+
+        function stopDrone() {
+            if (!audioCtx) return;
+            activeNodes.forEach(node => {
+                node.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5); // Fade out
+                setTimeout(() => { 
+                    node.osc.stop(); 
+                    node.lfo.stop(); 
+                    node.osc.disconnect();
+                }, 1500);
+            });
+            activeNodes = [];
+        }
+    </script>
+    """
+    components.html(html_code, height=150)
 
 
 def render_gpu_glsl_hologram(img_b64, depth_b64):
@@ -942,6 +1013,9 @@ if image is not None:
             " Transform."
         )
         st.image(generate_fft(image), use_container_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        # --- NEW AUDIO SONIFICATION INJECTION ---
+        render_sonification_module()
 
       # --- Export Audit Log ---
       st.markdown("<br>", unsafe_allow_html=True)
