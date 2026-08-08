@@ -1,24 +1,18 @@
 import os
-import urllib.request
-import gc
 import json
 from datetime import datetime
 import streamlit as st
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import transforms, models
-import timm
 from PIL import Image, ImageChops, ImageEnhance
 import cv2
 import numpy as np
 from streamlit_paste_button import paste_image_button
+from transformers import pipeline
 
 # ---------------------------------------------------------
-# 1. Page Configuration & MonoVision Custom Theme
+# 1. Page Configuration & Custom Cyber Theme
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MonoVision | Deepfake Forensics Studio",
+    page_title="MonoVision | AI Image Forensics",
     page_icon="👁️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -26,26 +20,23 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* Dark Cyber Core Background */
     .stApp {
         background: #090d16;
         color: #e2e8f0;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Sidebar Styling */
     section[data-testid="stSidebar"] {
         background-color: #0d1322 !important;
         border-right: 1px solid rgba(56, 189, 248, 0.15);
     }
 
-    /* Hero Header Banner */
     .hero-banner {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(9, 13, 22, 0.95) 100%);
         border: 1px solid rgba(56, 189, 248, 0.25);
         border-radius: 18px;
         padding: 2.2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
         box-shadow: 0 0 40px rgba(56, 189, 248, 0.08);
     }
@@ -66,24 +57,6 @@ st.markdown("""
         margin-bottom: 1.2rem;
     }
 
-    /* Pulsating Status Indicator */
-    .pulse-online {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #10b981;
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-        animation: pulse 2s infinite;
-        margin-right: 6px;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -96,29 +69,6 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* Tab Custom Styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background-color: #0f172a;
-        padding: 8px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        height: 48px;
-        border-radius: 10px;
-        color: #94a3b8;
-        font-weight: 600;
-    }
-
-    .stTabs [aria-selected="true"] {
-        background-color: #1e293b !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-
-    /* Verdict Card Highlight Overrides */
     .verdict-fake {
         background: linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
         border: 1.5px solid #f43f5e;
@@ -142,114 +92,69 @@ st.markdown("""
         font-size: 1.6rem;
         box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
     }
-
-    .verdict-uncertain {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1.5px solid #f59e0b;
-        color: #fde68a;
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-align: center;
-        font-weight: 800;
-        font-size: 1.6rem;
-        box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. Hero Branding Section
+# 2. Hero Section
 # ---------------------------------------------------------
 st.markdown("""
 <div class="hero-banner">
     <div class="hero-title">MONOVISION</div>
-    <div class="hero-subtitle">Deepfake & Synthetic Image Forensics Platform</div>
+    <div class="hero-subtitle">Deepfake & Synthetic Image Forensics</div>
     <div>
-        <span class="status-badge"><span class="pulse-online"></span> ENGINES ONLINE</span>
+        <span class="status-badge">ENGINE ONLINE</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Sidebar Engine Configuration & Controls
+# 3. Sidebar Configuration
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("### ⚙️ Engine Parameters")
-    st.markdown("---")
-    
-    threshold = st.slider(
-        "AI Detection Threshold (%)",
-        min_value=50,
-        max_value=90,
-        value=60,
-        step=5,
-        help="Confidence level required to classify an image as AI-generated."
-    )
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 📊 Active Model Pipeline")
-    
+    st.markdown("### 📊 Active Pipeline")
     with st.container(border=True):
-        st.markdown("**1. ViT-Tiny (Vision Transformer)**")
-        st.caption("Weight: 50% | Resolution: 224×224")
-        st.markdown("**2. ResNet-18 (Deep ConvNet)**")
-        st.caption("Weight: 50% | Resolution: 224×224")
-        
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🛡️ System Telemetry")
-    st.caption("Inference Mode: CPU")
-    st.caption("Spatial Sampling: 5-Crop Strategy")
+        st.markdown("**Model:** `Smogy/SMOGY-Ai-images-detector`")
+        st.caption("Fine-tuned on SDXL, DALL-E 3, FLUX, and artwork domain datasets.")
 
 # ---------------------------------------------------------
-# 4. Model Downloads & Processing Utilities
+# 4. Model Loader
 # ---------------------------------------------------------
-VIT_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/vit_highres_model.pth"
-RESNET_URL = "https://github.com/R-SRINATH-1806/AI-Image-Detector/releases/download/v1.0/resnet_highres_model.pth"
-
-def download_file_if_missing(file_path, url):
-    if not os.path.exists(file_path):
-        with st.spinner(f"Downloading model weights ({file_path})..."):
-            req = urllib.request.Request(
-                url, 
-                headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-            )
-            with urllib.request.urlopen(req) as response, open(file_path, 'wb') as out_file:
-                out_file.write(response.read())
-
-device = torch.device("cpu")
-
-base_transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-five_crop = transforms.FiveCrop(224)
-
 @st.cache_resource
-def load_models():
-    download_file_if_missing("vit_highres_model.pth", VIT_URL)
-    download_file_if_missing("resnet_highres_model.pth", RESNET_URL)
-    
-    vit = timm.create_model('vit_tiny_patch16_224', pretrained=False, num_classes=2)
-    vit.load_state_dict(torch.load("vit_highres_model.pth", map_location=device, weights_only=True))
-    vit.eval()
-    
-    resnet = models.resnet18(weights=None)
-    num_ftrs = resnet.fc.in_features
-    resnet.fc = nn.Linear(num_ftrs, 2)
-    resnet.load_state_dict(torch.load("resnet_highres_model.pth", map_location=device, weights_only=True))
-    resnet.eval()
+def load_detector():
+    """Loads the model pipeline cleanly."""
+    return pipeline("image-classification", model="Smogy/SMOGY-Ai-images-detector")
 
-    gc.collect()
-    return vit, resnet
+detector = load_detector()
 
-vit_model, resnet_model = load_models()
+def parse_predictions(results):
+    """
+    Parses output probabilities directly from the neural network
+    without any manual heuristic overrides.
+    """
+    fake_score = 0.0
+    real_score = 0.0
+    
+    for res in results:
+        label = str(res['label']).lower()
+        score = res['score'] * 100.0
+        
+        if any(k in label for k in ['fake', 'ai', 'generated', 'synthetic', 'label_1']):
+            fake_score = score
+        elif any(k in label for k in ['real', 'human', 'authentic', 'photography', 'label_0']):
+            real_score = score
+
+    if fake_score == 0.0 and real_score > 0.0:
+        fake_score = 100.0 - real_score
+    elif real_score == 0.0 and fake_score > 0.0:
+        real_score = 100.0 - fake_score
+        
+    return fake_score, real_score
 
 # ---------------------------------------------------------
-# 5. Visual Forensic Generators (ELA & FFT)
+# 5. Visual Forensic Visualizers (ELA & FFT)
 # ---------------------------------------------------------
 def generate_ela(image, quality=90):
-    """Generates Error Level Analysis (ELA) map highlighting compression artifacts."""
     temp_filename = "temp_ela.jpg"
     image.save(temp_filename, 'JPEG', quality=quality)
     compressed_image = Image.open(temp_filename)
@@ -265,7 +170,6 @@ def generate_ela(image, quality=90):
     return ela_image
 
 def generate_fft(image_pil):
-    """Generates Frequency Spectrum (FFT) map highlighting grid artifacts."""
     img_gray = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
     f_transform = np.fft.fft2(img_gray)
     f_shift = np.fft.fftshift(f_transform)
@@ -275,13 +179,19 @@ def generate_fft(image_pil):
     return Image.fromarray(magnitude_spectrum)
 
 # ---------------------------------------------------------
-# 6. Input Interface Tabs
+# 6. Input Interface
 # ---------------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["📋 Clipboard Import", "📁 File Upload", "🔗 Image URL"])
+tab1, tab2 = st.tabs(["📁 File Upload", "📋 Clipboard Import"])
 
 image = None
 
 with tab1:
+    st.markdown("<br>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Upload Image File", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file).convert('RGB')
+        
+with tab2:
     st.markdown("<br>", unsafe_allow_html=True)
     paste_result = paste_image_button(
         label="📋 Paste Image from Clipboard",
@@ -291,32 +201,11 @@ with tab1:
     if paste_result.image_data is not None:
         image = paste_result.image_data.convert('RGB')
 
-with tab2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Upload Image File", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file).convert('RGB')
-
-with tab3:
-    st.markdown("<br>", unsafe_allow_html=True)
-    url_input = st.text_input("Direct Image URL", placeholder="https://example.com/image.jpg", label_visibility="collapsed")
-    if url_input:
-        try:
-            req = urllib.request.Request(url_input, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req) as response:
-                image = Image.open(response).convert('RGB')
-        except Exception:
-            st.error("⚠️ Unable to load image URL. Please check the link or paste the image directly.")
-
 # ---------------------------------------------------------
-# 7. Diagnostic Dashboard & Analysis Execution
+# 7. Analysis & Output Dashboard
 # ---------------------------------------------------------
 if image is not None:
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    if image.width < 224 or image.height < 224:
-        image = image.resize((max(224, image.width), max(224, image.height)))
-        
     col_left, col_right = st.columns([1, 1], gap="medium")
     
     with col_left:
@@ -328,94 +217,52 @@ if image is not None:
     with col_right:
         with st.container(border=True):
             st.markdown("#### ⚙️ Forensic Control")
-            st.write("Ready to analyze micro-textures across Center + 4-Corner high-res crops.")
-            analyze_btn = st.button("🚀 Run MonoVision Analysis", type="primary", use_container_width=True)
+            st.write("Evaluating image features using fine-tuned neural classification.")
+            analyze_btn = st.button("🚀 Run Forensic Analysis", type="primary", use_container_width=True)
 
-        if analyze_btn:
-            patches = five_crop(image)
-            patch_tensors = torch.stack([base_transform(p) for p in patches])
-
-            with st.spinner("Executing neural micro-texture evaluation..."):
-                with torch.no_grad():
-                    vit_probs = F.softmax(vit_model(patch_tensors), dim=1).mean(dim=0).tolist()
-                    res_probs = F.softmax(resnet_model(patch_tensors), dim=1).mean(dim=0).tolist()
-
-                avg_fake = (vit_probs[0] + res_probs[0]) / 2.0 * 100
-                avg_real = (vit_probs[1] + res_probs[1]) / 2.0 * 100
+        if analyze_btn and detector is not None:
+            with st.spinner("Analyzing image features..."):
+                raw_results = detector(image)
+                ai_score, real_score = parse_predictions(raw_results)
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Dynamic Verdict Display
-            if avg_fake >= threshold:
-                st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Confidence)</div>', unsafe_allow_html=True)
+            if ai_score >= 50.0:
+                st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({ai_score:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
-            elif avg_real >= threshold:
-                st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({avg_real:.1f}% Confidence)</div>', unsafe_allow_html=True)
-                verdict_str = "Authentic Photo"
             else:
-                st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Inconclusive Signal ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
-                verdict_str = "Inconclusive"
+                st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({real_score:.1f}% Confidence)</div>', unsafe_allow_html=True)
+                verdict_str = "Authentic Photo"
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🔬 Neural Model Breakdown")
+            st.markdown("#### 🔬 Neural Breakdown")
             
-            c1, c2 = st.columns(2)
-            with c1:
-                with st.container(border=True):
-                    st.markdown("##### ViT-Tiny (Transformer)")
-                    st.progress(int(vit_probs[0] * 100), text=f"AI Artifacts: {vit_probs[0]*100:.1f}%")
-                    st.progress(int(vit_probs[1] * 100), text=f"Authentic Signal: {vit_probs[1]*100:.1f}%")
-                
-            with c2:
-                with st.container(border=True):
-                    st.markdown("##### ResNet-18 (Deep ConvNet)")
-                    st.progress(int(res_probs[0] * 100), text=f"AI Artifacts: {res_probs[0]*100:.1f}%")
-                    st.progress(int(res_probs[1] * 100), text=f"Authentic Signal: {res_probs[1]*100:.1f}%")
+            with st.container(border=True):
+                st.progress(int(ai_score), text=f"AI/Deepfake Probability: {ai_score:.1f}%")
+                st.progress(int(real_score), text=f"Authentic Photography Probability: {real_score:.1f}%")
 
-            # --- Visual 5-Crop Inspector ---
+            # --- Visual Forensics ---
             st.markdown("<br>", unsafe_allow_html=True)
-            with st.expander("🔍 Inspection Area: Sampled 5-Crop Micro-Patches", expanded=False):
-                st.write("These 224x224 crops were evaluated across the neural ensemble:")
-                crop_cols = st.columns(5)
-                crop_names = ["Top-Left", "Top-Right", "Bottom-Left", "Bottom-Right", "Center"]
-                for idx, crop in enumerate(patches):
-                    with crop_cols[idx]:
-                        st.image(crop, caption=crop_names[idx], use_container_width=True)
-
-            # --- Advanced Visual Forensics (ELA & FFT) ---
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🕵️‍♂️ Advanced Visual Forensics")
+            st.markdown("#### 🕵️ Visual Diagnostics")
             
             tab_ela, tab_fft = st.tabs(["Error Level Analysis (ELA)", "Frequency Spectrum (FFT)"])
             
             with tab_ela:
-                st.write("Highlights areas with different JPEG compression ratios. Digital splices and synthetic regions often glow brighter than untouched areas.")
                 st.image(generate_ela(image), use_container_width=True)
             
             with tab_fft:
-                st.write("Visualizes high-frequency patterns. Real photos have continuous radial glows, while AI generators often leave unnatural geometric grids.")
                 st.image(generate_fft(image), use_container_width=True)
 
-            # --- Forensic Report Download ---
+            # --- Export Audit Log ---
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
                 "platform": "MonoVision Forensics Studio",
+                "model": "Smogy/SMOGY-Ai-images-detector",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
-                "confidence_threshold_used": f"{threshold}%",
-                "ensemble_averages": {
-                    "ai_probability": f"{avg_fake:.2f}%",
-                    "real_probability": f"{avg_real:.2f}%"
-                },
-                "models": {
-                    "vit_tiny": {
-                        "ai_prob": f"{vit_probs[0]*100:.2f}%",
-                        "real_prob": f"{vit_probs[1]*100:.2f}%"
-                    },
-                    "resnet18": {
-                        "ai_prob": f"{res_probs[0]*100:.2f}%",
-                        "real_prob": f"{res_probs[1]*100:.2f}%"
-                    }
+                "probabilities": {
+                    "ai_probability": f"{ai_score:.2f}%",
+                    "real_probability": f"{real_score:.2f}%"
                 }
             }
             
@@ -425,4 +272,4 @@ if image is not None:
                 file_name=f"monovision_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
                 use_container_width=True
-            )
+    )
