@@ -235,14 +235,12 @@ def parse_predictions(results):
 # 5. Helper Generators & Base64 Encoder
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
-    """Converts PIL image to base64 data URL for WebGL insertion."""
     buffered = BytesIO()
     img_pil.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
     return f"data:image/png;base64,{img_str}"
 
 def render_3d_hologram_component(img_b64):
-    """Generates an interactive WebGL Three.js Hologram viewport."""
     html_code = f"""
     <!DOCTYPE html>
     <html>
@@ -296,7 +294,7 @@ def render_3d_hologram_component(img_b64):
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
 
-            // 1. Glowing Pedestal Base
+            // Pedestal Base
             const ringGeo = new THREE.RingGeometry(1.2, 1.8, 32);
             const ringMat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, side: THREE.DoubleSide, wireframe: true, transparent: true, opacity: 0.6 }});
             const ringMesh = new THREE.Mesh(ringGeo, ringMat);
@@ -310,7 +308,7 @@ def render_3d_hologram_component(img_b64):
             baseMesh.position.y = -1.6;
             scene.add(baseMesh);
 
-            // 2. Vertical Projection Light Cone
+            // Light Cone
             const coneGeo = new THREE.ConeGeometry(1.5, 3.2, 32, 1, true);
             const coneMat = new THREE.MeshBasicMaterial({{
                 color: 0x00f3ff,
@@ -323,7 +321,7 @@ def render_3d_hologram_component(img_b64):
             coneMesh.position.y = -0.1;
             scene.add(coneMesh);
 
-            // 3. Floating Hologram Card
+            // Hologram Card
             const textureLoader = new THREE.TextureLoader();
             textureLoader.load('{img_b64}', function(texture) {{
                 const aspect = texture.image.width / texture.image.height;
@@ -331,8 +329,6 @@ def render_3d_hologram_component(img_b64):
                 const planeHeight = planeWidth / aspect;
                 
                 const planeGeo = new THREE.PlaneGeometry(planeWidth, planeHeight, 16, 16);
-                
-                // Hologram Additive Blend Shader Style
                 const planeMat = new THREE.MeshBasicMaterial({{
                     map: texture,
                     side: THREE.DoubleSide,
@@ -345,24 +341,20 @@ def render_3d_hologram_component(img_b64):
                 holoCard.position.y = 0.5;
                 scene.add(holoCard);
 
-                // Grid Wireframe Overlay
                 const wireGeo = new THREE.PlaneGeometry(planeWidth, planeHeight, 10, 10);
                 const wireMat = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.25 }});
                 const wireMesh = new THREE.Mesh(wireGeo, wireMat);
                 wireMesh.position.z = 0.01;
                 holoCard.add(wireMesh);
 
-                // Animation Loop
                 let time = 0;
                 function animate() {{
                     requestAnimationFrame(animate);
                     time += 0.02;
 
-                    // Hover floating motion
                     holoCard.position.y = 0.5 + Math.sin(time * 1.5) * 0.08;
                     holoCard.rotation.y += 0.005;
 
-                    // Rotate rings & light beam pulse
                     ringMesh.rotation.z -= 0.01;
                     baseMesh.rotation.y += 0.005;
                     coneMesh.material.opacity = 0.10 + Math.sin(time * 3.0) * 0.04;
@@ -466,7 +458,8 @@ if image is not None:
         with st.container(border=True):
             st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>📷 INPUT FRAME BUFFER</h4>", unsafe_allow_html=True)
             st.image(image, use_container_width=True)
-            st.markdown(f"<p style='font-family: JetBrains Mono; color:#64748b; font-size:0.8rem; text-align:center;'>FRAME RESOLUTION: {image.width} × {image.height} PX</p>", unsafe_allow_html=True)
+            resolution_str = f"FRAME RESOLUTION: {image.width} × {image.height} PX"
+            st.markdown(f"<p style='font-family: JetBrains Mono; color:#64748b; font-size:0.8rem; text-align:center;'>{resolution_str}</p>", unsafe_allow_html=True)
         
     with col_right:
         with st.container(border=True):
@@ -482,15 +475,23 @@ if image is not None:
             st.markdown("<br>", unsafe_allow_html=True)
             
             if ai_score >= 50.0:
-                st.markdown(f'<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC / AI-GENERATED ({ai_score:.1f}% CONFIDENCE)</div>', unsafe_allow_html=True)
+                fake_html = f'<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC / AI-GENERATED ({ai_score:.1f}% CONFIDENCE)</div>'
+                st.markdown(fake_html, unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
             else:
-                st.markdown(f'<div class="verdict-real">✅ VERDICT: AUTHENTIC PHOTOGRAPH ({real_score:.1f}% CONFIDENCE)</div>', unsafe_allow_html=True)
+                real_html = f'<div class="verdict-real">✅ VERDICT: AUTHENTIC PHOTOGRAPH ({real_score:.1f}% CONFIDENCE)</div>'
+                st.markdown(real_html, unsafe_allow_html=True)
                 verdict_str = "Authentic Photo"
 
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size: 1rem;'>📊 PROBABILITY MATRIX</h4>", unsafe_allow_html=True)
             
             with st.container(border=True):
-                st.progress(int(ai_score), text=f"AI / Deepfake Signature Index: {ai_score:.1f}%")
-                st.progress(int(real_score), text=f"Authentic Optical Signa
+                ai_label = f"AI / Deepfake Signature Index: {ai_score:.1f}%"
+                real_label = f"Authentic Optical Signature Index: {real_score:.1f}%"
+                st.progress(int(ai_score), text=ai_label)
+                st.progress(int(real_score), text=real_label)
+
+            # --- Multi-Tab Advanced Visual Forensics ---
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<h4 style='font-family: Orbitron; color: #00f3ff; font-size:
