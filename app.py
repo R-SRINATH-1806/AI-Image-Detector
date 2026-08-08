@@ -314,6 +314,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
     <!DOCTYPE html>
     <html>
     <head>
+        <meta charset="utf-8">
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { background: #02040a; overflow: hidden; width: 100vw; height: 580px; font-family: 'Courier New', monospace; }
@@ -350,10 +351,19 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
             }
             .hud-btn:hover { background: #00f3ff; color: #000; box-shadow: 0 0 12px #00f3ff; }
         </style>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminanceHighPassShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     </head>
     <body>
         <div id="canvas-container">
-            <div class="hud-overlay">⚡ GPU GLSL VERTEX SHADER ENGINE // 90,000 VOXELS // BLOOM ACTIVE</div>
+            <div id="hud-status" class="hud-overlay">⚡ GPU GLSL VERTEX SHADER ENGINE // 90,000 VOXELS // BLOOM ACTIVE</div>
             
             <div class="controls-panel">
                 <div class="control-group">
@@ -378,16 +388,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
         </div>
 
         <script>
-            function loadScript(src) {
-                return new Promise((resolve, reject) => {
-                    const s = document.createElement('script');
-                    s.src = src;
-                    s.onload = resolve;
-                    s.onerror = reject;
-                    document.head.appendChild(s);
-                });
-            }
-
             let uniforms = {
                 uDepthMap: { value: null },
                 uColorMap: { value: null },
@@ -401,6 +401,17 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
             function setPalette(mode) {
                 uniforms.uColorMode.value = mode;
+            }
+
+            function createBase64Texture(b64Data) {
+                const texture = new THREE.Texture();
+                const img = new Image();
+                img.onload = function() {
+                    texture.image = img;
+                    texture.needsUpdate = true;
+                };
+                img.src = b64Data;
+                return texture;
             }
 
             const vertexShader = `
@@ -430,7 +441,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     pos.y += sin(pos.x * 8.0 + uTime * 2.0) * 0.02 * depth;
 
                     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = (3.2 / -mvPosition.z) * (0.8 + depth * 0.6);
+                    gl_PointSize = (12.0 / -mvPosition.z) * (0.8 + depth * 0.8);
                     gl_Position = projectionMatrix * mvPosition;
                 }
             `;
@@ -470,17 +481,8 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 }
             `;
 
-            async function init() {
+            function init() {
                 try {
-                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
-                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
-                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js');
-                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js');
-                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js');
-                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js');
-                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminanceHighPassShader.js');
-                    await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js');
-
                     const container = document.getElementById('canvas-container');
                     let width = container.clientWidth || window.innerWidth || 800;
                     let height = container.clientHeight || 580;
@@ -489,7 +491,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     scene.fog = new THREE.FogExp2(0x02040a, 0.04);
 
                     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                    camera.position.set(0, 2.5, 6.2);
+                    camera.position.set(0, 2.2, 4.8);
 
                     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
                     renderer.setSize(width, height);
@@ -499,9 +501,10 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     const controls = new THREE.OrbitControls(camera, renderer.domElement);
                     controls.enableDamping = true;
                     controls.dampingFactor = 0.05;
+                    controls.target.set(0, 0.8, 0);
 
                     const gridHelper = new THREE.GridHelper(10, 28, 0x00f3ff, 0x112233);
-                    gridHelper.position.y = -1.2;
+                    gridHelper.position.y = -0.2;
                     scene.add(gridHelper);
 
                     const scanPlaneGeo = new THREE.PlaneGeometry(3.6, 3.6);
@@ -512,12 +515,8 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     scanPlane.rotation.x = Math.PI / 2;
                     scene.add(scanPlane);
 
-                    const textureLoader = new THREE.TextureLoader();
-                    const colorTex = textureLoader.load('__IMG_B64__');
-                    const depthTex = textureLoader.load('__DEPTH_B64__');
-
-                    uniforms.uColorMap.value = colorTex;
-                    uniforms.uDepthMap.value = depthTex;
+                    uniforms.uColorMap.value = createBase64Texture('__IMG_B64__');
+                    uniforms.uDepthMap.value = createBase64Texture('__DEPTH_B64__');
 
                     const gridRes = 300;
                     const geometry = new THREE.BufferGeometry();
@@ -584,7 +583,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
                         if (particleSystem) {
                             particleSystem.rotation.y += 0.003;
-                            scanPlane.position.y = Math.sin(time * 1.5) * 0.9 + 0.5;
+                            scanPlane.position.y = Math.sin(time * 1.5) * 0.9 + 0.8;
                         }
 
                         controls.update();
@@ -606,15 +605,19 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
                 } catch(e) {
                     console.error("WebGL GPU Init Error: ", e);
+                    document.getElementById('hud-status').innerText = '❌ GPU ERROR: ' + e.message;
                 }
             }
-            init();
+
+            window.addEventListener('load', init);
         </script>
     </body>
     </html>
     """
-  html_code = html_template.replace("__IMG_B64__", img_b64).replace(
-      "__DEPTH_B64__", depth_b64
+  img_clean = img_b64.replace("\n", "").replace("\r", "")
+  depth_clean = depth_b64.replace("\n", "").replace("\r", "")
+  html_code = html_template.replace("__IMG_B64__", img_clean).replace(
+      "__DEPTH_B64__", depth_clean
   )
   components.html(html_code, height=600)
 
