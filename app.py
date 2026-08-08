@@ -310,45 +310,45 @@ def image_to_base64(img_pil):
 
 def render_gpu_glsl_hologram(img_b64, depth_b64):
   """Ultra-High Density WebGL GPU Shader Hologram (90,000+ Particles at 60FPS) with Unreal Bloom & Live Interactive Controls."""
-  html_code = f"""
+  html_template = """
     <!DOCTYPE html>
     <html>
     <head>
         <style>
-            * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-            body {{ background: #02040a; overflow: hidden; width: 100vw; height: 580px; font-family: 'Courier New', monospace; }}
-            #canvas-container {{ width: 100%; height: 100%; position: relative; }}
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { background: #02040a; overflow: hidden; width: 100vw; height: 580px; font-family: 'Courier New', monospace; }
+            #canvas-container { width: 100%; height: 100%; position: relative; }
             
-            .hud-overlay {{
+            .hud-overlay {
                 position: absolute; top: 12px; left: 12px;
                 color: #00f3ff; border: 1px solid rgba(0,243,255,0.5);
                 padding: 6px 14px; background: rgba(2,4,10,0.85);
                 font-size: 11px; letter-spacing: 1.5px; border-radius: 4px;
                 pointer-events: none; z-index: 100; box-shadow: 0 0 12px rgba(0,243,255,0.25);
-            }}
+            }
 
-            .controls-panel {{
+            .controls-panel {
                 position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 100;
                 display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
                 gap: 10px; background: rgba(2,4,10,0.88); padding: 10px 16px;
                 border: 1px solid rgba(0,243,255,0.3); border-radius: 8px; backdrop-filter: blur(8px);
-            }}
+            }
 
-            .control-group {{ display: flex; align-items: center; gap: 8px; color: #00f3ff; font-size: 11px; }}
-            .control-group label {{ font-weight: bold; letter-spacing: 1px; }}
-            .control-group input[type=range] {{
+            .control-group { display: flex; align-items: center; gap: 8px; color: #00f3ff; font-size: 11px; }
+            .control-group label { font-weight: bold; letter-spacing: 1px; }
+            .control-group input[type=range] {
                 -webkit-appearance: none; width: 90px; background: rgba(0,243,255,0.2); height: 4px; border-radius: 2px;
-            }}
-            .control-group input[type=range]::-webkit-slider-thumb {{
+            }
+            .control-group input[type=range]::-webkit-slider-thumb {
                 -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #00f3ff; cursor: pointer;
-            }}
+            }
 
-            .hud-btn {{
+            .hud-btn {
                 background: rgba(0,243,255,0.12); border: 1px solid #00f3ff; color: #00f3ff;
                 padding: 5px 12px; font-size: 10px; cursor: pointer; border-radius: 4px; font-weight: bold;
                 transition: all 0.2s; font-family: monospace;
-            }}
-            .hud-btn:hover {{ background: #00f3ff; color: #000; box-shadow: 0 0 12px #00f3ff; }}
+            }
+            .hud-btn:hover { background: #00f3ff; color: #000; box-shadow: 0 0 12px #00f3ff; }
         </style>
     </head>
     <body>
@@ -378,30 +378,30 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
         </div>
 
         <script>
-            function loadScript(src) {{
-                return new Promise((resolve, reject) => {{
+            function loadScript(src) {
+                return new Promise((resolve, reject) => {
                     const s = document.createElement('script');
                     s.src = src;
                     s.onload = resolve;
                     s.onerror = reject;
                     document.head.appendChild(s);
-                }});
-            }}
+                });
+            }
 
-            let uniforms = {{
-                uDepthMap: {{ value: null }},
-                uColorMap: {{ value: null }},
-                uExtrusionHeight: {{ value: 1.8 }},
-                uZClip: {{ value: 1.0 }},
-                uColorMode: {{ value: 0 }},
-                uTime: {{ value: 0.0 }}
-            }};
+            let uniforms = {
+                uDepthMap: { value: null },
+                uColorMap: { value: null },
+                uExtrusionHeight: { value: 1.8 },
+                uZClip: { value: 1.0 },
+                uColorMode: { value: 0 },
+                uTime: { value: 0.0 }
+            };
 
             let bloomPass;
 
-            function setPalette(mode) {{
+            function setPalette(mode) {
                 uniforms.uColorMode.value = mode;
-            }}
+            }
 
             const vertexShader = `
                 uniform sampler2D uDepthMap;
@@ -426,7 +426,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                         vClip = 0.0;
                     }
 
-                    // GPU-based Extrusion along Y-axis
                     pos.y += depth * uExtrusionHeight;
                     pos.y += sin(pos.x * 8.0 + uTime * 2.0) * 0.02 * depth;
 
@@ -451,24 +450,18 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     vec3 finalColor;
 
                     if (uColorMode == 0) {
-                        // Cyberpunk Cyan / Electric Purple
                         finalColor = mix(vec3(0.0, 0.35, 1.0), vec3(0.0, 0.95, 1.0), vDepth);
                     } else if (uColorMode == 1) {
-                        // Matrix Neural Green
                         finalColor = mix(vec3(0.0, 0.15, 0.05), vec3(0.1, 1.0, 0.4), vDepth);
                     } else if (uColorMode == 2) {
-                        // Synthwave Magenta / Sunset Orange
                         finalColor = mix(vec3(0.9, 0.0, 0.5), vec3(1.0, 0.6, 0.0), vDepth);
                     } else {
-                        // Real Original RGB Colors
                         finalColor = texColor.rgb;
                     }
 
-                    // Laser Scanlines
                     float scanline = sin((vUv.y * 180.0) - (uTime * 4.0)) * 0.18 + 0.82;
                     finalColor *= scanline;
 
-                    // Soft Circular Particle Point
                     float dist = length(gl_PointCoord - vec2(0.5));
                     if (dist > 0.5) discard;
                     float alpha = (1.0 - dist * 2.0) * (0.7 + vDepth * 0.3);
@@ -477,8 +470,8 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 }
             `;
 
-            async function init() {{
-                try {{
+            async function init() {
+                try {
                     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
                     await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
                     await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js');
@@ -498,7 +491,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
                     camera.position.set(0, 2.5, 6.2);
 
-                    const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
+                    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
                     renderer.setSize(width, height);
                     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                     container.appendChild(renderer.domElement);
@@ -507,37 +500,33 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     controls.enableDamping = true;
                     controls.dampingFactor = 0.05;
 
-                    // Neon Grid Floor
                     const gridHelper = new THREE.GridHelper(10, 28, 0x00f3ff, 0x112233);
                     gridHelper.position.y = -1.2;
                     scene.add(gridHelper);
 
-                    // Scanning Laser Plane
                     const scanPlaneGeo = new THREE.PlaneGeometry(3.6, 3.6);
-                    const scanPlaneMat = new THREE.MeshBasicMaterial({{
+                    const scanPlaneMat = new THREE.MeshBasicMaterial({
                         color: 0x00f3ff, side: THREE.DoubleSide, transparent: true, opacity: 0.12, wireframe: true
-                    }});
+                    });
                     const scanPlane = new THREE.Mesh(scanPlaneGeo, scanPlaneMat);
                     scanPlane.rotation.x = Math.PI / 2;
                     scene.add(scanPlane);
 
-                    // Load Textures directly into GPU
                     const textureLoader = new THREE.TextureLoader();
-                    const colorTex = textureLoader.load('{img_b64}');
-                    const depthTex = textureLoader.load('{depth_b64}');
+                    const colorTex = textureLoader.load('__IMG_B64__');
+                    const depthTex = textureLoader.load('__DEPTH_B64__');
 
                     uniforms.uColorMap.value = colorTex;
                     uniforms.uDepthMap.value = depthTex;
 
-                    // Create High-Density Mesh Buffer (300 x 300 = 90,000 Vertices)
                     const gridRes = 300;
                     const geometry = new THREE.BufferGeometry();
                     const positions = new Float32Array(gridRes * gridRes * 3);
                     const uvs = new Float32Array(gridRes * gridRes * 2);
 
                     let pIdx = 0, uIdx = 0;
-                    for (let y = 0; y < gridRes; y++) {{
-                        for (let x = 0; x < gridRes; x++) {{
+                    for (let y = 0; y < gridRes; y++) {
+                        for (let x = 0; x < gridRes; x++) {
                             const u = x / (gridRes - 1);
                             const v = y / (gridRes - 1);
 
@@ -546,29 +535,28 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                             positions[pIdx + 2] = (v - 0.5) * 3.6;
 
                             uvs[uIdx] = u;
-                            uvs[uIdx + 1] = 1.0 - v; // Flip UV Y axis
+                            uvs[uIdx + 1] = 1.0 - v;
 
                             pIdx += 3;
                             uIdx += 2;
-                        }}
-                    }}
+                        }
+                    }
 
                     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
                     geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 
-                    const shaderMaterial = new THREE.ShaderMaterial({{
+                    const shaderMaterial = new THREE.ShaderMaterial({
                         uniforms: uniforms,
                         vertexShader: vertexShader,
                         fragmentShader: fragmentShader,
                         transparent: true,
                         blending: THREE.AdditiveBlending,
                         depthWrite: false
-                    }});
+                    });
 
                     const particleSystem = new THREE.Points(geometry, shaderMaterial);
                     scene.add(particleSystem);
 
-                    // Unreal Bloom Post-Processing
                     const renderScene = new THREE.RenderPass(scene, camera);
                     bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.4, 0.4, 0.85);
                     
@@ -576,56 +564,58 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     composer.addPass(renderScene);
                     composer.addPass(bloomPass);
 
-                    // Connect Sliders to Uniforms & Post-FX
-                    document.getElementById('sliderExtrude').addEventListener('input', (e) => {{
+                    document.getElementById('sliderExtrude').addEventListener('input', (e) => {
                         uniforms.uExtrusionHeight.value = parseFloat(e.target.value);
-                    }});
+                    });
 
-                    document.getElementById('sliderBloom').addEventListener('input', (e) => {{
+                    document.getElementById('sliderBloom').addEventListener('input', (e) => {
                         if (bloomPass) bloomPass.strength = parseFloat(e.target.value);
-                    }});
+                    });
 
-                    document.getElementById('sliderClip').addEventListener('input', (e) => {{
+                    document.getElementById('sliderClip').addEventListener('input', (e) => {
                         uniforms.uZClip.value = parseFloat(e.target.value);
-                    }});
+                    });
 
                     let time = 0;
-                    function animate() {{
+                    function animate() {
                         requestAnimationFrame(animate);
                         time += 0.02;
                         uniforms.uTime.value = time;
 
-                        if (particleSystem) {{
+                        if (particleSystem) {
                             particleSystem.rotation.y += 0.003;
                             scanPlane.position.y = Math.sin(time * 1.5) * 0.9 + 0.5;
-                        }}
+                        }
 
                         controls.update();
                         composer.render();
-                    }}
+                    }
                     animate();
 
-                    const resizeObserver = new ResizeObserver(() => {{
+                    const resizeObserver = new ResizeObserver(() => {
                         const newWidth = container.clientWidth;
                         const newHeight = container.clientHeight || 580;
-                        if (newWidth > 0 && newHeight > 0) {{
+                        if (newWidth > 0 && newHeight > 0) {
                             camera.aspect = newWidth / newHeight;
                             camera.updateProjectionMatrix();
                             renderer.setSize(newWidth, newHeight);
                             composer.setSize(newWidth, newHeight);
-                        }}
-                    }});
+                        }
+                    });
                     resizeObserver.observe(container);
 
-                }} catch(e) {{
+                } catch(e) {
                     console.error("WebGL GPU Init Error: ", e);
-                }}
-            }}
+                }
+            }
             init();
         </script>
     </body>
     </html>
     """
+  html_code = html_template.replace("__IMG_B64__", img_b64).replace(
+      "__DEPTH_B64__", depth_b64
+  )
   components.html(html_code, height=600)
 
 
