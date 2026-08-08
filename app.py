@@ -159,26 +159,39 @@ st.markdown("""
     <div class="hero-title">MONOVISION</div>
     <div class="hero-subtitle">Deepfake & Synthetic Image Forensics Platform</div>
     <div>
-        <span class="status-badge"><span class="pulse-online"></span> AUTO-ANALYZER ONLINE</span>
+        <span class="status-badge"><span class="pulse-online"></span> NEXT-GEN ENGINE ONLINE</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Sidebar Configuration
+# 3. Sidebar Engine Configuration & Controls
 # ---------------------------------------------------------
 with st.sidebar:
+    st.markdown("### ⚙️ Engine Parameters")
+    st.markdown("---")
+    
+    threshold = st.slider(
+        "AI Detection Threshold (%)",
+        min_value=50,
+        max_value=95,
+        value=65,
+        step=5,
+        help="Confidence level required to classify an image as AI-generated."
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 📊 Active Model Pipeline")
     
     with st.container(border=True):
         st.markdown("**prithivMLmods/Deep-Fake-Detector-v2-Model**")
         st.caption("Architecture: Vision Transformer (ViT-Base)")
-        st.caption("Mode: Automatic Relative Confidence Evaluator")
+        st.caption("Training Data: Real vs. Deepfake Images")
         
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛡️ System Telemetry")
     st.caption("Inference API: Hugging Face Transformers")
-    st.caption("Decision Logic: Smart Margin Evaluator")
+    st.caption("Spatial Sampling: Global Vision Transform")
 
 # ---------------------------------------------------------
 # 4. Hugging Face Next-Gen Model Loader
@@ -267,11 +280,13 @@ if image is not None:
             analyze_btn = st.button("🚀 Run MonoVision Analysis", type="primary", use_container_width=True)
 
         if analyze_btn:
-            with st.spinner("Executing neural evaluation..."):
+            with st.spinner("Executing next-gen neural evaluation..."):
+                # Run the Hugging Face model
                 results = hf_detector(image)
                 
                 avg_fake, avg_real = 0.0, 0.0
                 
+                # Parse Hugging Face dynamic pipeline responses
                 for res in results:
                     label = res['label'].lower()
                     score = res['score'] * 100
@@ -281,6 +296,7 @@ if image is not None:
                     elif label in ['real', 'realism', 'authentic', 'label_0']:
                         avg_real = score
                 
+                # Fill in missing probability if pipeline only returns top-1 score
                 if avg_fake == 0.0 and avg_real > 0:
                     avg_fake = 100.0 - avg_real
                 elif avg_real == 0.0 and avg_fake > 0:
@@ -288,19 +304,16 @@ if image is not None:
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # --- SMART AUTOMATIC VERDICT LOGIC ---
-            margin = abs(avg_fake - avg_real)
-            
-            # If scores are within 10% of each other (e.g., 52% vs 48%), signal is too weak
-            if margin < 10.0:
-                st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Inconclusive Signal ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
-                verdict_str = "Inconclusive"
-            elif avg_fake > avg_real:
+            # Dynamic Verdict Display
+            if avg_fake >= threshold:
                 st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
-            else:
+            elif avg_real >= threshold:
                 st.markdown(f'<div class="verdict-real">✅ Verdict: Authentic Photograph ({avg_real:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "Authentic Photo"
+            else:
+                st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Inconclusive Signal ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
+                verdict_str = "Inconclusive"
 
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("#### 🔬 Vision Transformer Breakdown")
@@ -330,6 +343,7 @@ if image is not None:
                 "engine": "Hugging Face - prithivMLmods/Deep-Fake-Detector-v2-Model",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
+                "confidence_threshold_used": f"{threshold}%",
                 "neural_probabilities": {
                     "ai_probability": f"{avg_fake:.2f}%",
                     "real_probability": f"{avg_real:.2f}%"
