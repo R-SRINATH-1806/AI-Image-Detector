@@ -71,7 +71,8 @@ def load_models():
     resnet.eval()
 
     # Model 3: ViT-Base (768-dim) for the Landmark Model
-    vit_landmark = timm.create_model('vit_base_patch16_224', pretrained=False, num_classes=2)
+    # --- THE FIX: Updated num_classes to 18 to match your trained weights ---
+    vit_landmark = timm.create_model('vit_base_patch16_224', pretrained=False, num_classes=18)
     
     raw_checkpoint = torch.load("vit_landmark_model.1.pth", map_location=device)
     
@@ -86,7 +87,8 @@ def load_models():
     # Strip 'module.' prefix if trained using PyTorch DataParallel
     clean_state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
 
-    vit_landmark.load_state_dict(clean_state_dict, strict=False)
+    # --- THE FIX: Removed strict=False so we ensure all weights are actually loaded ---
+    vit_landmark.load_state_dict(clean_state_dict)
     vit_landmark.eval()
     
     # Free up unused RAM so Streamlit Cloud does not crash
