@@ -86,27 +86,6 @@ st.markdown("""
         font-weight: 600;
     }
 
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background-color: #0f172a;
-        padding: 8px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        height: 48px;
-        border-radius: 10px;
-        color: #94a3b8;
-        font-weight: 600;
-    }
-
-    .stTabs [aria-selected="true"] {
-        background-color: #1e293b !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-
     .verdict-fake {
         background: linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
         border: 1.5px solid #f43f5e;
@@ -130,18 +109,6 @@ st.markdown("""
         font-size: 1.6rem;
         box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
     }
-
-    .verdict-uncertain {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1.5px solid #f59e0b;
-        color: #fde68a;
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-align: center;
-        font-weight: 800;
-        font-size: 1.6rem;
-        box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -153,7 +120,7 @@ st.markdown("""
     <div class="hero-title">MONOVISION</div>
     <div class="hero-subtitle">Deepfake & Synthetic Image Forensics Platform</div>
     <div>
-        <span class="status-badge"><span class="pulse-online"></span> NEURAL ENGINE ONLINE</span>
+        <span class="status-badge"><span class="pulse-online"></span> MULTI-CROP ENGINE ONLINE</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -163,23 +130,20 @@ st.markdown("""
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("### 📊 Active Model Pipeline")
-    
     with st.container(border=True):
         st.markdown("**umm-maybe/AI-image-detector**")
-        st.caption("Architecture: Vision Transformer (ViT-Base)")
-        st.caption("Domain: General AI Generation, Midjourney, SD & Photos")
+        st.caption("Strategy: Multi-Crop Spatial Feature Sampling")
+        st.caption("Thresholding: Strict >68% Confidence Floor")
         
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🛡️ System Telemetry")
-    st.caption("Inference API: Hugging Face Transformers")
-    st.caption("Status: Stable Single-Pipeline Execution")
+    st.markdown("### 🛡️ Calibration Mode")
+    st.caption("Optimized to eliminate false positives on high-detail architectural real photos.")
 
 # ---------------------------------------------------------
-# 4. Hugging Face Model Loader (Safe & Lightweight)
+# 4. Hugging Face Model Loader & Multi-Crop Inference Engine
 # ---------------------------------------------------------
 @st.cache_resource
 def load_hf_detector():
-    """Loads a stable general-purpose detector model."""
     try:
         return pipeline("image-classification", model="umm-maybe/AI-image-detector")
     except Exception as e:
@@ -188,11 +152,38 @@ def load_hf_detector():
 
 hf_detector = load_hf_detector()
 
+def run_multicrop_inference(image, pipe):
+    """
+    Evaluates full image + 4 cropped patches to separate true AI generation 
+    from JPEG/compression noise on high-detail real photos.
+    """
+    w, h = image.size
+    crops = [
+        image, # Full image
+        image.crop((int(w*0.1), int(h*0.1), int(w*0.9), int(h*0.9))), # Center crop
+        image.crop((0, 0, int(w*0.6), int(h*0.6))), # Top-left crop
+        image.crop((int(w*0.4), int(h*0.4), w, h))  # Bottom-right crop
+    ]
+    
+    fake_scores = []
+    
+    for crop in crops:
+        results = pipe(crop)
+        for res in results:
+            label = str(res['label']).lower()
+            score = res['score'] * 100.0
+            if any(k in label for k in ['fake', 'ai', 'generated', 'synthetic', 'label_1']):
+                fake_scores.append(score)
+                break
+                
+    avg_fake = sum(fake_scores) / len(fake_scores) if fake_scores else 0.0
+    avg_real = 100.0 - avg_fake
+    return avg_fake, avg_real
+
 # ---------------------------------------------------------
 # 5. Visual Forensic Generators (ELA & FFT)
 # ---------------------------------------------------------
 def generate_ela(image, quality=90):
-    """Generates Error Level Analysis (ELA) map highlighting compression artifacts."""
     temp_filename = "temp_ela.jpg"
     image.save(temp_filename, 'JPEG', quality=quality)
     compressed_image = Image.open(temp_filename)
@@ -208,7 +199,6 @@ def generate_ela(image, quality=90):
     return ela_image
 
 def generate_fft(image_pil):
-    """Generates Frequency Spectrum (FFT) map highlighting grid artifacts."""
     img_gray = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
     f_transform = np.fft.fft2(img_gray)
     f_shift = np.fft.fftshift(f_transform)
@@ -246,12 +236,6 @@ with tab2:
 if image is not None:
     st.markdown("<br>", unsafe_allow_html=True)
     
-    if image.width < 500 or image.height < 500:
-        st.warning(
-            f"⚠️ **Low Resolution Media ({image.width} × {image.height}px):** "
-            "Thumbnails contain heavy JPEG compression blocks, which may lower detection precision."
-        )
-
     col_left, col_right = st.columns([1, 1], gap="medium")
     
     with col_left:
@@ -263,33 +247,17 @@ if image is not None:
     with col_right:
         with st.container(border=True):
             st.markdown("#### ⚙️ Forensic Control")
-            st.write("Ready to analyze via ViT-Base Image Classification pipeline.")
-            analyze_btn = st.button("🚀 Run Forensic Analysis", type="primary", use_container_width=True)
+            st.write("Running multi-crop spatial sampling across high & low frequency features.")
+            analyze_btn = st.button("🚀 Run Multi-Crop Forensic Analysis", type="primary", use_container_width=True)
 
         if analyze_btn and hf_detector is not None:
-            with st.spinner("Analyzing neural texture patterns..."):
-                results = hf_detector(image)
-                
-                avg_fake, avg_real = 0.0, 0.0
-                
-                for res in results:
-                    label = str(res['label']).lower()
-                    score = res['score'] * 100.0
-                    
-                    if any(k in label for k in ['fake', 'ai', 'generated', 'synthetic', 'artificial', 'label_1']):
-                        avg_fake = score
-                    elif any(k in label for k in ['real', 'authentic', 'human', 'label_0']):
-                        avg_real = score
-                
-                if avg_fake == 0.0 and avg_real > 0:
-                    avg_fake = 100.0 - avg_real
-                elif avg_real == 0.0 and avg_fake > 0:
-                    avg_real = 100.0 - avg_fake
+            with st.spinner("Analyzing neural texture patterns across spatial crops..."):
+                avg_fake, avg_real = run_multicrop_inference(image, hf_detector)
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # --- ACCURATE DIRECT VERDICT LOGIC ---
-            if avg_fake >= 50.0:
+            # --- HIGH CONFIDENCE SAFETY MARGIN (Strict >68% for FAKE) ---
+            if avg_fake >= 68.0:
                 st.markdown(f'<div class="verdict-fake">⚠️ Verdict: Synthetically Generated ({avg_fake:.1f}% Confidence)</div>', unsafe_allow_html=True)
                 verdict_str = "AI-Generated"
             else:
@@ -297,7 +265,7 @@ if image is not None:
                 verdict_str = "Authentic Photo"
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 🔬 Neural Breakdown")
+            st.markdown("#### 🔬 Neural Breakdown (Multi-Crop Averaged)")
             
             with st.container(border=True):
                 st.progress(int(avg_fake), text=f"AI/Deepfake Signature: {avg_fake:.1f}%")
@@ -321,7 +289,7 @@ if image is not None:
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
                 "platform": "MonoVision Forensics Studio",
-                "engine": "umm-maybe/AI-image-detector",
+                "engine": "umm-maybe/AI-image-detector (Multi-Crop)",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
                 "probabilities": {
