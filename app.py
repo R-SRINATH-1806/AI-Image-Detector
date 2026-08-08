@@ -165,24 +165,24 @@ with st.sidebar:
     st.markdown("### 📊 Active Model Pipeline")
     
     with st.container(border=True):
-        st.markdown("**prithivMLmods/Deep-Fake-Detector-v2-Model**")
-        st.caption("Architecture: Vision Transformer (ViT)")
-        st.caption("Mode: Automatic Relative Confidence Evaluator")
+        st.markdown("**umm-maybe/AI-image-detector**")
+        st.caption("Architecture: Vision Transformer (ViT-Base)")
+        st.caption("Domain: Universal Artificial & Real Imagery")
         
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛡️ System Telemetry")
-    st.caption("Inference API: Hugging Face Transformers")
-    st.caption("Decision Engine: Dynamic Margin Evaluator")
+    st.caption("Inference Engine: Hugging Face Transformers")
+    st.caption("Decision Logic: Dynamic Relative Evaluator")
 
 # ---------------------------------------------------------
-# 4. Hugging Face Next-Gen Model Loader
+# 4. Hugging Face Universal Model Loader
 # ---------------------------------------------------------
 @st.cache_resource
 def load_hf_detector():
-    """Pulls a next-gen Deepfake ViT model directly from Hugging Face."""
+    """Pulls a general-purpose AI image detector directly from Hugging Face."""
     pipe = pipeline(
         "image-classification", 
-        model="prithivMLmods/Deep-Fake-Detector-v2-Model"
+        model="umm-maybe/AI-image-detector"
     )
     return pipe
 
@@ -246,14 +246,11 @@ with tab2:
 if image is not None:
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # --- LOW RESOLUTION CHECK & WARNING ---
-    is_low_res = image.width < 500 or image.height < 500
-    if is_low_res:
+    # Low resolution warning for compressed thumbnails
+    if image.width < 500 or image.height < 500:
         st.warning(
-            f"⚠️ **Low Resolution Detected ({image.width} × {image.height}px):** "
-            "Small or heavily compressed thumbnails lose natural camera sensor noise. "
-            "JPEG compression blocks can confuse AI models into marking authentic photos as fake. "
-            "For highest accuracy, please use full-resolution original images (>800px)."
+            f"⚠️ **Low Resolution Image Detected ({image.width} × {image.height}px):** "
+            "Small thumbnails lose camera sensor details. For best forensic accuracy, use original full-resolution files (>800px)."
         )
         
     col_left, col_right = st.columns([1, 1], gap="medium")
@@ -267,11 +264,11 @@ if image is not None:
     with col_right:
         with st.container(border=True):
             st.markdown("#### ⚙️ Forensic Control")
-            st.write("Ready to analyze via State-of-the-Art Deepfake Vision Transformer.")
+            st.write("Ready to analyze via State-of-the-Art Vision Transformer.")
             analyze_btn = st.button("🚀 Run MonoVision Analysis", type="primary", use_container_width=True)
 
         if analyze_btn:
-            with st.spinner("Executing neural evaluation..."):
+            with st.spinner("Evaluating visual probabilities..."):
                 results = hf_detector(image)
                 
                 avg_fake, avg_real = 0.0, 0.0
@@ -292,10 +289,9 @@ if image is not None:
 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # --- AUTOMATIC RELATIVE VERDICT LOGIC ---
+            # --- AUTOMATIC VERDICT LOGIC ---
             margin = abs(avg_fake - avg_real)
             
-            # If scores are within 10% of each other, signal is too weak
             if margin < 10.0:
                 st.markdown(f'<div class="verdict-uncertain">🤔 Verdict: Inconclusive Signal ({avg_real:.1f}% Real / {avg_fake:.1f}% AI)</div>', unsafe_allow_html=True)
                 verdict_str = "Inconclusive"
@@ -331,7 +327,7 @@ if image is not None:
             st.markdown("<br>", unsafe_allow_html=True)
             report_data = {
                 "platform": "MonoVision Forensics Studio",
-                "engine": "Hugging Face - prithivMLmods/Deep-Fake-Detector-v2-Model",
+                "engine": "Hugging Face - umm-maybe/AI-image-detector",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "verdict": verdict_str,
                 "neural_probabilities": {
