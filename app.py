@@ -7,7 +7,6 @@ import torch.nn.functional as F
 from torchvision import transforms, models
 import timm
 from PIL import Image
-from streamlit_paste_button import paste_image_button
 
 # ---------------------------------------------------------
 # 1. Page Configuration
@@ -60,29 +59,29 @@ def load_models():
 vit_model, resnet_model = load_models()
 
 # ---------------------------------------------------------
-# 3. Input Options (Clipboard Paste vs File Upload)
+# 3. Input Options (Tabs for File/Paste vs URL)
 # ---------------------------------------------------------
-st.markdown("### 📥 Choose Image Input")
-
-col_paste, col_upload = st.columns(2)
+tab1, tab2 = st.tabs(["📁 File Upload / Paste Image", "🔗 Image Web Link (URL)"])
 
 image = None
 
-with col_paste:
-    st.write("**Option A: Clipboard**")
-    paste_result = paste_image_button(
-        label="📋 Paste Image from Clipboard",
-        background_color="#FF4B4B",
-        hover_background_color="#D33636",
-    )
-    if paste_result.image_data is not None:
-        image = paste_result.image_data.convert('RGB')
-
-with col_upload:
-    st.write("**Option B: Upload File**")
-    uploaded_file = st.file_uploader("Upload an image file", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
+with tab1:
+    st.caption("💡 Click the box below to select a file, or click it and press **Ctrl + V** to paste an image.")
+    uploaded_file = st.file_uploader("Upload or Paste Image", type=["jpg", "jpeg", "png", "webp"], label_visibility="collapsed")
     if uploaded_file is not None:
         image = Image.open(uploaded_file).convert('RGB')
+
+with tab2:
+    st.caption("🌐 Right-click any image online, select 'Copy image address', and paste the URL below.")
+    url_input = st.text_input("Image URL", placeholder="https://example.com/image.jpg", label_visibility="collapsed")
+    
+    if url_input:
+        try:
+            req = urllib.request.Request(url_input, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response:
+                image = Image.open(response).convert('RGB')
+        except Exception:
+            st.error("⚠️ Unable to load image from this URL. Please verify the link is a direct image URL.")
 
 # ---------------------------------------------------------
 # 4. Analysis & Results
@@ -92,7 +91,7 @@ if image is not None:
     col_img, col_info = st.columns([1, 1])
     
     with col_img:
-        st.image(image, caption="Selected Image", use_container_width=True)
+        st.image(image, caption="Loaded Image", use_container_width=True)
         
     with col_info:
         st.write("### Ready to Analyze")
