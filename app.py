@@ -3,13 +3,11 @@ from datetime import datetime
 from io import BytesIO
 import json
 import os
-from urllib.parse import urlparse
 
 import cv2
 import numpy as np
-from PIL import Image, ImageChops, ImageEnhance, ExifTags
+from PIL import Image, ImageChops, ImageEnhance
 import plotly.graph_objects as go
-import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_paste_button import paste_image_button
@@ -188,9 +186,9 @@ st.markdown(
     """
 <div class="hud-banner">
     <div class="hud-title">MONOVISION v7.0 ULTRA</div>
-    <div class="hud-subtitle">// GPU-ACCELERATED GLSL HOLOGRAM & PROVENANCE FORENSICS SUITE</div>
+    <div class="hud-subtitle">// GPU-ACCELERATED GLSL HOLOGRAM & AI FORENSICS SUITE</div>
     <div>
-        <span class="hud-badge"><span class="pulse-dot"></span> REAL-TIME GPU VERTEX SHADER & WIKIMEDIA PROVENANCE SCANNER ACTIVE</span>
+        <span class="hud-badge"><span class="pulse-dot"></span> REAL-TIME GPU VERTEX SHADER & UNREAL BLOOM ONLINE</span>
     </div>
 </div>
 """,
@@ -208,15 +206,15 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         st.markdown(
-            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>PROVENANCE:</b> EXIF & Domain Whitelist Engine</p>""",
-            unsafe_allow_html=True,
-        )
-        st.markdown(
             """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>DEPTH ENGINE:</b> Intel DPT-MiDaS Hybrid</p>""",
             unsafe_allow_html=True,
         )
         st.markdown(
             """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>3D PIPELINE:</b> GLSL GPU Shader (90k Vertices)</p>""",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>POST-FX:</b> Unreal Bloom + Selective Pass</p>""",
             unsafe_allow_html=True,
         )
 
@@ -225,7 +223,6 @@ with st.sidebar:
         """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
         unsafe_allow_html=True,
     )
-    st.caption("• Trusted Domain & EXIF Provenance Override")
     st.caption("• Custom GLSL GPU Particle Displacement Shader")
     st.caption("• Selective Unreal Bloom & Chromatic Pass")
     st.caption("• Live Interactive Canvas Controls & Z-Cut Plane")
@@ -238,56 +235,7 @@ with st.sidebar:
 
 
 # ---------------------------------------------------------
-# 3. Provenance & Whitelisting Logic
-# ---------------------------------------------------------
-TRUSTED_DOMAINS = [
-    "wikimedia.org",
-    "wikipedia.org",
-    "commons.wikimedia.org",
-    "upload.wikimedia.org",
-]
-
-
-def check_image_provenance(image_url=None, img_pil=None):
-    """Checks source domain and embedded EXIF headers for trusted repository origin."""
-    if image_url:
-        domain = urlparse(image_url).netloc.lower()
-        if any(trusted in domain for trusted in TRUSTED_DOMAINS):
-            return (
-                True,
-                f"Verified Repository Origin: Source URL matches trusted domain ({domain})",
-            )
-
-    if img_pil and hasattr(img_pil, "_getexif"):
-        try:
-            exif = img_pil._getexif()
-            if exif:
-                for tag_id, value in exif.items():
-                    tag_name = ExifTags.TAGS.get(tag_id, str(tag_id))
-                    if isinstance(value, str):
-                        val_lower = value.lower()
-                        if "wikimedia" in val_lower or "wikipedia" in val_lower:
-                            return (
-                                True,
-                                f"Verified Metadata: EXIF tag '{tag_name}' attributes Wikimedia origin",
-                            )
-        except Exception:
-            pass
-
-    return False, "No verified digital repository provenance detected"
-
-
-def load_image_from_url(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    response = requests.get(url, headers=headers, timeout=10)
-    response.raise_for_status()
-    return Image.open(BytesIO(response.content)).convert("RGB")
-
-
-# ---------------------------------------------------------
-# 4. Neural Engine Loaders
+# 3. Neural Engine Loaders
 # ---------------------------------------------------------
 @st.cache_resource
 def load_detector():
@@ -352,9 +300,10 @@ def parse_predictions(results):
 
 
 # ---------------------------------------------------------
-# 5. Forensic Processing Functions
+# 4. Forensic Processing Functions
 # ---------------------------------------------------------
 def compute_ela(img_pil, quality=90):
+    """Calculates JPEG Error Level Analysis (ELA) map."""
     buffer = BytesIO()
     img_pil.save(buffer, format="JPEG", quality=quality)
     buffer.seek(0)
@@ -370,6 +319,7 @@ def compute_ela(img_pil, quality=90):
 
 
 def compute_fft(img_pil):
+    """Calculates 2D Fast Fourier Transform high-frequency spectral map."""
     gray = np.array(img_pil.convert("L"))
     f = np.fft.fft2(gray)
     fshift = np.fft.fftshift(f)
@@ -381,6 +331,7 @@ def compute_fft(img_pil):
 
 
 def compute_spatial_anomaly(img_pil):
+    """Calculates spatial edge disruption and high-gradient anomalies."""
     arr = np.array(img_pil.convert("RGB"))
     gray = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
     laplacian = cv2.Laplacian(gray, cv2.CV_64F)
@@ -391,6 +342,7 @@ def compute_spatial_anomaly(img_pil):
 
 
 def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
+    """Generates interactive Plotly 3D topography depth mesh."""
     resized = depth_pil.resize(downsample_size)
     z_data = np.array(resized)
     fig = go.Figure(data=[go.Surface(z=z_data, colorscale="Viridis")])
@@ -418,7 +370,7 @@ def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
 
 
 # ---------------------------------------------------------
-# 6. WebGL GLSL Shader Engine & Interactive Components
+# 5. WebGL GLSL Shader Engine & Interactive Components
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
     buffered = BytesIO()
@@ -428,6 +380,7 @@ def image_to_base64(img_pil):
 
 
 def render_sonification_module():
+    """Generates a Web Audio API synthesizer for acoustic data scanning."""
     html_code = """
     <div style="background: rgba(10,16,30,0.8); border: 1px solid rgba(0, 243, 255, 0.4); border-left: 4px solid #00f3ff; padding: 15px; border-radius: 8px; text-align: center; color: #00f3ff; font-family: 'Courier New', monospace; box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);">
         <p style="margin-top: 0; font-weight: bold; letter-spacing: 2px;">🔊 NEURO-ACOUSTIC DATA SONIFICATION</p>
@@ -494,6 +447,7 @@ def render_sonification_module():
 
 
 def render_gpu_glsl_hologram(img_b64, depth_b64):
+    """Ultra-High Density WebGL GPU Shader Hologram (90,000+ Particles at 60FPS) with Unreal Bloom & Live Interactive Controls."""
     html_template = """
     <!DOCTYPE html>
     <html>
@@ -843,14 +797,13 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
 
 # ---------------------------------------------------------
-# 7. Streamlit User Interface Workflow
+# 6. Streamlit User Interface Workflow
 # ---------------------------------------------------------
 render_cyber_header("📂 TELEMETRY INPUT PORTAL")
 
-input_tab1, input_tab2 = st.tabs(["📁 UPLOAD / URL / PASTE", "🖼️ DEMO TARGETS"])
+input_tab1, input_tab2 = st.tabs(["📁 UPLOAD / PASTE", "🖼️ DEMO TARGETS"])
 
 image_pil = None
-source_url = None
 
 with input_tab1:
     col_u1, col_u2 = st.columns([2, 1])
@@ -859,23 +812,12 @@ with input_tab1:
             "Select an image file for GPU forensic analysis",
             type=["png", "jpg", "jpeg", "webp"],
         )
-        url_input = st.text_input(
-            "🌐 Or paste direct Image / Wikipedia URL for Provenance Scan:",
-            placeholder="https://upload.wikimedia.org/wikipedia/commons/...",
-        )
     with col_u2:
         st.write("Or paste clipboard image:")
         paste_result = paste_image_button("📋 PASTE IMAGE")
 
     if uploaded_file is not None:
         image_pil = Image.open(uploaded_file).convert("RGB")
-    elif url_input.strip() != "":
-        source_url = url_input.strip()
-        try:
-            image_pil = load_image_from_url(source_url)
-            st.success("Successfully fetched image from target URL.")
-        except Exception as e:
-            st.error(f"Failed to download image from provided URL: {e}")
     elif paste_result.image_data is not None:
         image_pil = paste_result.image_data.convert("RGB")
 
@@ -915,9 +857,6 @@ if image_pil is not None:
         predictions = detector(image_pil)
         fake_score, real_score = parse_predictions(predictions)
 
-        # Provenance Whitelist Verification
-        is_trusted, trust_reason = check_image_provenance(source_url, image_pil)
-
         caption_text = "Latent inversion unavailable."
         if captioner is not None:
             try:
@@ -929,18 +868,7 @@ if image_pil is not None:
     # Verdict Header
     res_col1, res_col2 = st.columns([1, 2])
     with res_col1:
-        if is_trusted:
-            st.markdown(
-                f"""<div class="verdict-real">🛡️ VERIFIED REPOSITORY<br>
-                <span style="font-size: 0.82rem; color: #00ff88; font-family: 'JetBrains Mono', monospace;">
-                {trust_reason}
-                </span><br>
-                <span style="font-size: 0.72rem; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">
-                Classifier raw score: {fake_score:.1f}% Synthetic (Overridden)
-                </span></div>""",
-                unsafe_allow_html=True,
-            )
-        elif fake_score >= 50.0:
+        if fake_score >= 50.0:
             st.markdown(
                 f"""<div class="verdict-fake">🚨 AI SYNTHETIC DETECTED<br><span style="font-size: 1rem; color: #fff;">CONFIDENCE: {fake_score:.2f}%</span></div>""",
                 unsafe_allow_html=True,
@@ -1015,9 +943,7 @@ if image_pil is not None:
         render_cyber_header("DIAGNOSTIC TELEMETRY REPORT")
         report_data = {
             "timestamp": datetime.now().isoformat(),
-            "verdict": "VERIFIED_REPOSITORY" if is_trusted else ("SYNTHETIC" if fake_score >= 50.0 else "AUTHENTIC"),
-            "provenance_verified": is_trusted,
-            "provenance_reason": trust_reason,
+            "verdict": "SYNTHETIC" if fake_score >= 50.0 else "AUTHENTIC",
             "confidence_synthetic": f"{fake_score:.2f}%",
             "confidence_authentic": f"{real_score:.2f}%",
             "prompt_inversion": caption_text,
