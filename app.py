@@ -17,8 +17,8 @@ from transformers import pipeline
 # 1. Page Configuration & Cyber HUD Styling
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="STARK HOLO-FORENSICS v10.0",
-    page_icon="⚡",
+    page_title="MONVISION v10.0",
+    page_icon="👁️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -180,13 +180,54 @@ def render_cyber_header(text):
 
 
 # ---------------------------------------------------------
-# 2. Hero Banner & Sidebar Architecture
+# 2. JARVIS Audio Voice Engine
+# ---------------------------------------------------------
+def speak_jarvis_voice(text):
+    clean_text = text.replace("'", "\\'").replace('"', '\\"').replace("\n", " ")
+    html_code = f"""
+    <script>
+    function speakJarvis() {{
+        if ('speechSynthesis' in window) {{
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance("{clean_text}");
+            
+            function setVoiceAndSpeak() {{
+                const voices = window.speechSynthesis.getVoices();
+                // Select British or deep male voice for JARVIS sound
+                const jarvisVoice = voices.find(v => 
+                    v.name.includes("Google UK English Male") || 
+                    v.name.includes("Daniel") || 
+                    v.name.includes("David") || 
+                    v.name.includes("George") ||
+                    (v.lang.startsWith("en") && v.name.toLowerCase().includes("male"))
+                );
+                if (jarvisVoice) msg.voice = jarvisVoice;
+                msg.pitch = 0.88;
+                msg.rate = 1.05;
+                window.speechSynthesis.speak(msg);
+            }}
+
+            if (window.speechSynthesis.getVoices().length !== 0) {{
+                setVoiceAndSpeak();
+            }} else {{
+                window.speechSynthesis.onvoiceschanged = setVoiceAndSpeak;
+            }}
+        }}
+    }}
+    speakJarvis();
+    </script>
+    """
+    components.html(html_code, height=0, width=0)
+
+
+# ---------------------------------------------------------
+# 3. Hero Banner & Sidebar Architecture
 # ---------------------------------------------------------
 st.markdown(
     """
 <div class="hud-banner">
-    <div class="hud-title">STARK HOLO-VISION v10.0</div>
-    <div class="hud-subtitle">// J.A.R.V.I.S. TACTICAL 3D HOLOGRAM & AI FORENSICS SUITE</div>
+    <div class="hud-title">MONVISION v10.0</div>
+    <div class="hud-subtitle">// J.A.R.V.I.S. VOICE & TACTICAL 3D HOLOGRAM FORENSICS SUITE</div>
     <div>
         <span class="hud-badge"><span class="pulse-dot"></span> HIGH-ACCURACY ViT DETECTOR ONLINE</span>
     </div>
@@ -197,7 +238,7 @@ st.markdown(
 
 with st.sidebar:
     st.markdown(
-        """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛰️ STARK PIPELINE</h3>""",
+        """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛰️ MONVISION PIPELINE</h3>""",
         unsafe_allow_html=True,
     )
     with st.container(border=True):
@@ -210,7 +251,7 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         st.markdown(
-            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>HOLO ENGINE:</b> J.A.R.V.I.S. WebGL (67,600 Voxels + Tactical HUD)</p>""",
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>VOICE ASSISTANT:</b> J.A.R.V.I.S. SpeechSynthesis Engine</p>""",
             unsafe_allow_html=True,
         )
 
@@ -220,19 +261,18 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.caption("• Explainable AI (XAI) Structural Breakdown")
+    st.caption("• Audio Speech Synthesis Voice Briefings")
     st.caption("• High-Precision Vision Transformer Classification")
     st.caption("• 3D Tactical Bounding Wireframe Box")
-    st.caption("• Dynamic Scanning Laser Beam Sweep")
     st.caption("• JPEG Error Level Analysis (ELA)")
     st.caption("• 2D Fast Fourier Transform (FFT)")
 
 
 # ---------------------------------------------------------
-# 3. Neural Engine Loaders
+# 4. Neural Engine Loaders
 # ---------------------------------------------------------
 @st.cache_resource
 def load_detector():
-    # Upgraded to higher accuracy classifier
     return pipeline("image-classification", model="umm-maybe/AI-image-detector")
 
 
@@ -297,7 +337,7 @@ def parse_predictions(results):
 
 
 # ---------------------------------------------------------
-# 4. Forensic Processing & XAI Explanation Engine
+# 5. Forensic Processing & XAI Engine
 # ---------------------------------------------------------
 def compute_ela(img_pil, quality=90):
     buffer = BytesIO()
@@ -363,26 +403,26 @@ def generate_xai_explanation(img_pil, fake_score, real_score):
 
     if is_ai:
         explanations.append(
-            f"🤖 **Vision Transformer Confidence Score:** Classified as **{fake_score:.1f}% synthetic probability** using deep patch embedding matching."
+            f"🤖 **Vision Transformer Confidence:** Classified as **{fake_score:.1f}% synthetic probability** using patch embedding classification."
         )
         explanations.append(
-            f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Detected artificial grid patterns in Fourier spectrum typical of diffusion upsamplers."
+            f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Detected grid pattern frequency spikes typical of neural upsampling."
         )
         explanations.append(
-            f"🏛️ **Structural & Architectural Discrepancies:** Detected generative hallucinations (e.g., duplicated minarets/columns, surreal reflection geometry)."
+            f"🏛️ **Structural Hallucinations:** Architectural discrepancies detected, such as impossible reflection geometry or duplicated structures."
         )
         explanations.append(
-            f"🔍 **Unnatural ELA Uniformity (Std Dev: {ela_std:.2f}):** Abnormal JPEG compression noise distribution across image surfaces."
+            f"🔍 **Unnatural ELA Noise Uniformity (Std Dev: {ela_std:.2f}):** Abnormal JPEG compression variance across image surfaces."
         )
     else:
         explanations.append(
-            f"📷 **Vision Transformer Confidence Score:** High authentic score (**{real_score:.1f}%**) with natural sensor characteristics."
+            f"📷 **Vision Transformer Confidence:** High authentic score (**{real_score:.1f}%**) matching natural optical sensor profiles."
         )
         explanations.append(
-            f"🌐 **Natural Power-Law Frequency Spectrum ({freq_ratio:.1f}% High-Freq):** Smooth energy falloff with no synthetic convolution spikes."
+            f"🌐 **Natural Power-Law Frequency Spectrum ({freq_ratio:.1f}% High-Freq):** Smooth natural energy falloff without synthetic spikes."
         )
         explanations.append(
-            f"🔍 **Sensor Noise Degradation (ELA Std Dev: {ela_std:.2f}):** Normal optical camera noise across textures."
+            f"🔍 **Sensor Noise Degradation (ELA Std Dev: {ela_std:.2f}):** Normal physical camera noise across organic surfaces."
         )
 
     return explanations, freq_ratio, ela_std, lap_var
@@ -416,7 +456,7 @@ def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
 
 
 # ---------------------------------------------------------
-# 5. J.A.R.V.I.S. Stark WebGL Hologram Engine
+# 6. Improved WebGL Hologram Engine (Fixed Overexposure)
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
     buffered = BytesIO()
@@ -483,27 +523,27 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
     </head>
     <body>
         <div id="canvas-container">
-            <div id="hud-status" class="hud-overlay">⚡ J.A.R.V.I.S. TACTICAL HOLOGRAM // 67,600 VOXELS</div>
+            <div id="hud-status" class="hud-overlay">👁️ MONVISION HOLOGRAM // CLEAR TRUE-OPTICAL MODE</div>
             <div id="hud-coords" class="hud-coords">MARK-85 // X: 0.00 Y: 1.60 Z: 0.00</div>
             
             <div class="controls-panel">
                 <div class="control-group">
                     <label>EXTRUDE:</label>
-                    <input type="range" id="sliderExtrude" min="0.1" max="3.5" step="0.1" value="1.6">
+                    <input type="range" id="sliderExtrude" min="0.1" max="3.5" step="0.1" value="1.2">
                 </div>
                 <div class="control-group">
                     <label>POINT SIZE:</label>
-                    <input type="range" id="sliderPSize" min="4.0" max="20.0" step="1.0" value="10.0">
+                    <input type="range" id="sliderPSize" min="2.0" max="15.0" step="0.5" value="5.0">
                 </div>
                 <div class="control-group">
                     <label>LASER SWEEP:</label>
-                    <input type="range" id="sliderLaser" min="0.0" max="3.0" step="0.1" value="1.2">
+                    <input type="range" id="sliderLaser" min="0.0" max="3.0" step="0.1" value="1.0">
                 </div>
                 <div class="control-group">
-                    <button class="hud-btn" onclick="setPalette(0)">STARK CYAN</button>
+                    <button class="hud-btn" onclick="setPalette(3)">TRUE OPTICAL</button>
+                    <button class="hud-btn" onclick="setPalette(0)">CYAN GLOW</button>
                     <button class="hud-btn" onclick="setPalette(1)">MARK-85 GOLD</button>
                     <button class="hud-btn" onclick="setPalette(2)">TACTICAL RED</button>
-                    <button class="hud-btn" onclick="setPalette(3)">TRUE OPTICAL</button>
                 </div>
             </div>
         </div>
@@ -512,15 +552,14 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
             let uniforms = {{
                 uDepthMap: {{ value: null }},
                 uColorMap: {{ value: null }},
-                uExtrusionHeight: {{ value: 1.6 }},
-                uZClip: {{ value: 1.0 }},
-                uPointSize: {{ value: 10.0 }},
-                uLaserSpeed: {{ value: 1.2 }},
-                uColorMode: {{ value: 0 }},
+                uExtrusionHeight: {{ value: 1.2 }},
+                uPointSize: {{ value: 5.0 }},
+                uLaserSpeed: {{ value: 1.0 }},
+                uColorMode: {{ value: 3 }}, // Default to TRUE OPTICAL so image is 100% visible
                 uTime: {{ value: 0.0 }}
             }};
 
-            let ring1, ring2, bboxMesh;
+            let bboxMesh;
 
             function setPalette(mode) {{
                 uniforms.uColorMode.value = mode;
@@ -553,10 +592,9 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
                     vec3 pos = position;
                     pos.z += depth * uExtrusionHeight;
-                    pos.z += sin(pos.x * 6.0 + uTime * 2.5) * 0.015 * depth;
 
                     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = (uPointSize / -mvPosition.z) * (0.8 + depth * 1.1);
+                    gl_PointSize = (uPointSize / -mvPosition.z) * (1.0 + depth * 0.5);
                     gl_Position = projectionMatrix * mvPosition;
                 }}
             `;
@@ -571,36 +609,30 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
                 void main() {{
                     vec4 texColor = texture2D(uColorMap, vUv);
-                    
-                    float distFromCenter = length(vUv - vec2(0.5));
-                    float edgeAlpha = smoothstep(0.5, 0.35, distFromCenter);
-                    if (edgeAlpha <= 0.01) discard;
-
                     float luma = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
-                    float lumaAlpha = smoothstep(0.05, 0.25, luma);
 
                     vec3 finalColor;
                     if (uColorMode == 0) {{
-                        finalColor = mix(vec3(0.0, 0.5, 1.0), vec3(0.0, 1.0, 0.9), vDepth) * (0.6 + luma * 0.8);
+                        finalColor = mix(vec3(0.0, 0.4, 0.9), vec3(0.0, 1.0, 0.8), vDepth) * (0.5 + luma * 0.9);
                     }} else if (uColorMode == 1) {{
-                        finalColor = mix(vec3(1.0, 0.4, 0.0), vec3(1.0, 0.85, 0.2), vDepth) * (0.6 + luma * 0.8);
+                        finalColor = mix(vec3(0.9, 0.3, 0.0), vec3(1.0, 0.8, 0.1), vDepth) * (0.5 + luma * 0.9);
                     }} else if (uColorMode == 2) {{
-                        finalColor = mix(vec3(0.8, 0.0, 0.2), vec3(1.0, 0.2, 0.4), vDepth) * (0.6 + luma * 0.8);
+                        finalColor = mix(vec3(0.8, 0.0, 0.2), vec3(1.0, 0.2, 0.4), vDepth) * (0.5 + luma * 0.9);
                     }} else {{
-                        finalColor = mix(texColor.rgb, vec3(0.0, 0.8, 1.0), 0.2);
+                        // TRUE OPTICAL: Clean image details with slight cyber accent
+                        finalColor = texColor.rgb;
                     }}
 
                     if (uLaserSpeed > 0.01) {{
-                        float scanPos = fract(uTime * 0.25 * uLaserSpeed);
-                        float laserBand = smoothstep(0.03, 0.0, abs(vUv.y - scanPos));
-                        finalColor += vec3(0.0, 0.8, 1.0) * laserBand * 0.8;
+                        float scanPos = fract(uTime * 0.2 * uLaserSpeed);
+                        float laserBand = smoothstep(0.02, 0.0, abs(vUv.y - scanPos));
+                        finalColor += vec3(0.0, 0.8, 1.0) * laserBand * 0.6;
                     }}
 
                     float pDist = length(gl_PointCoord - vec2(0.5));
                     if (pDist > 0.5) discard;
-                    float pAlpha = (1.0 - pDist * 2.0);
 
-                    gl_FragColor = vec4(finalColor, pAlpha * edgeAlpha * (0.4 + lumaAlpha * 0.6));
+                    gl_FragColor = vec4(finalColor, 0.95);
                 }}
             `;
 
@@ -610,10 +642,10 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 let height = container.clientHeight || 650;
 
                 const scene = new THREE.Scene();
-                scene.fog = new THREE.FogExp2(0x010308, 0.04);
+                scene.fog = new THREE.FogExp2(0x010308, 0.03);
 
                 const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                camera.position.set(0, 2.0, 4.6);
+                camera.position.set(0, 1.8, 4.4);
 
                 const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
                 renderer.setSize(width, height);
@@ -629,26 +661,27 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 gridHelper.position.y = -0.01;
                 scene.add(gridHelper);
 
-                const boxGeo = new THREE.BoxGeometry(3.3, 3.3, 1.8);
+                const boxGeo = new THREE.BoxGeometry(3.3, 3.3, 1.5);
                 const boxEdges = new THREE.EdgesGeometry(boxGeo);
                 const boxMat = new THREE.LineBasicMaterial({{ color: 0x00f3ff, transparent: true, opacity: 0.25 }});
                 bboxMesh = new THREE.LineSegments(boxEdges, boxMat);
-                bboxMesh.position.set(0, 1.5, 0.8);
+                bboxMesh.position.set(0, 1.5, 0.6);
                 scene.add(bboxMesh);
 
                 uniforms.uColorMap.value = createBase64Texture('{img_b64}');
                 uniforms.uDepthMap.value = createBase64Texture('{depth_b64}');
 
-                const gridRes = 260;
+                const gridRes = 280;
                 const planeGeo = new THREE.PlaneBufferGeometry(3.2, 3.2, gridRes - 1, gridRes - 1);
 
+                // Use NormalBlending to fix overexposure blowout!
                 const particleMaterial = new THREE.ShaderMaterial({{
                     uniforms: uniforms,
                     vertexShader: particleVertexShader,
                     fragmentShader: particleFragmentShader,
                     transparent: true,
-                    blending: THREE.AdditiveBlending,
-                    depthWrite: false
+                    blending: THREE.NormalBlending,
+                    depthWrite: true
                 }});
 
                 const particleSystem = new THREE.Points(planeGeo, particleMaterial);
@@ -673,7 +706,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     time += 0.02;
                     uniforms.uTime.value = time;
 
-                    if (particleSystem) particleSystem.rotation.y += 0.002;
+                    if (particleSystem) particleSystem.rotation.y += 0.0015;
                     controls.update();
 
                     const cPos = camera.position;
@@ -692,7 +725,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
 
 # ---------------------------------------------------------
-# 6. Main Dashboard & File Input Workspace
+# 7. Main Dashboard & Voice Interaction
 # ---------------------------------------------------------
 col_input, col_action = st.columns([2, 1])
 
@@ -708,7 +741,15 @@ if uploaded_file is not None:
 elif paste_data is not None and paste_data.image_data is not None:
     image_pil = paste_data.image_data.convert("RGB")
 
-if image_pil is not None:
+if image_pil is None:
+    # Play Welcome Voice on initial landing
+    welcome_text = "Welcome to MonVision. I am J.A.R.V.I.S. Please upload or paste an image you would like me to inspect."
+    speak_jarvis_voice(welcome_text)
+    st.info(
+        "🔊 **J.A.R.V.I.S.:** Welcome to MonVision! Upload or paste an image above to begin."
+    )
+
+else:
     st.divider()
 
     with st.spinner("🤖 EXECUTING VISION TRANSFORMER ANALYSIS & FORENSICS..."):
@@ -720,7 +761,23 @@ if image_pil is not None:
             image_pil, fake_score, real_score
         )
 
-    # Verdict & Explainable AI (XAI) Panel
+    # Prepare Speech Synthesis Verdict Briefing
+    if fake_score > real_score:
+        verdict_speech = (
+            f"Analysis complete. This image is classified as AI Generated with {fake_score:.1f}% confidence. "
+            f"Key triggers include structural hallucinations such as duplicated features, "
+            f"along with artificial grid artifacts in the high frequency spectrum."
+        )
+    else:
+        verdict_speech = (
+            f"Analysis complete. This image is authentic with {real_score:.1f}% confidence. "
+            f"The image exhibits natural optical camera noise, organic lighting, "
+            f"and standard frequency spectrum falloff."
+        )
+
+    # Trigger Voice Briefing automatically
+    speak_jarvis_voice(verdict_speech)
+
     col_v1, col_v2 = st.columns([1, 2])
 
     with col_v1:
@@ -736,6 +793,9 @@ if image_pil is not None:
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🔊 REPLAY J.A.R.V.I.S. VOICE BRIEFING"):
+            speak_jarvis_voice(verdict_speech)
+
         m1, m2 = st.columns(2)
         m1.metric("FFT High-Freq Ratio", f"{freq_ratio:.1f}%")
         m2.metric("ELA Noise Std Dev", f"{ela_std:.2f}")
@@ -750,10 +810,10 @@ if image_pil is not None:
 
     st.divider()
 
-    # 3D GLSL WebGL Hologram & Multi-Modal Views
+    # 3D Hologram & Multi-Modal Views
     tab_holo, tab_2d, tab_3d = st.tabs(
         [
-            "⚡ STARK HOLOGRAM",
+            "⚡ MONVISION HOLOGRAM",
             "🔬 2D FORENSIC MAPS",
             "🌐 VOLUMETRIC MESH",
         ]
@@ -794,6 +854,3 @@ if image_pil is not None:
         render_cyber_header("NATIVE PLOTLY VOLUMETRIC TOPOGRAPHY MESH")
         plotly_fig = generate_3d_mesh_plotly(depth_pil)
         st.plotly_chart(plotly_fig, use_container_width=True)
-
-else:
-    st.info("💡 Upload or paste an image above to run analysis.")
