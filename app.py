@@ -169,14 +169,14 @@ st.markdown(CYBER_CSS, unsafe_allow_html=True)
 
 
 def render_cyber_header(text):
-  st.markdown(
-      f"""
+    st.markdown(
+        f"""
     <h4 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem; margin-top: 15px; margin-bottom: 10px;">
         {text}
     </h4>
     """,
-      unsafe_allow_html=True,
-  )
+        unsafe_allow_html=True,
+    )
 
 
 # ---------------------------------------------------------
@@ -196,42 +196,42 @@ st.markdown(
 )
 
 with st.sidebar:
-  st.markdown(
-      """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛰️ GPU & AI PIPELINE</h3>""",
-      unsafe_allow_html=True,
-  )
-  with st.container(border=True):
     st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>""",
+        """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛰️ GPU & AI PIPELINE</h3>""",
         unsafe_allow_html=True,
     )
-    st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>DEPTH ENGINE:</b> Intel DPT-MiDaS Hybrid</p>""",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>3D PIPELINE:</b> GLSL GPU Shader (90k Vertices)</p>""",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>POST-FX:</b> Unreal Bloom + Selective Pass</p>""",
-        unsafe_allow_html=True,
-    )
+    with st.container(border=True):
+        st.markdown(
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>""",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>DEPTH ENGINE:</b> Intel DPT-MiDaS Hybrid</p>""",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>3D PIPELINE:</b> GLSL GPU Shader (90k Vertices)</p>""",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>POST-FX:</b> Unreal Bloom + Selective Pass</p>""",
+            unsafe_allow_html=True,
+        )
 
-  st.markdown("<br>", unsafe_allow_html=True)
-  st.markdown(
-      """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
-      unsafe_allow_html=True,
-  )
-  st.caption("• Custom GLSL GPU Particle Displacement Shader")
-  st.caption("• Selective Unreal Bloom & Chromatic Pass")
-  st.caption("• Live Interactive Canvas Controls & Z-Cut Plane")
-  st.caption("• Native 3D Volumetric Mesh Topography")
-  st.caption("• Spatial Anomaly Artifact Map")
-  st.caption("• Latent Prompt Inversion Vector")
-  st.caption("• JPEG Error Level Analysis (ELA)")
-  st.caption("• 2D Fast Fourier Transform (FFT)")
-  st.caption("• Neuro-Acoustic Sonification Engine")
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
+        unsafe_allow_html=True,
+    )
+    st.caption("• Custom GLSL GPU Particle Displacement Shader")
+    st.caption("• Selective Unreal Bloom & Chromatic Pass")
+    st.caption("• Live Interactive Canvas Controls & Z-Cut Plane")
+    st.caption("• Native 3D Volumetric Mesh Topography")
+    st.caption("• Spatial Anomaly Artifact Map")
+    st.caption("• Latent Prompt Inversion Vector")
+    st.caption("• JPEG Error Level Analysis (ELA)")
+    st.caption("• 2D Fast Fourier Transform (FFT)")
+    st.caption("• Neuro-Acoustic Sonification Engine")
 
 
 # ---------------------------------------------------------
@@ -239,25 +239,25 @@ with st.sidebar:
 # ---------------------------------------------------------
 @st.cache_resource
 def load_detector():
-  return pipeline("image-classification", model="Smogy/SMOGY-Ai-images-detector")
+    return pipeline("image-classification", model="Smogy/SMOGY-Ai-images-detector")
 
 
 @st.cache_resource
 def load_captioner():
-  try:
-    return pipeline(
-        "image-to-text", model="nlpconnect/vit-gpt2-image-captioning"
-    )
-  except Exception:
-    return None
+    try:
+        return pipeline(
+            "image-to-text", model="nlpconnect/vit-gpt2-image-captioning"
+        )
+    except Exception:
+        return None
 
 
 @st.cache_resource
 def load_depth_estimator():
-  try:
-    return pipeline("depth-estimation", model="Intel/dpt-hybrid-midas")
-  except Exception:
-    return None
+    try:
+        return pipeline("depth-estimation", model="Intel/dpt-hybrid-midas")
+    except Exception:
+        return None
 
 
 detector = load_detector()
@@ -266,47 +266,117 @@ depth_estimator = load_depth_estimator()
 
 
 def generate_depth_map(image_pil):
-  if depth_estimator is not None:
-    try:
-      result = depth_estimator(image_pil)
-      depth_img = result["depth"].convert("L")
-      return depth_img
-    except Exception:
-      pass
-  return image_pil.convert("L")
+    if depth_estimator is not None:
+        try:
+            result = depth_estimator(image_pil)
+            depth_img = result["depth"].convert("L")
+            return depth_img
+        except Exception:
+            pass
+    return image_pil.convert("L")
 
 
 def parse_predictions(results):
-  fake_score = 0.0
-  real_score = 0.0
-  for res in results:
-    label = str(res["label"]).lower()
-    score = res["score"] * 100.0
-    if any(
-        k in label for k in ["fake", "ai", "generated", "synthetic", "label_1"]
-    ):
-      fake_score = score
-    elif any(
-        k in label
-        for k in ["real", "human", "authentic", "photography", "label_0"]
-    ):
-      real_score = score
+    fake_score = 0.0
+    real_score = 0.0
+    for res in results:
+        label = str(res["label"]).lower()
+        score = res["score"] * 100.0
+        if any(
+            k in label for k in ["fake", "ai", "generated", "synthetic", "label_1"]
+        ):
+            fake_score = score
+        elif any(
+            k in label
+            for k in ["real", "human", "authentic", "photography", "label_0"]
+        ):
+            real_score = score
 
-  if fake_score == 0.0 and real_score > 0.0:
-    fake_score = 100.0 - real_score
-  elif real_score == 0.0 and fake_score > 0.0:
-    real_score = 100.0 - fake_score
-  return fake_score, real_score
+    if fake_score == 0.0 and real_score > 0.0:
+        fake_score = 100.0 - real_score
+    elif real_score == 0.0 and fake_score > 0.0:
+        real_score = 100.0 - fake_score
+    return fake_score, real_score
 
 
 # ---------------------------------------------------------
-# 4. WebGL GLSL Shader Engine & Interactive Components
+# 4. Forensic Processing Functions
+# ---------------------------------------------------------
+def compute_ela(img_pil, quality=90):
+    """Calculates JPEG Error Level Analysis (ELA) map."""
+    buffer = BytesIO()
+    img_pil.save(buffer, format="JPEG", quality=quality)
+    buffer.seek(0)
+    resaved_img = Image.open(buffer)
+
+    ela_img = ImageChops.difference(img_pil.convert("RGB"), resaved_img.convert("RGB"))
+    extrema = ela_img.getextrema()
+    max_diff = max([ex[1] for ex in extrema])
+    if max_diff == 0:
+        max_diff = 1
+    scale = 255.0 / max_diff
+    return ImageEnhance.Brightness(ela_img).enhance(scale)
+
+
+def compute_fft(img_pil):
+    """Calculates 2D Fast Fourier Transform high-frequency spectral map."""
+    gray = np.array(img_pil.convert("L"))
+    f = np.fft.fft2(gray)
+    fshift = np.fft.fftshift(f)
+    magnitude_spectrum = 20 * np.log(np.abs(fshift) + 1e-8)
+    mag_norm = cv2.normalize(
+        magnitude_spectrum, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U
+    )
+    return Image.fromarray(mag_norm)
+
+
+def compute_spatial_anomaly(img_pil):
+    """Calculates spatial edge disruption and high-gradient anomalies."""
+    arr = np.array(img_pil.convert("RGB"))
+    gray = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
+    laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+    laplacian_abs = np.uint8(np.absolute(laplacian))
+    heatmap = cv2.applyColorMap(laplacian_abs, cv2.COLORMAP_JET)
+    heatmap_rgb = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(heatmap_rgb)
+
+
+def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
+    """Generates interactive Plotly 3D topography depth mesh."""
+    resized = depth_pil.resize(downsample_size)
+    z_data = np.array(resized)
+    fig = go.Figure(data=[go.Surface(z=z_data, colorscale="Viridis")])
+    fig.update_layout(
+        title="VOLUMETRIC MESH TOPOGRAPHY MAP",
+        autosize=True,
+        height=500,
+        margin=dict(l=20, r=20, b=20, t=40),
+        paper_bgcolor="rgba(2,4,10,0.8)",
+        plot_bgcolor="rgba(2,4,10,0.8)",
+        font=dict(color="#00f3ff", family="JetBrains Mono"),
+        scene=dict(
+            xaxis=dict(
+                backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(0,243,255,0.2)"
+            ),
+            yaxis=dict(
+                backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(0,243,255,0.2)"
+            ),
+            zaxis=dict(
+                backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(0,243,255,0.2)"
+            ),
+        ),
+    )
+    return fig
+
+
+# ---------------------------------------------------------
+# 5. WebGL GLSL Shader Engine & Interactive Components
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
-  buffered = BytesIO()
-  img_pil.save(buffered, format="PNG")
-  img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-  return f"data:image/png;base64,{img_str}"
+    buffered = BytesIO()
+    img_pil.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    return f"data:image/png;base64,{img_str}"
 
 
 def render_sonification_module():
@@ -325,9 +395,8 @@ def render_sonification_module():
 
         function playSciFiDrone() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (activeNodes.length > 0) return; // Prevent overlapping
+            if (activeNodes.length > 0) return;
 
-            // Sci-fi chord frequencies (Sub-bass, Root, Fifth)
             const freqs = [41.20, 82.41, 123.47]; 
             
             freqs.forEach((freq, i) => {
@@ -337,7 +406,6 @@ def render_sonification_module():
                 osc.type = i === 0 ? 'sine' : 'sawtooth';
                 osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
                 
-                // LFO to create a pulsing "scanning" effect
                 let lfo = audioCtx.createOscillator();
                 lfo.type = 'sine';
                 lfo.frequency.value = 0.5 + (i * 1.5);
@@ -348,9 +416,8 @@ def render_sonification_module():
                 lfo.connect(lfoGain);
                 lfoGain.connect(osc.frequency);
                 
-                // Volume envelope
                 gain.gain.setValueAtTime(0, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 2.0); // Fade in
+                gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 2.0);
                 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
@@ -365,7 +432,7 @@ def render_sonification_module():
         function stopDrone() {
             if (!audioCtx) return;
             activeNodes.forEach(node => {
-                node.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5); // Fade out
+                node.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
                 setTimeout(() => { 
                     node.osc.stop(); 
                     node.lfo.stop(); 
@@ -380,8 +447,8 @@ def render_sonification_module():
 
 
 def render_gpu_glsl_hologram(img_b64, depth_b64):
-  """Ultra-High Density WebGL GPU Shader Hologram (90,000+ Particles at 60FPS) with Unreal Bloom & Live Interactive Controls."""
-  html_template = """
+    """Ultra-High Density WebGL GPU Shader Hologram (90,000+ Particles at 60FPS) with Unreal Bloom & Live Interactive Controls."""
+    html_template = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -459,7 +526,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
         </div>
 
         <script>
-            // Ensure shader uniform definitions exist on global THREE scope
             if (typeof THREE !== 'undefined') {
                 if (!THREE.CopyShader) {
                     THREE.CopyShader = {
@@ -581,31 +647,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
             function init() {
                 try {
-                    // Double check inline definitions if scripts loaded late
-                    if (typeof THREE !== 'undefined') {
-                        if (!THREE.CopyShader) {
-                            THREE.CopyShader = {
-                                uniforms: { 'tDiffuse': { value: null }, 'opacity': { value: 1.0 } },
-                                vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
-                                fragmentShader: 'uniform float opacity; uniform sampler2D tDiffuse; varying vec2 vUv; void main() { vec4 tex = texture2D( tDiffuse, vUv ); gl_FragColor = opacity * tex; }'
-                            };
-                        }
-                        if (!THREE.LuminanceHighPassShader) {
-                            THREE.LuminanceHighPassShader = {
-                                shaderID: 'luminanceHighPass',
-                                uniforms: {
-                                    'tDiffuse': { value: null },
-                                    'luminanceThreshold': { value: 0.21 },
-                                    'smoothWidth': { value: 0.01 },
-                                    'defaultColor': { value: new THREE.Color( 0x000000 ) },
-                                    'defaultOpacity': { value: 0.0 }
-                                },
-                                vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
-                                fragmentShader: 'uniform sampler2D tDiffuse; uniform vec3 defaultColor; uniform float defaultOpacity; uniform float luminanceThreshold; uniform float smoothWidth; varying vec2 vUv; void main() { vec4 texel = texture2D( tDiffuse, vUv ); vec3 luma = vec3( 0.299, 0.587, 0.114 ); float v = dot( texel.rgb, luma ); vec4 outputColor = vec4( defaultColor, defaultOpacity ); float alpha = smoothstep( luminanceThreshold, luminanceThreshold + smoothWidth, v ); gl_FragColor = mix( outputColor, texel, alpha ); }'
-                            };
-                        }
-                    }
-
                     const container = document.getElementById('canvas-container');
                     let width = container.clientWidth || window.innerWidth || 800;
                     let height = container.clientHeight || 580;
@@ -740,303 +781,178 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     });
                     resizeObserver.observe(container);
 
-                } catch(e) {
-                    console.error("WebGL GPU Init Error: ", e);
-                    document.getElementById('hud-status').innerText = '❌ GPU ERROR: ' + e.message;
+                } catch (err) {
+                    console.error("Initialization error:", err);
                 }
             }
-
-            window.addEventListener('load', init);
+            window.onload = init;
         </script>
     </body>
     </html>
     """
-  img_clean = img_b64.replace("\n", "").replace("\r", "")
-  depth_clean = depth_b64.replace("\n", "").replace("\r", "")
-  html_code = html_template.replace("__IMG_B64__", img_clean).replace(
-      "__DEPTH_B64__", depth_clean
-  )
-  components.html(html_code, height=600)
-
-
-def create_plotly_3d_hologram(depth_pil):
-  depth_small = depth_pil.resize((120, 120))
-  depth_np = np.array(depth_small)
-
-  x = np.linspace(0, 10, 120)
-  y = np.linspace(0, 10, 120)
-  X, Y = np.meshgrid(x, y)
-  Z = depth_np / 25.5
-
-  colorscale = [
-      [0.0, "rgb(2,4,10)"],
-      [0.5, "rgb(0,243,255)"],
-      [1.0, "rgb(255,0,85)"],
-  ]
-
-  fig = go.Figure(
-      data=[go.Surface(z=Z, x=X, y=Y, colorscale=colorscale, opacity=0.88)]
-  )
-  fig.update_layout(
-      title="NATIVE 3D VOLUMETRIC SURFACE MESH TOPOGRAPHY",
-      autosize=True,
-      height=500,
-      margin=dict(l=0, r=0, b=0, t=30),
-      paper_bgcolor="rgba(2,4,10,0)",
-      plot_bgcolor="rgba(2,4,10,0)",
-      scene=dict(
-          xaxis=dict(visible=False),
-          yaxis=dict(visible=False),
-          zaxis=dict(title="Depth Z", backgroundcolor="rgba(2,4,10,0)"),
-          aspectratio=dict(x=1, y=1, z=0.45),
-      ),
-  )
-  return fig
+    html_code = html_template.replace("__IMG_B64__", img_b64).replace(
+        "__DEPTH_B64__", depth_b64
+    )
+    components.html(html_code, height=620)
 
 
 # ---------------------------------------------------------
-# 5. Visual Forensics Processing Algorithms
+# 6. Streamlit User Interface Workflow
 # ---------------------------------------------------------
-def generate_spatial_anomaly_heatmap(image_pil):
-  img_np = np.array(image_pil)
-  gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
-  sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
-  sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
-  magnitude = cv2.magnitude(sobelx, sobely)
-  norm_mag = cv2.normalize(
-      magnitude, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U
-  )
-  heatmap = cv2.applyColorMap(norm_mag, cv2.COLORMAP_JET)
-  heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
-  overlay = cv2.addWeighted(img_np, 0.6, heatmap, 0.4, 0)
-  return Image.fromarray(overlay)
+render_cyber_header("📂 TELEMETRY INPUT PORTAL")
 
+input_tab1, input_tab2 = st.tabs(["📁 UPLOAD / PASTE", "🖼️ DEMO TARGETS"])
 
-def reconstruct_synthetic_prompt(image_pil):
-  description = ""
-  if captioner is not None:
-    try:
-      res = captioner(image_pil)
-      description = res[0]["generated_text"].strip()
-    except Exception:
-      description = ""
+image_pil = None
 
-  if not description:
-    w, h = image_pil.size
-    description = (
-        f"cyberpunk asset, resolution {w}x{h}, detailed geometric lighting,"
-        " volumetric textures"
+with input_tab1:
+    col_u1, col_u2 = st.columns([2, 1])
+    with col_u1:
+        uploaded_file = st.file_uploader(
+            "Select an image file for GPU forensic analysis",
+            type=["png", "jpg", "jpeg", "webp"],
+        )
+    with col_u2:
+        st.write("Or paste clipboard image:")
+        paste_result = paste_image_button("📋 PASTE IMAGE")
+
+    if uploaded_file is not None:
+        image_pil = Image.open(uploaded_file).convert("RGB")
+    elif paste_result.image_data is not None:
+        image_pil = paste_result.image_data.convert("RGB")
+
+with input_tab2:
+    st.caption("Load built-in test targets for validation:")
+    demo_cols = st.columns(3)
+    if demo_cols[0].button("🎯 Synthetic Portrait"):
+        img_arr = np.zeros((400, 400, 3), dtype=np.uint8)
+        cv2.circle(img_arr, (200, 200), 120, (0, 243, 255), -1)
+        cv2.putText(
+            img_arr,
+            "AI SYNTH",
+            (120, 210),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1.0,
+            (0, 0, 0),
+            2,
+        )
+        image_pil = Image.fromarray(img_arr)
+    if demo_cols[1].button("📷 Camera Scan"):
+        img_arr = np.random.randint(0, 255, (400, 400, 3), dtype=np.uint8)
+        image_pil = Image.fromarray(img_arr)
+
+if image_pil is not None:
+    st.divider()
+
+    # Image Processing
+    with st.spinner("⚡ Running GPU GLSL Hologram & Forensic Engine..."):
+        depth_pil = generate_depth_map(image_pil)
+        img_b64 = image_to_base64(image_pil)
+        depth_b64 = image_to_base64(depth_pil)
+
+        ela_pil = compute_ela(image_pil)
+        fft_pil = compute_fft(image_pil)
+        spatial_pil = compute_spatial_anomaly(image_pil)
+
+        predictions = detector(image_pil)
+        fake_score, real_score = parse_predictions(predictions)
+
+        caption_text = "Latent inversion unavailable."
+        if captioner is not None:
+            try:
+                caption_res = captioner(image_pil)
+                caption_text = caption_res[0]["generated_text"]
+            except Exception:
+                pass
+
+    # Verdict Header
+    res_col1, res_col2 = st.columns([1, 2])
+    with res_col1:
+        if fake_score >= 50.0:
+            st.markdown(
+                f"""<div class="verdict-fake">🚨 AI SYNTHETIC DETECTED<br><span style="font-size: 1rem; color: #fff;">CONFIDENCE: {fake_score:.2f}%</span></div>""",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f"""<div class="verdict-real">🛡️ NATURAL PHOTOGRAPH<br><span style="font-size: 1rem; color: #fff;">CONFIDENCE: {real_score:.2f}%</span></div>""",
+                unsafe_allow_html=True,
+            )
+
+    with res_col2:
+        st.markdown(
+            f"""
+        <div style="background: rgba(10,16,30,0.8); border: 1px solid rgba(0,243,255,0.3); padding: 15px; border-radius: 8px;">
+            <p style="margin: 0; color: #00f3ff; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"><b>LATENT PROMPT INVERSION VECTOR:</b></p>
+            <p style="margin-top: 5px; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">"{caption_text}"</p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Forensic Viewports
+    tab_holo, tab_forensic, tab_3dmesh, tab_audio, tab_export = st.tabs(
+        [
+            "⚡ 3D GPU GLSL HOLOGRAM",
+            "🔬 FORENSICS & SPECTRAL MAPS",
+            "📊 VOLUMETRIC MESH TOPOGRAPHY",
+            "🔊 NEURO-ACOUSTIC SONIFICATION",
+            "📄 FORENSIC REPORT EXPORT",
+        ]
     )
 
-  return (
-      f'"a hyper-realistic rendering of {description}, trending on artstation,'
-      ' 8k resolution, volumetric cyan lighting, photorealistic --v 6.0"'
-  )
-
-
-def generate_ela(image, quality=90):
-  temp_filename = "temp_ela.jpg"
-  image.save(temp_filename, "JPEG", quality=quality)
-  compressed_image = Image.open(temp_filename)
-  ela_image = ImageChops.difference(image, compressed_image)
-  extrema = ela_image.getextrema()
-  max_diff = (
-      max([ex[1] for ex in extrema])
-      if max([ex[1] for ex in extrema]) != 0
-      else 1
-  )
-  scale = 255.0 / max_diff
-  ela_image = ImageEnhance.Brightness(ela_image).enhance(scale)
-  if os.path.exists(temp_filename):
-    os.remove(temp_filename)
-  return ela_image
-
-
-def generate_fft(image_pil):
-  img_gray = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
-  f_transform = np.fft.fft2(img_gray)
-  f_shift = np.fft.fftshift(f_transform)
-  magnitude_spectrum = 20 * np.log(np.abs(f_shift) + 1)
-  magnitude_spectrum = cv2.normalize(
-      magnitude_spectrum, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U
-  )
-  return Image.fromarray(magnitude_spectrum)
-
-
-# ---------------------------------------------------------
-# 6. Media Ingestion
-# ---------------------------------------------------------
-tab1, tab2 = st.tabs(["📁 MEDIA UPLOAD", "📋 CLIPBOARD INGESTION"])
-
-image = None
-
-with tab1:
-  st.markdown("<br>", unsafe_allow_html=True)
-  uploaded_file = st.file_uploader(
-      "Upload Target Media",
-      type=["jpg", "jpeg", "png", "webp"],
-      label_visibility="collapsed",
-  )
-  if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert("RGB")
-
-with tab2:
-  st.markdown("<br>", unsafe_allow_html=True)
-  paste_result = paste_image_button(
-      label="📋 PASTE FROM CLIPBOARD BUFFER",
-      background_color="#0284c7",
-      hover_background_color="#0369a1",
-  )
-  if paste_result.image_data is not None:
-    image = paste_result.image_data.convert("RGB")
-
-# ---------------------------------------------------------
-# 7. Forensic Dashboard & Render Output
-# ---------------------------------------------------------
-if image is not None:
-  st.markdown("<br>", unsafe_allow_html=True)
-  col_left, col_right = st.columns([1, 1], gap="medium")
-
-  with col_left:
-    with st.container(border=True):
-      render_cyber_header("📷 INPUT FRAME BUFFER")
-      st.image(image, use_container_width=True)
-      res_txt = f"FRAME RESOLUTION: {image.width} × {image.height} PX"
-      st.markdown(
-          f"""<p style="font-family: 'JetBrains Mono', monospace; color: #64748b; font-size: 0.8rem; text-align: center;">{res_txt}</p>""",
-          unsafe_allow_html=True,
-      )
-
-  with col_right:
-    with st.container(border=True):
-      render_cyber_header("⚙️ NEURAL DIAGNOSTIC CONTROL")
-      st.write(
-          "Execute ViT classification and compute MiDaS AI monocular depth map"
-          " extrusion."
-      )
-      analyze_btn = st.button(
-          "🚀 INITIATE FULL FORENSIC SCAN",
-          type="primary",
-          use_container_width=True,
-      )
-
-    if analyze_btn and detector is not None:
-      with st.spinner(
-          "Computing AI Geometric Depth Map & Compiling GLSL GPU Shaders..."
-      ):
-        raw_results = detector(image)
-        ai_score, real_score = parse_predictions(raw_results)
-        depth_map = generate_depth_map(image)
-
-      st.markdown("<br>", unsafe_allow_html=True)
-
-      if ai_score >= 50.0:
-        fake_html = f"""<div class="verdict-fake">⚠️ VERDICT: SYNTHETIC / AI-GENERATED ({ai_score:.1f}% CONFIDENCE)</div>"""
-        st.markdown(fake_html, unsafe_allow_html=True)
-        verdict_str = "AI-Generated"
-      else:
-        real_html = f"""<div class="verdict-real">✅ VERDICT: AUTHENTIC PHOTOGRAPH ({real_score:.1f}% CONFIDENCE)</div>"""
-        st.markdown(real_html, unsafe_allow_html=True)
-        verdict_str = "Authentic Photo"
-
-      st.markdown("<br>", unsafe_allow_html=True)
-      render_cyber_header("📊 PROBABILITY MATRIX")
-
-      with st.container(border=True):
-        ai_label = f"AI / Deepfake Signature Index: {ai_score:.1f}%"
-        real_label = f"Authentic Optical Signature Index: {real_score:.1f}%"
-        st.progress(int(ai_score), text=ai_label)
-        st.progress(int(real_score), text=real_label)
-
-      # --- Multi-Tab Visual Forensics ---
-      st.markdown("<br>", unsafe_allow_html=True)
-      render_cyber_header("🕵️ ADVANCED FORENSIC DIAGNOSTICS SUITE")
-
-      t_holo, t_depth, t_mesh, t_heatmap, t_prompt, t_ela, t_fft = st.tabs([
-          "🛸 GPU GLSL HOLOGRAM",
-          "🗺️ AI DEPTH MAP",
-          "🌋 NATIVE 3D MESH",
-          "🎯 SPATIAL HEATMAP",
-          "🧬 PROMPT INVERSION",
-          "⚡ ELA COMPRESSION",
-          "🌐 2D-FFT SPECTRUM",
-      ])
-
-      with t_holo:
-        st.write(
-            "High-Density GPU Vertex Shader (90,000 Voxels) with Unreal Bloom"
-            " Post-Processing. Use canvas sliders below to tweak Extrusion,"
-            " Bloom, Z-Cut Plane, and Palettes."
-        )
-        img_b64 = image_to_base64(image)
-        depth_b64 = image_to_base64(depth_map)
+    with tab_holo:
+        render_cyber_header("VOLUMETRIC GPU PARTICLE SHADER INTERFACE")
         render_gpu_glsl_hologram(img_b64, depth_b64)
 
-      with t_depth:
-        st.write(
-            "Monocular Depth Estimation computed via Intel DPT-MiDaS Hybrid Neural"
-            " Pipeline:"
-        )
-        st.image(depth_map, use_container_width=True)
+    with tab_forensic:
+        render_cyber_header("MULTI-SPECTRAL ANOMALY DETECTION")
+        f_col1, f_col2, f_col3, f_col4 = st.columns(4)
 
-      with t_mesh:
-        st.write(
-            "Native Volumetric Surface Mesh projected from AI Depth Map"
-            " Topography:"
-        )
-        fig_3d = create_plotly_3d_hologram(depth_map)
-        st.plotly_chart(fig_3d, use_container_width=True)
+        with f_col1:
+            st.image(image_pil, caption="Source Telemetry", use_container_width=True)
+        with f_col2:
+            st.image(
+                ela_pil, caption="Error Level Analysis (ELA)", use_container_width=True
+            )
+        with f_col3:
+            st.image(
+                fft_pil,
+                caption="2D FFT Spectrum Analysis",
+                use_container_width=True,
+            )
+        with f_col4:
+            st.image(
+                spatial_pil,
+                caption="Spatial Disparity Map",
+                use_container_width=True,
+            )
 
-      with t_heatmap:
-        st.write(
-            "Highlights image coordinates where high-frequency neural"
-            " artifacts cluster."
-        )
-        st.image(
-            generate_spatial_anomaly_heatmap(image), use_container_width=True
-        )
+    with tab_3dmesh:
+        render_cyber_header("INTERACTIVE VOLUMETRIC TOPOGRAPHY MESH")
+        plotly_fig = generate_3d_mesh_plotly(depth_pil)
+        st.plotly_chart(plotly_fig, use_container_width=True)
 
-      with t_prompt:
-        st.write("Reconstructed latent diffusion prompt vector:")
-        prompt_vector = reconstruct_synthetic_prompt(image)
-        st.code(prompt_vector, language="markdown")
-
-      with t_ela:
-        st.write(
-            "Error Level Analysis highlights JPEG compression delta variance."
-        )
-        st.image(generate_ela(image), use_container_width=True)
-
-      with t_fft:
-        st.write(
-            "Visualizes spatial frequency distribution via 2D Fast Fourier"
-            " Transform."
-        )
-        st.image(generate_fft(image), use_container_width=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-        # --- NEW AUDIO SONIFICATION INJECTION ---
+    with tab_audio:
+        render_cyber_header("NEURO-ACOUSTIC FREQUENCY SONIFICATION")
         render_sonification_module()
 
-      # --- Export Audit Log ---
-      st.markdown("<br>", unsafe_allow_html=True)
-      report_data = {
-          "platform": "MonoVision Cyber Forensics Studio v7.0 ULTRA",
-          "engine": "Smogy/SMOGY-Ai-images-detector",
-          "depth_engine": "Intel/dpt-hybrid-midas",
-          "timestamp": datetime.utcnow().isoformat() + "Z",
-          "verdict": verdict_str,
-          "metrics": {
-              "ai_probability": f"{ai_score:.2f}%",
-              "real_probability": f"{real_score:.2f}%",
-          },
-          "estimated_prompt": prompt_vector,
-      }
-
-      time_stamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-      st.download_button(
-          label="📄 EXPORT FULL FORENSIC AUDIT LOG (JSON)",
-          data=json.dumps(report_data, indent=4),
-          file_name=f"monovision_audit_{time_stamp_str}.json",
-          mime="application/json",
-          use_container_width=True,
-      )
+    with tab_export:
+        render_cyber_header("DIAGNOSTIC TELEMETRY REPORT")
+        report_data = {
+            "timestamp": datetime.now().isoformat(),
+            "verdict": "SYNTHETIC" if fake_score >= 50.0 else "AUTHENTIC",
+            "confidence_synthetic": f"{fake_score:.2f}%",
+            "confidence_authentic": f"{real_score:.2f}%",
+            "prompt_inversion": caption_text,
+            "pipeline_version": "MONOVISION v7.0 ULTRA",
+        }
+        st.json(report_data)
+        st.download_button(
+            label="💾 DOWNLOAD FORENSIC JSON REPORT",
+            data=json.dumps(report_data, indent=4),
+            file_name=f"monovision_forensic_report_{int(datetime.now().timestamp())}.json",
+            mime="application/json",
+        )
