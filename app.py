@@ -3,6 +3,7 @@ from datetime import datetime
 from io import BytesIO
 import json
 import os
+import re
 
 import cv2
 import numpy as np
@@ -180,10 +181,13 @@ def render_cyber_header(text):
 
 
 # ---------------------------------------------------------
-# 2. JARVIS Audio Voice Engine
+# 2. Advanced J.A.R.V.I.S. Audio Speech Synthesis Engine
 # ---------------------------------------------------------
 def speak_jarvis_voice(text):
+    # Sanitize text for speech engine
     clean_text = text.replace("'", "\\'").replace('"', '\\"').replace("\n", " ")
+    clean_text = re.sub(r"[*#_🤖🌐🏛️🔍🚨🛡️⚡]", "", clean_text)
+
     html_code = f"""
     <script>
     function speakJarvis() {{
@@ -193,7 +197,7 @@ def speak_jarvis_voice(text):
             
             function setVoiceAndSpeak() {{
                 const voices = window.speechSynthesis.getVoices();
-                // Select British or deep male voice for JARVIS sound
+                // Select British or refined male voice for J.A.R.V.I.S. sound
                 const jarvisVoice = voices.find(v => 
                     v.name.includes("Google UK English Male") || 
                     v.name.includes("Daniel") || 
@@ -203,7 +207,7 @@ def speak_jarvis_voice(text):
                 );
                 if (jarvisVoice) msg.voice = jarvisVoice;
                 msg.pitch = 0.88;
-                msg.rate = 1.05;
+                msg.rate = 1.02;
                 window.speechSynthesis.speak(msg);
             }}
 
@@ -227,7 +231,7 @@ st.markdown(
     """
 <div class="hud-banner">
     <div class="hud-title">MONVISION v10.0</div>
-    <div class="hud-subtitle">// J.A.R.V.I.S. VOICE & TACTICAL 3D HOLOGRAM FORENSICS SUITE</div>
+    <div class="hud-subtitle">// J.A.R.V.I.S. VOICE ASSISTANT & TACTICAL HOLOGRAM SUITE</div>
     <div>
         <span class="hud-badge"><span class="pulse-dot"></span> HIGH-ACCURACY ViT DETECTOR ONLINE</span>
     </div>
@@ -251,7 +255,7 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         st.markdown(
-            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>VOICE ASSISTANT:</b> J.A.R.V.I.S. SpeechSynthesis Engine</p>""",
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>VOICE ENGINE:</b> J.A.R.V.I.S. Neural SpeechSynthesis</p>""",
             unsafe_allow_html=True,
         )
 
@@ -260,8 +264,8 @@ with st.sidebar:
         """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
         unsafe_allow_html=True,
     )
+    st.caption("• Voice Guidance & Verbal Forensic Briefings")
     st.caption("• Explainable AI (XAI) Structural Breakdown")
-    st.caption("• Audio Speech Synthesis Voice Briefings")
     st.caption("• High-Precision Vision Transformer Classification")
     st.caption("• 3D Tactical Bounding Wireframe Box")
     st.caption("• JPEG Error Level Analysis (ELA)")
@@ -400,19 +404,30 @@ def generate_xai_explanation(img_pil, fake_score, real_score):
 
     is_ai = fake_score > real_score
     explanations = []
+    spoken_reasons = []
 
     if is_ai:
         explanations.append(
             f"🤖 **Vision Transformer Confidence:** Classified as **{fake_score:.1f}% synthetic probability** using patch embedding classification."
         )
         explanations.append(
-            f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Detected grid pattern frequency spikes typical of neural upsampling."
+            f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Detected artificial grid patterns in Fourier spectrum typical of diffusion upsamplers."
         )
         explanations.append(
-            f"🏛️ **Structural Hallucinations:** Architectural discrepancies detected, such as impossible reflection geometry or duplicated structures."
+            f"🏛️ **Structural Hallucinations:** Architectural discrepancies detected, such as impossible reflection geometry or duplicated minarets and columns."
         )
         explanations.append(
             f"🔍 **Unnatural ELA Noise Uniformity (Std Dev: {ela_std:.2f}):** Abnormal JPEG compression variance across image surfaces."
+        )
+
+        spoken_reasons.append(
+            f"First, our vision transformer detected synthetic patch patterns with {fake_score:.1f} percent probability."
+        )
+        spoken_reasons.append(
+            f"Second, structural analysis revealed generative hallucinations, including duplicated minarets and unnatural reflection physics."
+        )
+        spoken_reasons.append(
+            f"Finally, spectral analysis detected high frequency artificial grid artifacts in the Fourier domain."
         )
     else:
         explanations.append(
@@ -425,7 +440,14 @@ def generate_xai_explanation(img_pil, fake_score, real_score):
             f"🔍 **Sensor Noise Degradation (ELA Std Dev: {ela_std:.2f}):** Normal physical camera noise across organic surfaces."
         )
 
-    return explanations, freq_ratio, ela_std, lap_var
+        spoken_reasons.append(
+            f"First, the image exhibits authentic optical camera noise profiles with a {real_score:.1f} percent real rating."
+        )
+        spoken_reasons.append(
+            "Second, the spectral energy falls off smoothly without any artificial upsampling spikes."
+        )
+
+    return explanations, spoken_reasons, freq_ratio, ela_std, lap_var
 
 
 def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
@@ -456,7 +478,7 @@ def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
 
 
 # ---------------------------------------------------------
-# 6. Improved WebGL Hologram Engine (Fixed Overexposure)
+# 6. Improved WebGL Hologram Engine
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
     buffered = BytesIO()
@@ -555,7 +577,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 uExtrusionHeight: {{ value: 1.2 }},
                 uPointSize: {{ value: 5.0 }},
                 uLaserSpeed: {{ value: 1.0 }},
-                uColorMode: {{ value: 3 }}, // Default to TRUE OPTICAL so image is 100% visible
+                uColorMode: {{ value: 3 }},
                 uTime: {{ value: 0.0 }}
             }};
 
@@ -619,7 +641,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     }} else if (uColorMode == 2) {{
                         finalColor = mix(vec3(0.8, 0.0, 0.2), vec3(1.0, 0.2, 0.4), vDepth) * (0.5 + luma * 0.9);
                     }} else {{
-                        // TRUE OPTICAL: Clean image details with slight cyber accent
                         finalColor = texColor.rgb;
                     }}
 
@@ -674,7 +695,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 const gridRes = 280;
                 const planeGeo = new THREE.PlaneBufferGeometry(3.2, 3.2, gridRes - 1, gridRes - 1);
 
-                // Use NormalBlending to fix overexposure blowout!
                 const particleMaterial = new THREE.ShaderMaterial({{
                     uniforms: uniforms,
                     vertexShader: particleVertexShader,
@@ -725,7 +745,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
 
 # ---------------------------------------------------------
-# 7. Main Dashboard & Voice Interaction
+# 7. Main Dashboard & Voice Interaction Workflow
 # ---------------------------------------------------------
 col_input, col_action = st.columns([2, 1])
 
@@ -742,40 +762,43 @@ elif paste_data is not None and paste_data.image_data is not None:
     image_pil = paste_data.image_data.convert("RGB")
 
 if image_pil is None:
-    # Play Welcome Voice on initial landing
-    welcome_text = "Welcome to MonVision. I am J.A.R.V.I.S. Please upload or paste an image you would like me to inspect."
-    speak_jarvis_voice(welcome_text)
+    # 1. Initial Greeting on Open
+    welcome_speech = "Good day, sir. How may I assist you today? Please upload or select an image you would like me to inspect."
+    speak_jarvis_voice(welcome_speech)
+
     st.info(
-        "🔊 **J.A.R.V.I.S.:** Welcome to MonVision! Upload or paste an image above to begin."
+        "🔊 **J.A.R.V.I.S.:** *Good day, sir. How may I assist you today? Please upload or select an image you would like me to inspect.*"
     )
 
 else:
     st.divider()
 
-    with st.spinner("🤖 EXECUTING VISION TRANSFORMER ANALYSIS & FORENSICS..."):
+    with st.spinner(
+        "🤖 J.A.R.V.I.S. PROCESSING IMAGE & RUNNING NEURAL FORENSICS..."
+    ):
         detector_results = detector(image_pil)
         fake_score, real_score = parse_predictions(detector_results)
         depth_pil = generate_depth_map(image_pil)
 
-        xai_reasons, freq_ratio, ela_std, lap_var = generate_xai_explanation(
-            image_pil, fake_score, real_score
+        xai_reasons, spoken_reasons, freq_ratio, ela_std, lap_var = (
+            generate_xai_explanation(image_pil, fake_score, real_score)
         )
 
-    # Prepare Speech Synthesis Verdict Briefing
+    # 2. Build Spoken Verdict & Reason Breakdown
     if fake_score > real_score:
         verdict_speech = (
-            f"Analysis complete. This image is classified as AI Generated with {fake_score:.1f}% confidence. "
-            f"Key triggers include structural hallucinations such as duplicated features, "
-            f"along with artificial grid artifacts in the high frequency spectrum."
+            f"Image received, sir. Processing completed. "
+            f"I have determined this image is A I Generated with {fake_score:.1f} percent confidence. "
+            f"Here is why: {' '.join(spoken_reasons)}"
         )
     else:
         verdict_speech = (
-            f"Analysis complete. This image is authentic with {real_score:.1f}% confidence. "
-            f"The image exhibits natural optical camera noise, organic lighting, "
-            f"and standard frequency spectrum falloff."
+            f"Image received, sir. Processing completed. "
+            f"I have determined this image is Authentic with {real_score:.1f} percent confidence. "
+            f"Here is why: {' '.join(spoken_reasons)}"
         )
 
-    # Trigger Voice Briefing automatically
+    # Speak analysis verdict automatically
     speak_jarvis_voice(verdict_speech)
 
     col_v1, col_v2 = st.columns([1, 2])
@@ -793,7 +816,7 @@ else:
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔊 REPLAY J.A.R.V.I.S. VOICE BRIEFING"):
+        if st.button("🔊 REPLAY J.A.R.V.I.S. VERDICT BRIEFING"):
             speak_jarvis_voice(verdict_speech)
 
         m1, m2 = st.columns(2)
