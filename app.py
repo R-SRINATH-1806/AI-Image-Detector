@@ -144,15 +144,6 @@ CYBER_CSS = """
         box-shadow: 0 0 40px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.15);
     }
 
-    .xai-card {
-        background: rgba(10, 16, 30, 0.85);
-        border: 1px solid rgba(0, 243, 255, 0.3);
-        border-radius: 8px;
-        padding: 1rem;
-        margin-top: 1rem;
-        font-family: 'JetBrains Mono', monospace;
-    }
-
     .stButton>button {
         background: linear-gradient(90deg, rgba(0, 243, 255, 0.2) 0%, rgba(112, 0, 255, 0.2) 100%) !important;
         border: 1px solid #00f3ff !important;
@@ -194,10 +185,10 @@ def render_cyber_header(text):
 st.markdown(
     """
 <div class="hud-banner">
-    <div class="hud-title">MONOVISION v7.0 ULTRA</div>
-    <div class="hud-subtitle">// GPU-ACCELERATED GLSL HOLOGRAM & AI FORENSICS SUITE</div>
+    <div class="hud-title">MONOVISION v8.0 ULTRA</div>
+    <div class="hud-subtitle">// GPU GLSL HYPER-REALISTIC HOLOGRAM & AI FORENSICS SUITE</div>
     <div>
-        <span class="hud-badge"><span class="pulse-dot"></span> REAL-TIME GPU VERTEX SHADER & UNREAL BLOOM ONLINE</span>
+        <span class="hud-badge"><span class="pulse-dot"></span> ULTRA-RESPONSIVE DUAL-SURFACE HOLO ENGINE ONLINE</span>
     </div>
 </div>
 """,
@@ -219,11 +210,11 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         st.markdown(
-            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>3D PIPELINE:</b> GLSL GPU Shader (90k Vertices)</p>""",
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>HOLO ENGINE:</b> Dual-Layer WebGL (48k Vertices + Wireframe Mesh)</p>""",
             unsafe_allow_html=True,
         )
         st.markdown(
-            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>POST-FX:</b> Unreal Bloom + Selective Pass</p>""",
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>POST-FX:</b> Unreal Bloom + Dynamic Glitch GLSL</p>""",
             unsafe_allow_html=True,
         )
 
@@ -232,12 +223,10 @@ with st.sidebar:
         """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
         unsafe_allow_html=True,
     )
-    st.caption("• Explainable AI (XAI) Forensic Metrics")
-    st.caption("• Custom GLSL GPU Particle Displacement Shader")
-    st.caption("• Selective Unreal Bloom & Chromatic Pass")
-    st.caption("• Live Interactive Canvas Controls & Z-Cut Plane")
-    st.caption("• Native 3D Volumetric Mesh Topography")
-    st.caption("• Spatial Anomaly Artifact Map")
+    st.caption("• Explainable AI (XAI) Forensic Breakdown")
+    st.caption("• Dual Surface WebGL Particle/Wireframe Hologram")
+    st.caption("• Projector Base Emitter & Light Beams")
+    st.caption("• Real-Time GLSL Glitch & Interference Engine")
     st.caption("• JPEG Error Level Analysis (ELA)")
     st.caption("• 2D Fast Fourier Transform (FFT)")
     st.caption("• Neuro-Acoustic Sonification Engine")
@@ -312,7 +301,6 @@ def parse_predictions(results):
 # 4. Forensic Processing & XAI Explanation Engine
 # ---------------------------------------------------------
 def compute_ela(img_pil, quality=90):
-    """Calculates JPEG Error Level Analysis (ELA) map."""
     buffer = BytesIO()
     img_pil.save(buffer, format="JPEG", quality=quality)
     buffer.seek(0)
@@ -328,7 +316,6 @@ def compute_ela(img_pil, quality=90):
 
 
 def compute_fft(img_pil):
-    """Calculates 2D Fast Fourier Transform high-frequency spectral map."""
     gray = np.array(img_pil.convert("L"))
     f = np.fft.fft2(gray)
     fshift = np.fft.fftshift(f)
@@ -340,7 +327,6 @@ def compute_fft(img_pil):
 
 
 def compute_spatial_anomaly(img_pil):
-    """Calculates spatial edge disruption and high-gradient anomalies."""
     arr = np.array(img_pil.convert("RGB"))
     gray = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
     laplacian = cv2.Laplacian(gray, cv2.CV_64F)
@@ -351,16 +337,9 @@ def compute_spatial_anomaly(img_pil):
 
 
 def generate_xai_explanation(img_pil, fake_score, real_score):
-    """
-    Computes mathematical forensic features to explain WHY the image
-    is classified as Real or AI generated to present to an ML instructor.
-    """
     gray = np.array(img_pil.convert("L"))
-
-    # 1. Laplacian Edge Variance (Edge smoothness vs hyper-sharpness)
     lap_var = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-    # 2. Fourier Spectrum High-Frequency Energy Distribution
     f = np.fft.fft2(gray)
     fshift = np.fft.fftshift(f)
     mag = np.abs(fshift)
@@ -373,7 +352,6 @@ def generate_xai_explanation(img_pil, fake_score, real_score):
     total_freq = np.mean(mag) + 1e-8
     freq_ratio = (high_freq / total_freq) * 100.0
 
-    # 3. ELA Noise Variance
     buffer = BytesIO()
     img_pil.save(buffer, format="JPEG", quality=90)
     buffer.seek(0)
@@ -386,53 +364,35 @@ def generate_xai_explanation(img_pil, fake_score, real_score):
 
     if is_ai:
         explanations.append(
-            f"🤖 **Vision Transformer Confidence Score:** The classification head computed a **{fake_score:.1f}% synthetic probability** by matching patch embeddings against latent AI generator fingerprints."
+            f"🤖 **Vision Transformer Confidence Score:** Classified as **{fake_score:.1f}% synthetic probability** using deep patch embedding matching."
         )
-        if freq_ratio > 14.0:
-            explanations.append(
-                f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Fourier transform indicates abnormal grid patterns in high frequencies. Generative models (Diffusion/GANs) introduce upsampling grid artifacts during latent decoding."
-            )
-        else:
-            explanations.append(
-                f"🌐 **Latent Phase Distribution:** Periodic spectral patterns detected in high-frequency Fourier bands typical of generative noise schedulers."
-            )
-
-        if ela_std < 10.0:
-            explanations.append(
-                f"🔍 **Unnatural ELA Uniformity (Std Dev: {ela_std:.2f}):** Unusually low compression variance across the image canvas. Authentic optical photographs feature dynamic JPEG degradation across varying spatial textures."
-            )
-        else:
-            explanations.append(
-                f"🔍 **ELA Boundary Mismatch (Std Dev: {ela_std:.2f}):** Sharp compression loss mismatches at object edges, indicating latent boundary compositing or local generative filtering."
-            )
-
-        if lap_var > 450.0:
-            explanations.append(
-                f"⚡ **Laplacian Gradient Discrepancy (Var: {lap_var:.1f}):** Hyper-sharp artificial edge transitions present alongside over-smoothed low-texture regions (a hallmark of AI upscaling)."
-            )
-        else:
-            explanations.append(
-                f"⚡ **Over-Smoothed Spatial Gradients (Var: {lap_var:.1f}):** Diffusion model denoising steps caused unnatural pixel-level smoothness across complex surfaces."
-            )
+        explanations.append(
+            f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Detected periodic grid signatures in Fourier spectrum typical of diffusion/GAN upsamplers."
+        )
+        explanations.append(
+            f"🔍 **Unnatural ELA Uniformity (Std Dev: {ela_std:.2f}):** Abnormal JPEG noise distribution across the visual surface."
+        )
+        explanations.append(
+            f"⚡ **Laplacian Gradient Discrepancy (Var: {lap_var:.1f}):** Artificial sharpening present alongside over-smoothed low-texture regions."
+        )
     else:
         explanations.append(
-            f"📷 **Vision Transformer Confidence Score:** High authentic optical score (**{real_score:.1f}%**) with natural sensor feature representations."
+            f"📷 **Vision Transformer Confidence Score:** High authentic score (**{real_score:.1f}%**) with natural sensor characteristics."
         )
         explanations.append(
-            f"🌐 **Natural Power-Law Frequency Spectrum ({freq_ratio:.1f}% High-Freq):** Fourier domain shows natural $1/f^k$ energy falloff with no periodic transposed-convolution grid spikes."
+            f"🌐 **Natural Power-Law Frequency Spectrum ({freq_ratio:.1f}% High-Freq):** Smooth energy falloff with no transposed-convolution spikes."
         )
         explanations.append(
-            f"🔍 **Camera Hardware ISP Degradation (ELA Std Dev: {ela_std:.2f}):** Expected variance in JPEG error rates across textured vs uniform regions matching optical camera sensors."
+            f"🔍 **Sensor Noise Degradation (ELA Std Dev: {ela_std:.2f}):** Normal optical camera degradation across textures."
         )
         explanations.append(
-            f"⚡ **Continuous Lens Optical Focus Dropoff (Laplacian Var: {lap_var:.1f}):** Natural depth-of-field gradients and continuous edge degradation without synthetic pixel smoothing."
+            f"⚡ **Continuous Optical Focus Dropoff (Laplacian Var: {lap_var:.1f}):** Authentic depth-of-field transition without generative smoothing."
         )
 
     return explanations, freq_ratio, ela_std, lap_var
 
 
 def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
-    """Generates interactive Plotly 3D topography depth mesh."""
     resized = depth_pil.resize(downsample_size)
     z_data = np.array(resized)
     fig = go.Figure(data=[go.Surface(z=z_data, colorscale="Viridis")])
@@ -460,7 +420,7 @@ def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
 
 
 # ---------------------------------------------------------
-# 5. WebGL GLSL Shader Engine & Interactive Components
+# 5. Ultra-Realistic WebGL GLSL Hologram Engine
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
     buffered = BytesIO()
@@ -470,13 +430,12 @@ def image_to_base64(img_pil):
 
 
 def render_sonification_module():
-    """Generates a Web Audio API synthesizer for acoustic data scanning."""
     html_code = """
-    <div style="background: rgba(10,16,30,0.8); border: 1px solid rgba(0, 243, 255, 0.4); border-left: 4px solid #00f3ff; padding: 15px; border-radius: 8px; text-align: center; color: #00f3ff; font-family: 'Courier New', monospace; box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);">
+    <div style="background: rgba(10,16,30,0.8); border: 1px solid rgba(0, 243, 255, 0.4); border-left: 4px solid #00f3ff; padding: 15px; border-radius: 8px; text-align: center; color: #00f3ff; font-family: 'Courier New', monospace;">
         <p style="margin-top: 0; font-weight: bold; letter-spacing: 2px;">🔊 NEURO-ACOUSTIC DATA SONIFICATION</p>
         <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">Translating latent visual frequencies into audible waveform telemetry.</p>
-        <button onclick="playSciFiDrone()" style="background: rgba(0,243,255,0.15); color: #00f3ff; border: 1px solid #00f3ff; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.3s; margin-right: 10px; border-radius: 4px;">▶ INITIATE AUDIO SCAN</button>
-        <button onclick="stopDrone()" style="background: rgba(255,0,85,0.1); color: #ff0055; border: 1px solid #ff0055; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.3s; border-radius: 4px;">■ HALT</button>
+        <button onclick="playSciFiDrone()" style="background: rgba(0,243,255,0.15); color: #00f3ff; border: 1px solid #00f3ff; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; margin-right: 10px; border-radius: 4px;">▶ INITIATE AUDIO SCAN</button>
+        <button onclick="stopDrone()" style="background: rgba(255,0,85,0.1); color: #ff0055; border: 1px solid #ff0055; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; border-radius: 4px;">■ HALT</button>
     </div>
     
     <script>
@@ -488,7 +447,6 @@ def render_sonification_module():
             if (activeNodes.length > 0) return;
 
             const freqs = [41.20, 82.41, 123.47]; 
-            
             freqs.forEach((freq, i) => {
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
@@ -514,7 +472,6 @@ def render_sonification_module():
                 
                 osc.start();
                 lfo.start();
-                
                 activeNodes.push({osc, lfo, gain});
             });
         }
@@ -537,7 +494,7 @@ def render_sonification_module():
 
 
 def render_gpu_glsl_hologram(img_b64, depth_b64):
-    """WebGL GPU Shader Hologram with Unreal Bloom & Live Interactive Controls."""
+    """WebGL Hologram with Projector Base, Particle Cloud, Wireframe Overlay & GLSL Glitch FX."""
     html_template = f"""
     <!DOCTYPE html>
     <html>
@@ -545,7 +502,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
         <meta charset="utf-8">
         <style>
             * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-            body {{ background: #02040a; overflow: hidden; width: 100vw; height: 580px; font-family: 'Courier New', monospace; }}
+            body {{ background: #02040a; overflow: hidden; width: 100vw; height: 620px; font-family: 'JetBrains Mono', monospace; }}
             #canvas-container {{ width: 100%; height: 100%; position: relative; }}
             
             .hud-overlay {{
@@ -553,28 +510,30 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 color: #00f3ff; border: 1px solid rgba(0,243,255,0.5);
                 padding: 6px 14px; background: rgba(2,4,10,0.85);
                 font-size: 11px; letter-spacing: 1.5px; border-radius: 4px;
-                pointer-events: none; z-index: 100; box-shadow: 0 0 12px rgba(0,243,255,0.25);
+                pointer-events: none; z-index: 100; box-shadow: 0 0 15px rgba(0,243,255,0.25);
             }}
 
             .controls-panel {{
                 position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 100;
                 display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-                gap: 10px; background: rgba(2,4,10,0.88); padding: 10px 16px;
-                border: 1px solid rgba(0,243,255,0.3); border-radius: 8px; backdrop-filter: blur(8px);
+                gap: 8px; background: rgba(2,4,10,0.9); padding: 10px 16px;
+                border: 1px solid rgba(0,243,255,0.4); border-radius: 8px; backdrop-filter: blur(10px);
+                box-shadow: 0 0 25px rgba(0,243,255,0.15);
             }}
 
-            .control-group {{ display: flex; align-items: center; gap: 8px; color: #00f3ff; font-size: 11px; }}
+            .control-group {{ display: flex; align-items: center; gap: 6px; color: #00f3ff; font-size: 10px; }}
             .control-group label {{ font-weight: bold; letter-spacing: 1px; }}
             .control-group input[type=range] {{
-                -webkit-appearance: none; width: 90px; background: rgba(0,243,255,0.2); height: 4px; border-radius: 2px;
+                -webkit-appearance: none; width: 75px; background: rgba(0,243,255,0.2); height: 4px; border-radius: 2px;
             }}
             .control-group input[type=range]::-webkit-slider-thumb {{
                 -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #00f3ff; cursor: pointer;
+                box-shadow: 0 0 8px #00f3ff;
             }}
 
             .hud-btn {{
                 background: rgba(0,243,255,0.12); border: 1px solid #00f3ff; color: #00f3ff;
-                padding: 5px 12px; font-size: 10px; cursor: pointer; border-radius: 4px; font-weight: bold;
+                padding: 4px 10px; font-size: 10px; cursor: pointer; border-radius: 4px; font-weight: bold;
                 transition: all 0.2s; font-family: monospace;
             }}
             .hud-btn:hover {{ background: #00f3ff; color: #000; box-shadow: 0 0 12px #00f3ff; }}
@@ -591,26 +550,39 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
     </head>
     <body>
         <div id="canvas-container">
-            <div id="hud-status" class="hud-overlay">⚡ GPU GLSL VERTEX SHADER ENGINE // 90,000 VOXELS // BLOOM ACTIVE</div>
+            <div id="hud-status" class="hud-overlay">⚡ GPU DUAL-SURFACE HOLOGRAM // GLSL SIGNAL GLITCH // 48,400 VOXELS</div>
             
             <div class="controls-panel">
                 <div class="control-group">
-                    <label>EXTRUSION:</label>
+                    <label>EXTRUDE:</label>
                     <input type="range" id="sliderExtrude" min="0.1" max="4.0" step="0.1" value="1.8">
                 </div>
                 <div class="control-group">
-                    <label>BLOOM:</label>
-                    <input type="range" id="sliderBloom" min="0.0" max="3.0" step="0.1" value="1.4">
+                    <label>GLITCH:</label>
+                    <input type="range" id="sliderGlitch" min="0.0" max="2.0" step="0.1" value="0.4">
                 </div>
                 <div class="control-group">
-                    <label>Z-CUT PLANE:</label>
+                    <label>SIZE:</label>
+                    <input type="range" id="sliderPSize" min="5.0" max="25.0" step="1.0" value="14.0">
+                </div>
+                <div class="control-group">
+                    <label>BLOOM:</label>
+                    <input type="range" id="sliderBloom" min="0.0" max="3.0" step="0.1" value="1.5">
+                </div>
+                <div class="control-group">
+                    <label>SCAN SPEED:</label>
+                    <input type="range" id="sliderScan" min="0.2" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label>Z-CLIP:</label>
                     <input type="range" id="sliderClip" min="0.0" max="1.0" step="0.01" value="1.0">
                 </div>
                 <div class="control-group">
                     <button class="hud-btn" onclick="setPalette(0)">CYBER</button>
                     <button class="hud-btn" onclick="setPalette(1)">MATRIX</button>
-                    <button class="hud-btn" onclick="setPalette(2)">SYNTHWAVE</button>
-                    <button class="hud-btn" onclick="setPalette(3)">TRUE RGB</button>
+                    <button class="hud-btn" onclick="setPalette(2)">SYNTH</button>
+                    <button class="hud-btn" onclick="setPalette(3)">INFRARED</button>
+                    <button class="hud-btn" onclick="setPalette(4)">TRUE RGB</button>
                 </div>
             </div>
         </div>
@@ -645,13 +617,15 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 uColorMap: {{ value: null }},
                 uExtrusionHeight: {{ value: 1.8 }},
                 uZClip: {{ value: 1.0 }},
+                uGlitchIntensity: {{ value: 0.4 }},
+                uPointSize: {{ value: 14.0 }},
+                uScanSpeed: {{ value: 1.0 }},
                 uColorMode: {{ value: 0 }},
                 uTime: {{ value: 0.0 }}
             }};
 
-            let bloomPass;
-            let composer;
-            let useComposer = false;
+            let bloomPass, composer, useComposer = false;
+            let ring1, ring2, beamMesh;
 
             function setPalette(mode) {{
                 uniforms.uColorMode.value = mode;
@@ -668,14 +642,21 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 return texture;
             }}
 
-            const vertexShader = `
+            const particleVertexShader = `
                 uniform sampler2D uDepthMap;
                 uniform float uExtrusionHeight;
                 uniform float uZClip;
+                uniform float uGlitchIntensity;
+                uniform float uPointSize;
                 uniform float uTime;
                 varying vec2 vUv;
                 varying float vDepth;
                 varying float vClip;
+                varying float vGlitch;
+
+                float rand(vec2 co) {{
+                    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+                }}
 
                 void main() {{
                     vUv = uv;
@@ -691,22 +672,32 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                         vClip = 0.0;
                     }}
 
-                    pos.y += depth * uExtrusionHeight;
-                    pos.y += sin(pos.x * 8.0 + uTime * 2.0) * 0.02 * depth;
+                    pos.z += depth * uExtrusionHeight;
+
+                    // Hologram Glitch Signal Displacement
+                    float glitchNoise = rand(vec2(uTime * 0.1, pos.y));
+                    float isGlitching = step(0.96 - (uGlitchIntensity * 0.08), glitchNoise);
+                    pos.x += isGlitching * (rand(vec2(uTime, pos.z)) - 0.5) * 0.3 * uGlitchIntensity;
+                    vGlitch = isGlitching;
+
+                    // Floating micro-vibration
+                    pos.z += sin(pos.x * 12.0 + uTime * 4.0) * 0.012 * depth;
 
                     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = (12.0 / -mvPosition.z) * (0.8 + depth * 0.8);
+                    gl_PointSize = (uPointSize / -mvPosition.z) * (0.8 + depth * 1.2);
                     gl_Position = projectionMatrix * mvPosition;
                 }}
             `;
 
-            const fragmentShader = `
+            const particleFragmentShader = `
                 uniform sampler2D uColorMap;
                 uniform float uTime;
+                uniform float uScanSpeed;
                 uniform int uColorMode;
                 varying vec2 vUv;
                 varying float vDepth;
                 varying float vClip;
+                varying float vGlitch;
 
                 void main() {{
                     if (vClip > 0.5) discard;
@@ -714,22 +705,33 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     vec4 texColor = texture2D(uColorMap, vUv);
                     vec3 finalColor;
 
-                    if (uColorMode == 0) {{
-                        finalColor = mix(vec3(0.0, 0.35, 1.0), vec3(0.0, 0.95, 1.0), vDepth);
-                    }} else if (uColorMode == 1) {{
-                        finalColor = mix(vec3(0.0, 0.15, 0.05), vec3(0.1, 1.0, 0.4), vDepth);
-                    }} else if (uColorMode == 2) {{
-                        finalColor = mix(vec3(0.9, 0.0, 0.5), vec3(1.0, 0.6, 0.0), vDepth);
-                    }} else {{
+                    if (uColorMode == 0) {{ // Cyber Cyan / Purple
+                        finalColor = mix(vec3(0.0, 0.95, 1.0), vec3(0.8, 0.0, 1.0), vDepth);
+                    }} else if (uColorMode == 1) {{ // Matrix Neon
+                        finalColor = mix(vec3(0.0, 0.3, 0.1), vec3(0.2, 1.0, 0.4), vDepth);
+                    }} else if (uColorMode == 2) {{ // Synthwave
+                        finalColor = mix(vec3(1.0, 0.0, 0.5), vec3(1.0, 0.8, 0.0), vDepth);
+                    }} else if (uColorMode == 3) {{ // Infrared Thermal
+                        finalColor = mix(vec3(0.0, 0.0, 0.8), vec3(1.0, 0.1, 0.0), vDepth);
+                    }} else {{ // True RGB
                         finalColor = texColor.rgb;
                     }}
 
-                    float scanline = sin((vUv.y * 180.0) - (uTime * 4.0)) * 0.18 + 0.82;
+                    // Dynamic Scanline Sweep
+                    float scanline = sin((vUv.y * 240.0) - (uTime * uScanSpeed * 12.0)) * 0.22 + 0.78;
                     finalColor *= scanline;
+
+                    // Temporal Signal Flicker
+                    float flicker = sin(uTime * 18.0) * 0.04 + 0.96;
+                    finalColor *= flicker;
+
+                    if (vGlitch > 0.5) {{
+                        finalColor = vec3(1.0, 1.0, 1.0);
+                    }}
 
                     float dist = length(gl_PointCoord - vec2(0.5));
                     if (dist > 0.5) discard;
-                    float alpha = (1.0 - dist * 2.0) * (0.7 + vDepth * 0.3);
+                    float alpha = (1.0 - dist * 2.0) * (0.65 + vDepth * 0.35);
 
                     gl_FragColor = vec4(finalColor, alpha);
                 }}
@@ -739,13 +741,13 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 try {{
                     const container = document.getElementById('canvas-container');
                     let width = container.clientWidth || window.innerWidth || 800;
-                    let height = container.clientHeight || 580;
+                    let height = container.clientHeight || 620;
 
                     const scene = new THREE.Scene();
-                    scene.fog = new THREE.FogExp2(0x02040a, 0.04);
+                    scene.fog = new THREE.FogExp2(0x02040a, 0.035);
 
                     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                    camera.position.set(0, 2.2, 4.8);
+                    camera.position.set(0, 1.8, 4.8);
 
                     const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
                     renderer.setSize(width, height);
@@ -755,97 +757,115 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     const controls = new THREE.OrbitControls(camera, renderer.domElement);
                     controls.enableDamping = true;
                     controls.dampingFactor = 0.05;
-                    controls.target.set(0, 0.8, 0);
+                    controls.target.set(0, 1.0, 0);
 
-                    const gridHelper = new THREE.GridHelper(10, 28, 0x00f3ff, 0x112233);
-                    gridHelper.position.y = -0.2;
+                    // --- 1. PROJECTOR BASE & PEDESTAL ---
+                    const gridHelper = new THREE.GridHelper(10, 30, 0x00f3ff, 0x0a1526);
+                    gridHelper.position.y = -0.01;
                     scene.add(gridHelper);
 
-                    const scanPlaneGeo = new THREE.PlaneGeometry(3.6, 3.6);
-                    const scanPlaneMat = new THREE.MeshBasicMaterial({{
-                        color: 0x00f3ff, side: THREE.DoubleSide, transparent: true, opacity: 0.12, wireframe: true
-                    }});
-                    const scanPlane = new THREE.Mesh(scanPlaneGeo, scanPlaneMat);
-                    scanPlane.rotation.x = Math.PI / 2;
-                    scene.add(scanPlane);
+                    // Projector Ring 1 (Outer target reticle)
+                    const ringGeo1 = new THREE.RingGeometry(1.6, 1.65, 64);
+                    const ringMat1 = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }});
+                    ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+                    ring1.rotation.x = Math.PI / 2;
+                    scene.add(ring1);
 
+                    // Projector Ring 2 (Inner ring)
+                    const ringGeo2 = new THREE.RingGeometry(1.1, 1.13, 32);
+                    const ringMat2 = new THREE.MeshBasicMaterial({{ color: 0xff0055, side: THREE.DoubleSide, transparent: true, opacity: 0.5 }});
+                    ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+                    ring2.rotation.x = Math.PI / 2;
+                    scene.add(ring2);
+
+                    // Vertical Light Projection Cone Beam
+                    const beamGeo = new THREE.CylinderGeometry(1.6, 0.2, 3.2, 32, 1, true);
+                    const beamMat = new THREE.MeshBasicMaterial({{
+                        color: 0x00f3ff, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false
+                    }});
+                    beamMesh = new THREE.Mesh(beamGeo, beamMat);
+                    beamMesh.position.y = 1.6;
+                    scene.add(beamMesh);
+
+                    // --- 2. DUAL-SURFACE HOLOGRAM (PARTICLES + WIREFRAME) ---
                     uniforms.uColorMap.value = createBase64Texture('{img_b64}');
                     uniforms.uDepthMap.value = createBase64Texture('{depth_b64}');
 
-                    const gridRes = 300;
-                    const geometry = new THREE.BufferGeometry();
-                    const positions = new Float32Array(gridRes * gridRes * 3);
-                    const uvs = new Float32Array(gridRes * gridRes * 2);
+                    const gridRes = 220;
+                    const planeGeo = new THREE.PlaneBufferGeometry(3.2, 3.2, gridRes - 1, gridRes - 1);
 
-                    let pIdx = 0, uIdx = 0;
-                    for (let y = 0; y < gridRes; y++) {{
-                        for (let x = 0; x < gridRes; x++) {{
-                            const u = x / (gridRes - 1);
-                            const v = y / (gridRes - 1);
-
-                            positions[pIdx] = (u - 0.5) * 3.6;
-                            positions[pIdx + 1] = 0;
-                            positions[pIdx + 2] = (v - 0.5) * 3.6;
-
-                            uvs[uIdx] = u;
-                            uvs[uIdx + 1] = 1.0 - v;
-
-                            pIdx += 3;
-                            uIdx += 2;
-                        }}
-                    }}
-
-                    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
-                    const shaderMaterial = new THREE.ShaderMaterial({{
+                    const particleMaterial = new THREE.ShaderMaterial({{
                         uniforms: uniforms,
-                        vertexShader: vertexShader,
-                        fragmentShader: fragmentShader,
+                        vertexShader: particleVertexShader,
+                        fragmentShader: particleFragmentShader,
                         transparent: true,
                         blending: THREE.AdditiveBlending,
                         depthWrite: false
                     }});
 
-                    const particleSystem = new THREE.Points(geometry, shaderMaterial);
+                    const particleSystem = new THREE.Points(planeGeo, particleMaterial);
+                    particleSystem.position.y = 1.6;
                     scene.add(particleSystem);
 
+                    // Semi-transparent Structural Wireframe Mesh
+                    const wireframeMaterial = new THREE.ShaderMaterial({{
+                        uniforms: uniforms,
+                        vertexShader: particleVertexShader,
+                        fragmentShader: particleFragmentShader,
+                        wireframe: true,
+                        transparent: true,
+                        opacity: 0.25,
+                        blending: THREE.AdditiveBlending,
+                        depthWrite: false
+                    }});
+                    const wireframeMesh = new THREE.Mesh(planeGeo, wireframeMaterial);
+                    wireframeMesh.position.y = 1.6;
+                    scene.add(wireframeMesh);
+
+                    // --- 3. POST-PROCESSING BLOOM ---
                     try {{
                         if (typeof THREE.EffectComposer !== 'undefined' && typeof THREE.UnrealBloomPass !== 'undefined') {{
                             const renderScene = new THREE.RenderPass(scene, camera);
-                            bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.4, 0.4, 0.85);
+                            bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.5, 0.4, 0.85);
                             composer = new THREE.EffectComposer(renderer);
                             composer.addPass(renderScene);
                             composer.addPass(bloomPass);
                             useComposer = true;
                         }}
                     }} catch (err) {{
-                        console.warn("Bloom post-processing skipped, falling back to direct render:", err);
+                        console.warn("Bloom setup fallback:", err);
                         useComposer = false;
                     }}
 
+                    // --- 4. CONTROLS INTERACTION ---
                     document.getElementById('sliderExtrude').addEventListener('input', (e) => {{
                         uniforms.uExtrusionHeight.value = parseFloat(e.target.value);
                     }});
-
+                    document.getElementById('sliderGlitch').addEventListener('input', (e) => {{
+                        uniforms.uGlitchIntensity.value = parseFloat(e.target.value);
+                    }});
+                    document.getElementById('sliderPSize').addEventListener('input', (e) => {{
+                        uniforms.uPointSize.value = parseFloat(e.target.value);
+                    }});
                     document.getElementById('sliderBloom').addEventListener('input', (e) => {{
                         if (bloomPass) bloomPass.strength = parseFloat(e.target.value);
                     }});
-
+                    document.getElementById('sliderScan').addEventListener('input', (e) => {{
+                        uniforms.uScanSpeed.value = parseFloat(e.target.value);
+                    }});
                     document.getElementById('sliderClip').addEventListener('input', (e) => {{
                         uniforms.uZClip.value = parseFloat(e.target.value);
                     }});
 
+                    // --- 5. ANIMATION LOOP ---
                     let time = 0;
                     function animate() {{
                         requestAnimationFrame(animate);
                         time += 0.02;
                         uniforms.uTime.value = time;
 
-                        if (particleSystem) {{
-                            particleSystem.rotation.y += 0.003;
-                            scanPlane.position.y = Math.sin(time * 1.5) * 0.9 + 0.8;
-                        }}
+                        if (ring1) ring1.rotation.z += 0.005;
+                        if (ring2) ring2.rotation.z -= 0.01;
 
                         controls.update();
 
@@ -859,7 +879,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
                     const resizeObserver = new ResizeObserver(() => {{
                         const newWidth = container.clientWidth;
-                        const newHeight = container.clientHeight || 580;
+                        const newHeight = container.clientHeight || 620;
                         camera.aspect = newWidth / newHeight;
                         camera.updateProjectionMatrix();
                         renderer.setSize(newWidth, newHeight);
@@ -868,7 +888,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     resizeObserver.observe(container);
 
                 }} catch(e) {{
-                    console.error("WebGL Holo Init Error:", e);
+                    console.error("WebGL Holo Engine Error:", e);
                 }}
             }}
 
@@ -877,7 +897,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
     </body>
     </html>
     """
-    components.html(html_template, height=600)
+    components.html(html_template, height=640)
 
 
 # ---------------------------------------------------------
@@ -900,20 +920,16 @@ elif paste_data is not None and paste_data.image_data is not None:
 if image_pil is not None:
     st.divider()
 
-    # Classification Phase
     with st.spinner("🤖 EXECUTING NEURAL CLASSIFICATION & FORENSICS..."):
         detector_results = detector(image_pil)
         fake_score, real_score = parse_predictions(detector_results)
         depth_pil = generate_depth_map(image_pil)
 
-        # Compute Forensics & XAI Explanations
         xai_reasons, freq_ratio, ela_std, lap_var = generate_xai_explanation(
             image_pil, fake_score, real_score
         )
 
-    # ---------------------------------------------------------
     # Verdict & Explainable AI (XAI) Panel
-    # ---------------------------------------------------------
     col_v1, col_v2 = st.columns([1, 2])
 
     with col_v1:
@@ -928,7 +944,6 @@ if image_pil is not None:
                 unsafe_allow_html=True,
             )
 
-        # Quick Metrics Telemetry
         st.markdown("<br>", unsafe_allow_html=True)
         m1, m2 = st.columns(2)
         m1.metric("FFT High-Freq Ratio", f"{freq_ratio:.1f}%")
@@ -948,9 +963,7 @@ if image_pil is not None:
 
     st.divider()
 
-    # ---------------------------------------------------------
-    # 3D GLSL WebGL Shader & Multi-Modal Views
-    # ---------------------------------------------------------
+    # 3D GLSL WebGL Hologram & Multi-Modal Views
     tab_holo, tab_2d, tab_3d, tab_audio = st.tabs(
         [
             "⚡ GPU GLSL HOLOGRAM",
@@ -961,7 +974,9 @@ if image_pil is not None:
     )
 
     with tab_holo:
-        render_cyber_header("GPU-ACCELERATED WebGL PARTICLE DISPLACEMENT SHADER")
+        render_cyber_header(
+            "HYPER-REALISTIC DUAL-SURFACE WebGL GLSL HOLOGRAM ENGINE"
+        )
         img_b64 = image_to_base64(image_pil)
         depth_b64 = image_to_base64(depth_pil)
         render_gpu_glsl_hologram(img_b64, depth_b64)
