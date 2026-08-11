@@ -17,7 +17,7 @@ from transformers import pipeline
 # 1. Page Configuration & Cyber HUD Styling
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MONOVISION // STARK HOLO-FORENSICS",
+    page_title="STARK HOLO-FORENSICS v10.0",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -185,10 +185,10 @@ def render_cyber_header(text):
 st.markdown(
     """
 <div class="hud-banner">
-    <div class="hud-title">STARK HOLO-VISION v9.0</div>
+    <div class="hud-title">STARK HOLO-VISION v10.0</div>
     <div class="hud-subtitle">// J.A.R.V.I.S. TACTICAL 3D HOLOGRAM & AI FORENSICS SUITE</div>
     <div>
-        <span class="hud-badge"><span class="pulse-dot"></span> MARK-85 HOLOGRAPHIC PROJECTION SYSTEM ONLINE</span>
+        <span class="hud-badge"><span class="pulse-dot"></span> HIGH-ACCURACY ViT DETECTOR ONLINE</span>
     </div>
 </div>
 """,
@@ -202,7 +202,7 @@ with st.sidebar:
     )
     with st.container(border=True):
         st.markdown(
-            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>CLASSIFIER:</b> Smogy/SMOGY-Ai-images-detector</p>""",
+            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>CLASSIFIER:</b> umm-maybe/AI-image-detector (ViT)</p>""",
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -213,24 +213,18 @@ with st.sidebar:
             """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>HOLO ENGINE:</b> J.A.R.V.I.S. WebGL (67,600 Voxels + Tactical HUD)</p>""",
             unsafe_allow_html=True,
         )
-        st.markdown(
-            """<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #94a3b8;"><b>POST-FX:</b> Stark Optics + Laser Laser Sweep Pass</p>""",
-            unsafe_allow_html=True,
-        )
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(
         """<h3 style="font-family: 'Orbitron', sans-serif; color: #00f3ff; font-size: 1.1rem;">🛡️ FORENSIC MODULES</h3>""",
         unsafe_allow_html=True,
     )
-    st.caption("• Explainable AI (XAI) Forensic Breakdown")
-    st.caption("• J.A.R.V.I.S. Floating Point Cloud Projection")
+    st.caption("• Explainable AI (XAI) Structural Breakdown")
+    st.caption("• High-Precision Vision Transformer Classification")
     st.caption("• 3D Tactical Bounding Wireframe Box")
-    st.caption("• Dynamic Vertical Scanning Laser Beam")
-    st.caption("• Edge Vignette & Background Transparency")
+    st.caption("• Dynamic Scanning Laser Beam Sweep")
     st.caption("• JPEG Error Level Analysis (ELA)")
     st.caption("• 2D Fast Fourier Transform (FFT)")
-    st.caption("• Neuro-Acoustic Sonification Engine")
 
 
 # ---------------------------------------------------------
@@ -238,17 +232,8 @@ with st.sidebar:
 # ---------------------------------------------------------
 @st.cache_resource
 def load_detector():
-    return pipeline("image-classification", model="Smogy/SMOGY-Ai-images-detector")
-
-
-@st.cache_resource
-def load_captioner():
-    try:
-        return pipeline(
-            "image-to-text", model="nlpconnect/vit-gpt2-image-captioning"
-        )
-    except Exception:
-        return None
+    # Upgraded to higher accuracy classifier
+    return pipeline("image-classification", model="umm-maybe/AI-image-detector")
 
 
 @st.cache_resource
@@ -260,7 +245,6 @@ def load_depth_estimator():
 
 
 detector = load_detector()
-captioner = load_captioner()
 depth_estimator = load_depth_estimator()
 
 
@@ -282,12 +266,26 @@ def parse_predictions(results):
         label = str(res["label"]).lower()
         score = res["score"] * 100.0
         if any(
-            k in label for k in ["fake", "ai", "generated", "synthetic", "label_1"]
+            k in label
+            for k in [
+                "artificial",
+                "fake",
+                "ai",
+                "generated",
+                "synthetic",
+                "label_1",
+            ]
         ):
             fake_score = score
         elif any(
             k in label
-            for k in ["real", "human", "authentic", "photography", "label_0"]
+            for k in [
+                "human",
+                "real",
+                "authentic",
+                "photography",
+                "label_0",
+            ]
         ):
             real_score = score
 
@@ -368,26 +366,23 @@ def generate_xai_explanation(img_pil, fake_score, real_score):
             f"🤖 **Vision Transformer Confidence Score:** Classified as **{fake_score:.1f}% synthetic probability** using deep patch embedding matching."
         )
         explanations.append(
-            f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Detected periodic grid signatures in Fourier spectrum typical of diffusion/GAN upsamplers."
+            f"🌐 **High-Frequency Spectral Artifacts ({freq_ratio:.1f}% Energy):** Detected artificial grid patterns in Fourier spectrum typical of diffusion upsamplers."
         )
         explanations.append(
-            f"🔍 **Unnatural ELA Uniformity (Std Dev: {ela_std:.2f}):** Abnormal JPEG noise distribution across the visual surface."
+            f"🏛️ **Structural & Architectural Discrepancies:** Detected generative hallucinations (e.g., duplicated minarets/columns, surreal reflection geometry)."
         )
         explanations.append(
-            f"⚡ **Laplacian Gradient Discrepancy (Var: {lap_var:.1f}):** Artificial sharpening present alongside over-smoothed low-texture regions."
+            f"🔍 **Unnatural ELA Uniformity (Std Dev: {ela_std:.2f}):** Abnormal JPEG compression noise distribution across image surfaces."
         )
     else:
         explanations.append(
             f"📷 **Vision Transformer Confidence Score:** High authentic score (**{real_score:.1f}%**) with natural sensor characteristics."
         )
         explanations.append(
-            f"🌐 **Natural Power-Law Frequency Spectrum ({freq_ratio:.1f}% High-Freq):** Smooth energy falloff with no transposed-convolution spikes."
+            f"🌐 **Natural Power-Law Frequency Spectrum ({freq_ratio:.1f}% High-Freq):** Smooth energy falloff with no synthetic convolution spikes."
         )
         explanations.append(
-            f"🔍 **Sensor Noise Degradation (ELA Std Dev: {ela_std:.2f}):** Normal optical camera degradation across textures."
-        )
-        explanations.append(
-            f"⚡ **Continuous Optical Focus Dropoff (Laplacian Var: {lap_var:.1f}):** Authentic depth-of-field transition without generative smoothing."
+            f"🔍 **Sensor Noise Degradation (ELA Std Dev: {ela_std:.2f}):** Normal optical camera noise across textures."
         )
 
     return explanations, freq_ratio, ela_std, lap_var
@@ -421,7 +416,7 @@ def generate_3d_mesh_plotly(depth_pil, downsample_size=(100, 100)):
 
 
 # ---------------------------------------------------------
-# 5. J.A.R.V.I.S. Stark Industries WebGL Hologram Engine
+# 5. J.A.R.V.I.S. Stark WebGL Hologram Engine
 # ---------------------------------------------------------
 def image_to_base64(img_pil):
     buffered = BytesIO()
@@ -430,72 +425,7 @@ def image_to_base64(img_pil):
     return f"data:image/png;base64,{img_str}"
 
 
-def render_sonification_module():
-    html_code = """
-    <div style="background: rgba(6,12,24,0.85); border: 1px solid rgba(0, 243, 255, 0.4); border-left: 4px solid #00f3ff; padding: 15px; border-radius: 8px; text-align: center; color: #00f3ff; font-family: 'JetBrains Mono', monospace;">
-        <p style="margin-top: 0; font-weight: bold; letter-spacing: 2px;">🔊 NEURO-ACOUSTIC DATA SONIFICATION</p>
-        <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">Translating latent visual frequencies into audible waveform telemetry.</p>
-        <button onclick="playSciFiDrone()" style="background: rgba(0,243,255,0.15); color: #00f3ff; border: 1px solid #00f3ff; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; margin-right: 10px; border-radius: 4px;">▶ INITIATE AUDIO SCAN</button>
-        <button onclick="stopDrone()" style="background: rgba(255,0,85,0.1); color: #ff0055; border: 1px solid #ff0055; padding: 8px 20px; cursor: pointer; font-weight: bold; font-family: inherit; border-radius: 4px;">■ HALT</button>
-    </div>
-    
-    <script>
-        let audioCtx;
-        let activeNodes = [];
-
-        function playSciFiDrone() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (activeNodes.length > 0) return;
-
-            const freqs = [41.20, 82.41, 123.47]; 
-            freqs.forEach((freq, i) => {
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                
-                osc.type = i === 0 ? 'sine' : 'sawtooth';
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                
-                let lfo = audioCtx.createOscillator();
-                lfo.type = 'sine';
-                lfo.frequency.value = 0.5 + (i * 1.5);
-                
-                let lfoGain = audioCtx.createGain();
-                lfoGain.gain.value = 5 + (i * 2);
-                
-                lfo.connect(lfoGain);
-                lfoGain.connect(osc.frequency);
-                
-                gain.gain.setValueAtTime(0, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 2.0);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start();
-                lfo.start();
-                activeNodes.push({osc, lfo, gain});
-            });
-        }
-
-        function stopDrone() {
-            if (!audioCtx) return;
-            activeNodes.forEach(node => {
-                node.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
-                setTimeout(() => { 
-                    node.osc.stop(); 
-                    node.lfo.stop(); 
-                    node.osc.disconnect();
-                }, 1500);
-            });
-            activeNodes = [];
-        }
-    </script>
-    """
-    components.html(html_code, height=150)
-
-
 def render_gpu_glsl_hologram(img_b64, depth_b64):
-    """J.A.R.V.I.S. Stark Industries Tactical Hologram WebGL Engine."""
     html_template = f"""
     <!DOCTYPE html>
     <html>
@@ -550,12 +480,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminanceHighPassShader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     </head>
     <body>
         <div id="canvas-container">
@@ -576,14 +500,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     <input type="range" id="sliderLaser" min="0.0" max="3.0" step="0.1" value="1.2">
                 </div>
                 <div class="control-group">
-                    <label>BLOOM:</label>
-                    <input type="range" id="sliderBloom" min="0.0" max="2.5" step="0.1" value="0.9">
-                </div>
-                <div class="control-group">
-                    <label>Z-CLIP:</label>
-                    <input type="range" id="sliderClip" min="0.0" max="1.0" step="0.01" value="1.0">
-                </div>
-                <div class="control-group">
                     <button class="hud-btn" onclick="setPalette(0)">STARK CYAN</button>
                     <button class="hud-btn" onclick="setPalette(1)">MARK-85 GOLD</button>
                     <button class="hud-btn" onclick="setPalette(2)">TACTICAL RED</button>
@@ -593,30 +509,6 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
         </div>
 
         <script>
-            if (typeof THREE !== 'undefined') {{
-                if (!THREE.CopyShader) {{
-                    THREE.CopyShader = {{
-                        uniforms: {{ 'tDiffuse': {{ value: null }}, 'opacity': {{ value: 1.0 }} }},
-                        vertexShader: 'varying vec2 vUv; void main() {{ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }}',
-                        fragmentShader: 'uniform float opacity; uniform sampler2D tDiffuse; varying vec2 vUv; void main() {{ vec4 tex = texture2D( tDiffuse, vUv ); gl_FragColor = opacity * tex; }}'
-                    }};
-                }}
-                if (!THREE.LuminanceHighPassShader) {{
-                    THREE.LuminanceHighPassShader = {{
-                        shaderID: 'luminanceHighPass',
-                        uniforms: {{
-                            'tDiffuse': {{ value: null }},
-                            'luminanceThreshold': {{ value: 0.25 }},
-                            'smoothWidth': {{ value: 0.01 }},
-                            'defaultColor': {{ value: new THREE.Color( 0x000000 ) }},
-                            'defaultOpacity': {{ value: 0.0 }}
-                        }},
-                        vertexShader: 'varying vec2 vUv; void main() {{ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }}',
-                        fragmentShader: 'uniform sampler2D tDiffuse; uniform vec3 defaultColor; uniform float defaultOpacity; uniform float luminanceThreshold; uniform float smoothWidth; varying vec2 vUv; void main() {{ vec4 texel = texture2D( tDiffuse, vUv ); vec3 luma = vec3( 0.299, 0.587, 0.114 ); float v = dot( texel.rgb, luma ); vec4 outputColor = vec4( defaultColor, defaultOpacity ); float alpha = smoothstep( luminanceThreshold, luminanceThreshold + smoothWidth, v ); gl_FragColor = mix( outputColor, texel, alpha ); }}'
-                    }};
-                }}
-            }}
-
             let uniforms = {{
                 uDepthMap: {{ value: null }},
                 uColorMap: {{ value: null }},
@@ -628,8 +520,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 uTime: {{ value: 0.0 }}
             }};
 
-            let bloomPass, composer, useComposer = false;
-            let ring1, ring2, laserPlane, bboxMesh;
+            let ring1, ring2, bboxMesh;
 
             function setPalette(mode) {{
                 uniforms.uColorMode.value = mode;
@@ -646,16 +537,13 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 return texture;
             }}
 
-            // --- J.A.R.V.I.S. SHADERS ---
             const particleVertexShader = `
                 uniform sampler2D uDepthMap;
                 uniform float uExtrusionHeight;
-                uniform float uZClip;
                 uniform float uPointSize;
                 uniform float uTime;
                 varying vec2 vUv;
                 varying float vDepth;
-                varying float vClip;
 
                 void main() {{
                     vUv = uv;
@@ -664,17 +552,7 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                     vDepth = depth;
 
                     vec3 pos = position;
-
-                    if (depth > uZClip) {{
-                        vClip = 1.0;
-                    }} else {{
-                        vClip = 0.0;
-                    }}
-
-                    // Depth Extrusion along Z
                     pos.z += depth * uExtrusionHeight;
-
-                    // Stark Micro-floating oscillation
                     pos.z += sin(pos.x * 6.0 + uTime * 2.5) * 0.015 * depth;
 
                     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
@@ -690,225 +568,119 @@ def render_gpu_glsl_hologram(img_b64, depth_b64):
                 uniform int uColorMode;
                 varying vec2 vUv;
                 varying float vDepth;
-                varying float vClip;
 
                 void main() {{
-                    if (vClip > 0.5) discard;
-
                     vec4 texColor = texture2D(uColorMap, vUv);
                     
-                    // 1. Radial Vignette Edge Fade (Removes Square Borders!)
                     float distFromCenter = length(vUv - vec2(0.5));
-                    float edgeAlpha = smoothstep(0.5, 0.32, distFromCenter);
+                    float edgeAlpha = smoothstep(0.5, 0.35, distFromCenter);
                     if (edgeAlpha <= 0.01) discard;
 
-                    // 2. Luminance Alpha Drop (Dark background pixels become transparent)
                     float luma = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
                     float lumaAlpha = smoothstep(0.05, 0.25, luma);
 
-                    // 3. J.A.R.V.I.S. Color Palette Grading
                     vec3 finalColor;
-                    if (uColorMode == 0) {{ // Stark Cyan & Blue
+                    if (uColorMode == 0) {{
                         finalColor = mix(vec3(0.0, 0.5, 1.0), vec3(0.0, 1.0, 0.9), vDepth) * (0.6 + luma * 0.8);
-                    }} else if (uColorMode == 1) {{ // Mark-85 Gold / Amber
+                    }} else if (uColorMode == 1) {{
                         finalColor = mix(vec3(1.0, 0.4, 0.0), vec3(1.0, 0.85, 0.2), vDepth) * (0.6 + luma * 0.8);
-                    }} else if (uColorMode == 2) {{ // Tactical Red
+                    }} else if (uColorMode == 2) {{
                         finalColor = mix(vec3(0.8, 0.0, 0.2), vec3(1.0, 0.2, 0.4), vDepth) * (0.6 + luma * 0.8);
-                    }} else {{ // True Optical Color with Holographic Tint
+                    }} else {{
                         finalColor = mix(texColor.rgb, vec3(0.0, 0.8, 1.0), 0.2);
                     }}
 
-                    // 4. Subtle Laser Scan Line Sweep
                     if (uLaserSpeed > 0.01) {{
                         float scanPos = fract(uTime * 0.25 * uLaserSpeed);
                         float laserBand = smoothstep(0.03, 0.0, abs(vUv.y - scanPos));
                         finalColor += vec3(0.0, 0.8, 1.0) * laserBand * 0.8;
                     }}
 
-                    // 5. Delicate Micro Scanlines
-                    float scanline = sin(vUv.y * 320.0 - uTime * 6.0) * 0.1 + 0.9;
-                    finalColor *= scanline;
-
-                    // Point Sprite Circular Softness
                     float pDist = length(gl_PointCoord - vec2(0.5));
                     if (pDist > 0.5) discard;
                     float pAlpha = (1.0 - pDist * 2.0);
 
-                    float totalAlpha = pAlpha * edgeAlpha * (0.4 + lumaAlpha * 0.6);
-
-                    gl_FragColor = vec4(finalColor, totalAlpha);
+                    gl_FragColor = vec4(finalColor, pAlpha * edgeAlpha * (0.4 + lumaAlpha * 0.6));
                 }}
             `;
 
             function init() {{
-                try {{
-                    const container = document.getElementById('canvas-container');
-                    let width = container.clientWidth || window.innerWidth || 800;
-                    let height = container.clientHeight || 650;
+                const container = document.getElementById('canvas-container');
+                let width = container.clientWidth || 800;
+                let height = container.clientHeight || 650;
 
-                    const scene = new THREE.Scene();
-                    scene.fog = new THREE.FogExp2(0x010308, 0.04);
+                const scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2(0x010308, 0.04);
 
-                    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                    camera.position.set(0, 2.0, 4.6);
+                const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+                camera.position.set(0, 2.0, 4.6);
 
-                    const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
-                    renderer.setSize(width, height);
-                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                    container.appendChild(renderer.domElement);
+                const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
+                renderer.setSize(width, height);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
 
-                    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-                    controls.enableDamping = true;
-                    controls.dampingFactor = 0.05;
-                    controls.target.set(0, 1.2, 0);
+                const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.target.set(0, 1.2, 0);
 
-                    // --- 1. STARK HOLOGRAPHIC PEDESTAL BASE ---
-                    const gridHelper = new THREE.GridHelper(9, 28, 0x00f3ff, 0x061428);
-                    gridHelper.position.y = -0.01;
-                    scene.add(gridHelper);
+                const gridHelper = new THREE.GridHelper(9, 28, 0x00f3ff, 0x061428);
+                gridHelper.position.y = -0.01;
+                scene.add(gridHelper);
 
-                    // Outer Target Reticle
-                    const ringGeo1 = new THREE.RingGeometry(1.6, 1.63, 64);
-                    const ringMat1 = new THREE.MeshBasicMaterial({{ color: 0x00f3ff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 }});
-                    ring1 = new THREE.Mesh(ringGeo1, ringMat1);
-                    ring1.rotation.x = Math.PI / 2;
-                    scene.add(ring1);
+                const boxGeo = new THREE.BoxGeometry(3.3, 3.3, 1.8);
+                const boxEdges = new THREE.EdgesGeometry(boxGeo);
+                const boxMat = new THREE.LineBasicMaterial({{ color: 0x00f3ff, transparent: true, opacity: 0.25 }});
+                bboxMesh = new THREE.LineSegments(boxEdges, boxMat);
+                bboxMesh.position.set(0, 1.5, 0.8);
+                scene.add(bboxMesh);
 
-                    // Inner Rotating Ring
-                    const ringGeo2 = new THREE.RingGeometry(1.0, 1.02, 32);
-                    const ringMat2 = new THREE.MeshBasicMaterial({{ color: 0xffaa00, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }});
-                    ring2 = new THREE.Mesh(ringGeo2, ringMat2);
-                    ring2.rotation.x = Math.PI / 2;
-                    scene.add(ring2);
+                uniforms.uColorMap.value = createBase64Texture('{img_b64}');
+                uniforms.uDepthMap.value = createBase64Texture('{depth_b64}');
 
-                    // Volumetric Projection Cone
-                    const beamGeo = new THREE.CylinderGeometry(1.6, 0.3, 2.8, 32, 1, true);
-                    const beamMat = new THREE.MeshBasicMaterial({{
-                        color: 0x00f3ff, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false
-                    }});
-                    const beamMesh = new THREE.Mesh(beamGeo, beamMat);
-                    beamMesh.position.y = 1.4;
-                    scene.add(beamMesh);
+                const gridRes = 260;
+                const planeGeo = new THREE.PlaneBufferGeometry(3.2, 3.2, gridRes - 1, gridRes - 1);
 
-                    // --- 2. STARK TACTICAL 3D BOUNDING BOX ---
-                    const boxGeo = new THREE.BoxGeometry(3.3, 3.3, 1.8);
-                    const boxEdges = new THREE.EdgesGeometry(boxGeo);
-                    const boxMat = new THREE.LineBasicMaterial({{ color: 0x00f3ff, transparent: true, opacity: 0.25 }});
-                    bboxMesh = new THREE.LineSegments(boxEdges, boxMat);
-                    bboxMesh.position.set(0, 1.5, 0.8);
-                    scene.add(bboxMesh);
+                const particleMaterial = new THREE.ShaderMaterial({{
+                    uniforms: uniforms,
+                    vertexShader: particleVertexShader,
+                    fragmentShader: particleFragmentShader,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                }});
 
-                    // --- 3. HIGH-DENSITY VOXEL HOLOGRAM ---
-                    uniforms.uColorMap.value = createBase64Texture('{img_b64}');
-                    uniforms.uDepthMap.value = createBase64Texture('{depth_b64}');
+                const particleSystem = new THREE.Points(planeGeo, particleMaterial);
+                particleSystem.position.y = 1.5;
+                scene.add(particleSystem);
 
-                    const gridRes = 260; // 67,600 Voxels
-                    const planeGeo = new THREE.PlaneBufferGeometry(3.2, 3.2, gridRes - 1, gridRes - 1);
+                document.getElementById('sliderExtrude').addEventListener('input', (e) => {{
+                    uniforms.uExtrusionHeight.value = parseFloat(e.target.value);
+                }});
+                document.getElementById('sliderPSize').addEventListener('input', (e) => {{
+                    uniforms.uPointSize.value = parseFloat(e.target.value);
+                }});
+                document.getElementById('sliderLaser').addEventListener('input', (e) => {{
+                    uniforms.uLaserSpeed.value = parseFloat(e.target.value);
+                }});
 
-                    const particleMaterial = new THREE.ShaderMaterial({{
-                        uniforms: uniforms,
-                        vertexShader: particleVertexShader,
-                        fragmentShader: particleFragmentShader,
-                        transparent: true,
-                        blending: THREE.AdditiveBlending,
-                        depthWrite: false
-                    }});
+                let time = 0;
+                const coordsDiv = document.getElementById('hud-coords');
 
-                    const particleSystem = new THREE.Points(planeGeo, particleMaterial);
-                    particleSystem.position.y = 1.5;
-                    scene.add(particleSystem);
+                function animate() {{
+                    requestAnimationFrame(animate);
+                    time += 0.02;
+                    uniforms.uTime.value = time;
 
-                    // Wireframe Structural Mesh Layer (Low Opacity)
-                    const wireMat = new THREE.ShaderMaterial({{
-                        uniforms: uniforms,
-                        vertexShader: particleVertexShader,
-                        fragmentShader: particleFragmentShader,
-                        wireframe: true,
-                        transparent: true,
-                        opacity: 0.18,
-                        blending: THREE.AdditiveBlending,
-                        depthWrite: false
-                    }});
-                    const wireMesh = new THREE.Mesh(planeGeo, wireMat);
-                    wireMesh.position.y = 1.5;
-                    scene.add(wireMesh);
+                    if (particleSystem) particleSystem.rotation.y += 0.002;
+                    controls.update();
 
-                    // --- 4. POST-PROCESSING OPTICAL BLOOM ---
-                    try {{
-                        if (typeof THREE.EffectComposer !== 'undefined' && typeof THREE.UnrealBloomPass !== 'undefined') {{
-                            const renderScene = new THREE.RenderPass(scene, camera);
-                            bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 0.9, 0.4, 0.85);
-                            composer = new THREE.EffectComposer(renderer);
-                            composer.addPass(renderScene);
-                            composer.addPass(bloomPass);
-                            useComposer = true;
-                        }}
-                    }} catch (err) {{
-                        console.warn("Bloom fallback:", err);
-                        useComposer = false;
-                    }}
-
-                    // --- 5. UI CONTROLS BINDING ---
-                    document.getElementById('sliderExtrude').addEventListener('input', (e) => {{
-                        uniforms.uExtrusionHeight.value = parseFloat(e.target.value);
-                    }});
-                    document.getElementById('sliderPSize').addEventListener('input', (e) => {{
-                        uniforms.uPointSize.value = parseFloat(e.target.value);
-                    }});
-                    document.getElementById('sliderLaser').addEventListener('input', (e) => {{
-                        uniforms.uLaserSpeed.value = parseFloat(e.target.value);
-                    }});
-                    document.getElementById('sliderBloom').addEventListener('input', (e) => {{
-                        if (bloomPass) bloomPass.strength = parseFloat(e.target.value);
-                    }});
-                    document.getElementById('sliderClip').addEventListener('input', (e) => {{
-                        uniforms.uZClip.value = parseFloat(e.target.value);
-                    }});
-
-                    // --- 6. ANIMATION LOOP ---
-                    let time = 0;
-                    const coordsDiv = document.getElementById('hud-coords');
-
-                    function animate() {{
-                        requestAnimationFrame(animate);
-                        time += 0.02;
-                        uniforms.uTime.value = time;
-
-                        if (ring1) ring1.rotation.z += 0.006;
-                        if (ring2) ring2.rotation.z -= 0.012;
-
-                        if (particleSystem) {{
-                            particleSystem.rotation.y += 0.002;
-                            wireMesh.rotation.y = particleSystem.rotation.y;
-                        }}
-
-                        controls.update();
-
-                        // Update HUD Telemetry
-                        const cPos = camera.position;
-                        coordsDiv.innerText = `MARK-85 // X: ${{cPos.x.toFixed(2)}} Y: ${{cPos.y.toFixed(2)}} Z: ${{cPos.z.toFixed(2)}}`;
-
-                        if (useComposer && composer) {{
-                            composer.render();
-                        }} else {{
-                            renderer.render(scene, camera);
-                        }}
-                    }}
-                    animate();
-
-                    const resizeObserver = new ResizeObserver(() => {{
-                        const newWidth = container.clientWidth;
-                        const newHeight = container.clientHeight || 650;
-                        camera.aspect = newWidth / newHeight;
-                        camera.updateProjectionMatrix();
-                        renderer.setSize(newWidth, newHeight);
-                        if (composer) composer.setSize(newWidth, newHeight);
-                    }});
-                    resizeObserver.observe(container);
-
-                }} catch(e) {{
-                    console.error("J.A.R.V.I.S. Holo Engine Error:", e);
+                    const cPos = camera.position;
+                    coordsDiv.innerText = `MARK-85 // X: ${{cPos.x.toFixed(2)}} Y: ${{cPos.y.toFixed(2)}} Z: ${{cPos.z.toFixed(2)}}`;
+                    renderer.render(scene, camera);
                 }}
+                animate();
             }}
 
             window.onload = init;
@@ -939,7 +711,7 @@ elif paste_data is not None and paste_data.image_data is not None:
 if image_pil is not None:
     st.divider()
 
-    with st.spinner("🤖 EXECUTING NEURAL CLASSIFICATION & FORENSICS..."):
+    with st.spinner("🤖 EXECUTING VISION TRANSFORMER ANALYSIS & FORENSICS..."):
         detector_results = detector(image_pil)
         fake_score, real_score = parse_predictions(detector_results)
         depth_pil = generate_depth_map(image_pil)
@@ -970,10 +742,6 @@ if image_pil is not None:
 
     with col_v2:
         render_cyber_header("🧠 EXPLAINABLE AI (XAI) FORENSIC BREAKDOWN")
-        st.caption(
-            "Quantitative forensic features explaining the classification decision for technical evaluation:"
-        )
-
         for reason in xai_reasons:
             st.markdown(
                 f"""<div style="background: rgba(0, 243, 255, 0.05); border-left: 3px solid #00f3ff; padding: 8px 12px; margin-bottom: 8px; border-radius: 4px; font-size: 0.88rem; font-family: 'JetBrains Mono', monospace;">{reason}</div>""",
@@ -983,12 +751,11 @@ if image_pil is not None:
     st.divider()
 
     # 3D GLSL WebGL Hologram & Multi-Modal Views
-    tab_holo, tab_2d, tab_3d, tab_audio = st.tabs(
+    tab_holo, tab_2d, tab_3d = st.tabs(
         [
             "⚡ STARK HOLOGRAM",
             "🔬 2D FORENSIC MAPS",
             "🌐 VOLUMETRIC MESH",
-            "🔊 SONIFICATION",
         ]
     )
 
@@ -1007,19 +774,19 @@ if image_pil is not None:
         with f1:
             st.image(
                 compute_fft(image_pil),
-                caption="2D Fast Fourier Transform (FFT) High-Freq Spectrum",
+                caption="2D Fast Fourier Transform (FFT)",
                 use_container_width=True,
             )
         with f2:
             st.image(
                 compute_ela(image_pil),
-                caption="Error Level Analysis (ELA) Compression Map",
+                caption="Error Level Analysis (ELA)",
                 use_container_width=True,
             )
         with f3:
             st.image(
                 compute_spatial_anomaly(image_pil),
-                caption="Spatial Edge & Laplacian Anomaly Map",
+                caption="Spatial Edge Anomaly Map",
                 use_container_width=True,
             )
 
@@ -1028,9 +795,5 @@ if image_pil is not None:
         plotly_fig = generate_3d_mesh_plotly(depth_pil)
         st.plotly_chart(plotly_fig, use_container_width=True)
 
-    with tab_audio:
-        render_cyber_header("NEURO-ACOUSTIC FREQUENCY SONIFICATION")
-        render_sonification_module()
-
 else:
-    st.info("💡 Upload or paste an image above to begin real-time forensics analysis.")
+    st.info("💡 Upload or paste an image above to run analysis.")
