@@ -1,8 +1,9 @@
 streamlit
-pillow
 opencv-python-headless
 numpy
+pillow
 plotly
 streamlit-paste-button
-transformers
 torch
+transformers
+edge-tts
