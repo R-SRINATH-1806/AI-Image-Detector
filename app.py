@@ -531,44 +531,44 @@ def image_to_base64(img_pil):
 
 
 def render_gpu_glsl_hologram(img_b64, depth_b64):
-    html_template = f"""
+    html_template = """
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <style>
-            * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-            body {{ background: #010308; overflow: hidden; width: 100vw; height: 620px; font-family: 'JetBrains Mono', monospace; }}
-            #canvas-container {{ width: 100%; height: 100%; position: relative; }}
-            .hud-overlay {{
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { background: #010308; overflow: hidden; width: 100vw; height: 620px; font-family: 'JetBrains Mono', monospace; }
+            #canvas-container { width: 100%; height: 100%; position: relative; }
+            .hud-overlay {
                 position: absolute; top: 14px; left: 14px;
                 color: #00f3ff; border: 1px solid rgba(0,243,255,0.5);
                 padding: 6px 14px; background: rgba(2,6,16,0.88);
                 font-size: 11px; letter-spacing: 1.5px; border-radius: 4px;
                 pointer-events: none; z-index: 100; box-shadow: 0 0 15px rgba(0,243,255,0.2);
-            }}
-            .controls-panel {{
+            }
+            .controls-panel {
                 position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 100;
                 display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
                 gap: 8px; background: rgba(2,6,16,0.92); padding: 10px 18px;
                 border: 1px solid rgba(0,243,255,0.4); border-radius: 8px; backdrop-filter: blur(12px);
-            }}
-            .control-group {{ display: flex; align-items: center; gap: 6px; color: #00f3ff; font-size: 10px; }}
-            .control-group input[type=range] {{
+            }
+            .control-group { display: flex; align-items: center; gap: 6px; color: #00f3ff; font-size: 10px; }
+            .control-group input[type=range] {
                 -webkit-appearance: none; width: 70px; background: rgba(0,243,255,0.2); height: 4px; border-radius: 2px;
-            }}
-            .control-group input[type=range]::-webkit-slider-thumb {{
+            }
+            .control-group input[type=range]::-webkit-slider-thumb {
                 -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #00f3ff; cursor: pointer;
-            }}
-            .hud-btn {{
+            }
+            .hud-btn {
                 background: rgba(0,243,255,0.12); border: 1px solid #00f3ff; color: #00f3ff;
                 padding: 4px 10px; font-size: 10px; cursor: pointer; border-radius: 4px; font-weight: bold;
-            }}
-            .hud-btn:hover {{ background: #00f3ff; color: #000; }}
+            }
+            .hud-btn:hover { background: #00f3ff; color: #000; }
         </style>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     </head>
     <body>
         <div id="canvas-container">
-            <div class="hud-
+            <div class="hud-overlay">👁️ MONVISIO
